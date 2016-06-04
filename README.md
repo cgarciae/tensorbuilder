@@ -18,7 +18,7 @@ At the moment the easiest way to install it in your project is to do the followi
 
 ## Getting Started
 
-Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer.
+Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer through a Builder and then get back its tensor:
 
     import tensorflow as tf
     import tensorbuilder as tb
@@ -29,6 +29,40 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
         x.builder()
         .connect_layer(10, fn=tf.nn.tanh)
         .connect_layer(3, fn=tf.nn.softmax)
+        .tensor
+    )
+
+## Branching
+If you are sufficiently familiar with tensorflow or use prettytensor then you might appreciate the branching capabilities of Tensor Builder in this (overly complex) example
+
+    import tensorflow as tf
+    import tensorbuilder as tb
+
+    x = tf.placeholder(tf.float32, shape=[None, 5])
+    keep_prob = tf.placeholder(tf.float32)
+
+    h = (
+        x.builder()
+        .connect_layer(10)
+        .branch(lambda base:
+        [
+            base
+            .connect_layer(3, fn=tf.nn.relu)
+        ,
+            base
+            .connect_layer(9, fn=tf.nn.tanh)
+            .branch(lambda base2: 
+            [
+              base2
+              .connect_layer(6, fn=tf.nn.sigmoid)
+            ,
+              base2
+              .map(tf.nn.dropout, keep_prob)
+              .connect_layer(8, tf.nn.softmax)
+            ])
+        ])
+        .connect_layer(6, fn=tf.nn.sigmoid)
+        .tensor
     )
 
 ## Documentation
