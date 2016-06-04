@@ -1125,6 +1125,7 @@ table {
 
 
 <h2>Documentation</h2>
+<h2>Examples</h2>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensorbuilder" class="source">
@@ -1161,6 +1162,10 @@ table {
 <span class="sd">    )</span>
 
 <span class="sd">## Documentation</span>
+
+<span class="sd">## Examples</span>
+
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.1&quot;</span>
@@ -1729,6 +1734,8 @@ table {
 <span class="sd">    The previous is the same as</span>
 
 <span class="sd">        a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
+
+<span class="sd">    since tensorbuilder monkey-patches tensorflow&#39;s Tensor with this function as method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Builder</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
@@ -1866,7 +1873,10 @@ table {
 
 <p>The previous is the same as</p>
 <div class="codehilite"><pre><span></span>a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-</pre></div></div>
+</pre></div>
+
+
+<p>since tensorbuilder monkey-patches tensorflow's Tensor with this function as method.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder.builder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensorbuilder.builder" class="source">
@@ -1891,6 +1901,8 @@ table {
 <span class="sd">    The previous is the same as</span>
 
 <span class="sd">        a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
+
+<span class="sd">    since tensorbuilder monkey-patches tensorflow&#39;s Tensor with this function as method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Builder</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 </pre></div>

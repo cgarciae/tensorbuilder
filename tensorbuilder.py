@@ -603,6 +603,8 @@ def builder(tensor):
     The previous is the same as
 
         a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()
+
+    since tensorbuilder monkey-patches tensorflow's Tensor with this function as method.
     """
     return Builder(tensor)
 
