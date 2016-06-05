@@ -89,7 +89,7 @@ from decorator import decorator
 
 # Decorators
 @decorator
-def immutable(method, self, *args, **kwargs):
+def _immutable(method, self, *args, **kwargs):
     """
     Decorator. Passes a copy of the entity to the method so that the original object remains un touched.
     Used in methods to get a fluent immatable API.
@@ -126,10 +126,10 @@ class Builder(object):
         """Returns a copy of this Builder"""
         return Builder(self.tensor, self.variables.copy())
 
-    @immutable
+    @_immutable
     def connect_weights(builder, size, name="connect_weights", weights_name="w"):
         """
-        `@immutable`
+        `@_immutable`
 
         Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. 
 
@@ -167,10 +167,10 @@ class Builder(object):
 
         return builder
 
-    @immutable
+    @_immutable
     def connect_bias(builder, name="connect_bias", bias_name="b"):
         """
-        `@immutable`
+        `@_immutable`
 
         Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **b** be a **tf.Variable** of shape **[n]**. Then `builder.connect_bias()` computes `tf.add(x, b)`.
 
@@ -217,10 +217,10 @@ class Builder(object):
         return builder
 
 
-    @immutable
+    @_immutable
     def connect_layer(builder, size, fn=None, name="layer", weights_name=None, bias=True, bias_name=None):
         """
-        `@immutable`
+        `@_immutable`
 
         Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, let **w** be a **tf.Variable** of shape **[n, size]**, let **b** be a **tf.Variable** of shape **[n]**, and **fn** be a function from a tensor to a tensor. Then `builder.connect_layer(size, fn=fn)` computes `fn(tf.matmul(x, w) + b)`. If **fn** is not present the layer is linear.
 
@@ -289,10 +289,10 @@ class Builder(object):
 
         return builder
 
-    @immutable
+    @_immutable
     def map(builder, fn, *args, **kwargs):
         """
-        `@immutable`
+        `@_immutable`
 
         Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` and **fn** be a function from a tensor to a tensor. Then `builder.map(fn)` computes `fn(x)`. All extra positional and named arguments are forwarded to **fn** such that
 
@@ -331,10 +331,10 @@ class Builder(object):
         builder.tensor = fn(builder.tensor, *args, **kwargs)
         return builder
 
-    @immutable
+    @_immutable
     def then(builder, fn):
         """
-        `@immutable`
+        `@_immutable`
 
         Expects a function **fn** with type `builder -> builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.
 
@@ -385,10 +385,10 @@ class Builder(object):
         """
         return fn(builder)
 
-    @immutable
+    @_immutable
     def branch(builder, fn):
         """
-        `@immutable`
+        `@_immutable`
 
         Expects a function **fn** with type `Builder -> list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later 
 
@@ -467,8 +467,8 @@ class Builder(object):
         branches = fn(builder)
         return BuilderTree(branches)
 
-    @immutable
-    def leafs(builder):
+    @_immutable
+    def _leafs(builder):
         """A generator function that yields the builder, used by `tensorbuilder.tensorbuilder.BuilderTree.leafs` of `tensorbuilder.tensorbuilder.BuilderTree`"""
         yield builder
 
@@ -518,7 +518,7 @@ class BuilderTree(object):
             )
 
         """
-        return [builder for builder in self.leafs() ]
+        return [builder for builder in self._leafs() ]
 
     def tensors(self):
         """
@@ -549,9 +549,9 @@ class BuilderTree(object):
                 .tensors()
             )
         """
-        return [builder.tensor for builder in self.leafs() ]
+        return [builder.tensor for builder in self._leafs() ]
 
-    @immutable
+    @_immutable
     def connect_layer(tree, size, fn=None, name="layer", bias=True, bias_name=None):
         """
         Connects all the leaf `tensorbuilder.tensorbuilder.Builder` nodes of this tree to a single layer. The order of computation is done as follows
@@ -601,7 +601,7 @@ class BuilderTree(object):
                 .connect_layer(3, fn=tf.nn.softmax)
             )
         """
-        builders = [ builder.connect_weights(size) for builder in tree.leafs() ]
+        builders = [ builder.connect_weights(size) for builder in tree._leafs() ]
         builder = _add_builders(builders)
 
         if bias:
@@ -613,11 +613,11 @@ class BuilderTree(object):
         return builder
 
 
-    @immutable
-    def leafs(tree):
+    @_immutable
+    def _leafs(tree):
         """A generator function that lazily returns all the Builders contianed by this tree"""
         for branch in tree.branches:
-            for builder in branch.leafs():
+            for builder in branch._leafs():
                 yield builder
 
 
