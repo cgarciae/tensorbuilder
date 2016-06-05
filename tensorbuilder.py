@@ -43,19 +43,19 @@ If you are sufficiently familiar with tensorflow or use prettytensor then you mi
     h = (
         x.builder()
         .connect_layer(10)
-        .branch(lambda base:
+        .branch(lambda root:
         [
-            base
+            root
             .connect_layer(3, fn=tf.nn.relu)
         ,
-            base
+            root
             .connect_layer(9, fn=tf.nn.tanh)
-            .branch(lambda base2: 
+            .branch(lambda root2: 
             [
-              base2
+              root2
               .connect_layer(6, fn=tf.nn.sigmoid)
             ,
-              base2
+              root2
               .map(tf.nn.dropout, keep_prob)
               .connect_layer(8, tf.nn.softmax)
             ])
@@ -65,6 +65,8 @@ If you are sufficiently familiar with tensorflow or use prettytensor then you mi
     )
 
 ## Documentation
+
+The main documentaion is in the [tensorbuilder module](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
 
 ## Examples
 
