@@ -1,11 +1,29 @@
 """
 All functions in this module are automatically generated. They help create custom layers and mappings for a Builder based on the functions in `tf.nn`. It works the following way:
 
-* Let `f` be a function in `tf.nn`, then the functions with name `f_layer` and `map_f` exists in this module and take a Builder as its first argument
+* Let `f` be a function in `tf.nn`, then the functions with name `f_layer` and `map_f` exists in this module and take a Builder as its first argument. `f_layer` and `map_f` receive \*args and \*\*kwargs which are forwarded to `f`.
 * `f_layer` functions connect a Builder to a layer with `f` as its activation function.
 * `map_f` functions just map `f` over the tensor inside the Builder.
+* 
 
-Calling `tensorbuilder.builder_nn.use_extras` monkey-patches all the functions in this module as methods of the Builder class.
+Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder class.
+
+** Examples **
+
+	import tensorflow as tf
+	import tensorbuilder as tb
+
+	tb.builder_nn.patch()
+
+	x = tf.placeholder(tf.float32, shape=[None, 5])
+	keep_prob = tf.placeholder(tf.float32)
+
+	h = (
+		x.builder()
+		.tanh_layer(10)
+		.map_dropout(keep_prob)
+		.softmax_layer(3)
+	)
 """
 
 import tensorflow as tf
@@ -15,12 +33,12 @@ from collections import namedtuple
 
 _patches = []
 
-def use_extras():
+def patch():
 	"""
 	Moneky-patches all functions in this modules as methods on the Builder class.
 	"""
-	for patch in _patches:
-		exec(patch)
+	for _patch in _patches:
+		exec(_patch)
 
 DefaultArgSpec = namedtuple('DefaultArgSpec', 'has_default default_value')
 
@@ -85,6 +103,7 @@ for _nn_name, f in inspect.getmembers(tf.nn, inspect.isfunction):
 
 
  	exec("""
+
 @tb._immutable
 def {1}(builder, size, *args, **kwargs):
 	\"\"\"
@@ -128,6 +147,7 @@ _patches.append(\"tb.Builder.{1} = {1}\")
  	""".format(_nn_name, _layer_name, _f_signature, _f_docs))
 
  	exec("""
+
 @tb._immutable
 def {1}(builder, *args, **kwargs):
 	\"\"\"
