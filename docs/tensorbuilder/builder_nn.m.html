@@ -1138,6 +1138,7 @@ table {
     <li class="mono"><a href="#tensorbuilder.builder_nn.moments_layer">moments_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.nce_loss_layer">nce_loss_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.normalize_moments_layer">normalize_moments_layer</a></li>
+    <li class="mono"><a href="#tensorbuilder.builder_nn.patch">patch</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.relu6_layer">relu6_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.relu_layer">relu_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.relu_layer_layer">relu_layer_layer</a></li>
@@ -1156,7 +1157,6 @@ table {
     <li class="mono"><a href="#tensorbuilder.builder_nn.tanh_layer">tanh_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.top_k_layer">top_k_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.uniform_candidate_sampler_layer">uniform_candidate_sampler_layer</a></li>
-    <li class="mono"><a href="#tensorbuilder.builder_nn.use_extras">use_extras</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.weighted_cross_entropy_with_logits_layer">weighted_cross_entropy_with_logits_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.xw_plus_b_layer">xw_plus_b_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.builder_nn.xw_plus_b_v1_layer">xw_plus_b_v1_layer</a></li>
@@ -1188,22 +1188,57 @@ table {
   <h1 class="title"><span class="name">tensorbuilder.builder_nn</span> module</h1>
   <p>All functions in this module are automatically generated. They help create custom layers and mappings for a Builder based on the functions in <code>tf.nn</code>. It works the following way:</p>
 <ul>
-<li>Let <code>f</code> be a function in <code>tf.nn</code>, then the functions with name <code>f_layer</code> and <code>map_f</code> exists in this module and take a Builder as its first argument</li>
+<li>Let <code>f</code> be a function in <code>tf.nn</code>, then the functions with name <code>f_layer</code> and <code>map_f</code> exists in this module and take a Builder as its first argument. <code>f_layer</code> and <code>map_f</code> receive *args and **kwargs which are forwarded to <code>f</code>.</li>
 <li><code>f_layer</code> functions connect a Builder to a layer with <code>f</code> as its activation function.</li>
 <li><code>map_f</code> functions just map <code>f</code> over the tensor inside the Builder.</li>
+<li></li>
 </ul>
-<p>Calling <a href="#tensorbuilder.builder_nn.use_extras"><code>use_extras</code></a> monkey-patches all the functions in this module as methods of the Builder class.</p>
+<p>Calling <a href="#tensorbuilder.builder_nn.patch"><code>patch</code></a> monkey-patches all the functions in this module as methods of the Builder class.</p>
+<p><strong> Examples </strong></p>
+<div class="codehilite"><pre><span></span>    <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+    <span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+
+    <span class="n">tb</span><span class="o">.</span><span class="n">builder_nn</span><span class="o">.</span><span class="n">patch</span><span class="p">()</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">map_dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.builder_nn', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.builder_nn" class="source">
     <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">All functions in this module are automatically generated. They help create custom layers and mappings for a Builder based on the functions in `tf.nn`. It works the following way:</span>
 
-<span class="sd">* Let `f` be a function in `tf.nn`, then the functions with name `f_layer` and `map_f` exists in this module and take a Builder as its first argument</span>
+<span class="sd">* Let `f` be a function in `tf.nn`, then the functions with name `f_layer` and `map_f` exists in this module and take a Builder as its first argument. `f_layer` and `map_f` receive \*args and \*\*kwargs which are forwarded to `f`.</span>
 <span class="sd">* `f_layer` functions connect a Builder to a layer with `f` as its activation function.</span>
 <span class="sd">* `map_f` functions just map `f` over the tensor inside the Builder.</span>
+<span class="sd">* </span>
 
-<span class="sd">Calling `tensorbuilder.builder_nn.use_extras` monkey-patches all the functions in this module as methods of the Builder class.</span>
+<span class="sd">Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder class.</span>
+
+<span class="sd">** Examples **</span>
+
+<span class="sd">	import tensorflow as tf</span>
+<span class="sd">	import tensorbuilder as tb</span>
+
+<span class="sd">	tb.builder_nn.patch()</span>
+
+<span class="sd">	x = tf.placeholder(tf.float32, shape=[None, 5])</span>
+<span class="sd">	keep_prob = tf.placeholder(tf.float32)</span>
+
+<span class="sd">	h = (</span>
+<span class="sd">		x.builder()</span>
+<span class="sd">		.tanh_layer(10)</span>
+<span class="sd">		.map_dropout(keep_prob)</span>
+<span class="sd">		.softmax_layer(3)</span>
+<span class="sd">	)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
@@ -1213,12 +1248,12 @@ table {
 
 <span class="n">_patches</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="k">def</span> <span class="nf">use_extras</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">patch</span><span class="p">():</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Moneky-patches all functions in this modules as methods on the Builder class.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">_patches</span><span class="p">:</span>
-		<span class="k">exec</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">_patch</span> <span class="ow">in</span> <span class="n">_patches</span><span class="p">:</span>
+		<span class="k">exec</span><span class="p">(</span><span class="n">_patch</span><span class="p">)</span>
 
 <span class="n">DefaultArgSpec</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;DefaultArgSpec&#39;</span><span class="p">,</span> <span class="s1">&#39;has_default default_value&#39;</span><span class="p">)</span>
 
@@ -1283,6 +1318,7 @@ table {
 
 
  	<span class="k">exec</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+
 <span class="s2">@tb._immutable</span>
 <span class="s2">def {1}(builder, size, *args, **kwargs):</span>
 <span class="s2">	</span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2"></span>
@@ -1326,6 +1362,7 @@ table {
 <span class="s2"> 	&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_nn_name</span><span class="p">,</span> <span class="n">_layer_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">))</span>
 
  	<span class="k">exec</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+
 <span class="s2">@tb._immutable</span>
 <span class="s2">def {1}(builder, *args, **kwargs):</span>
 <span class="s2">	</span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2"></span>
@@ -6091,6 +6128,32 @@ with an otherwise unused class.</p>
   
       
   <div class="item">
+    <div class="name def" id="tensorbuilder.builder_nn.patch">
+    <p>def <span class="ident">patch</span>(</p><p>)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>Moneky-patches all functions in this modules as methods on the Builder class.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.builder_nn.patch', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.builder_nn.patch" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patch</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Moneky-patches all functions in this modules as methods on the Builder class.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">for</span> <span class="n">_patch</span> <span class="ow">in</span> <span class="n">_patches</span><span class="p">:</span>
+		<span class="k">exec</span><span class="p">(</span><span class="n">_patch</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
     <div class="name def" id="tensorbuilder.builder_nn.relu6_layer">
     <p>def <span class="ident">relu6_layer</span>(</p><p>builder, size, *args, **kwargs)</p>
     </div>
@@ -6856,32 +6919,6 @@ compute them approximately.</p>
     <code>sampled_candidates</code>. The expected counts under the sampling distribution
     of each of <code>sampled_candidates</code>.</p></div>
   <div class="source_cont">
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tensorbuilder.builder_nn.use_extras">
-    <p>def <span class="ident">use_extras</span>(</p><p>)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Moneky-patches all functions in this modules as methods on the Builder class.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.builder_nn.use_extras', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.builder_nn.use_extras" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">use_extras</span><span class="p">():</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	Moneky-patches all functions in this modules as methods on the Builder class.</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">_patches</span><span class="p">:</span>
-		<span class="k">exec</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
-</pre></div>
-
-  </div>
 </div>
 
   </div>
