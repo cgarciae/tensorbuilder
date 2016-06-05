@@ -1193,7 +1193,7 @@ table {
 <li><code>map_f</code> functions just map <code>f</code> over the tensor inside the Builder.</li>
 <li></li>
 </ul>
-<p>Calling <a href="#tensorbuilder.builder_nn.patch"><code>patch</code></a> monkey-patches all the functions in this module as methods of the Builder class.</p>
+<p>Calling <a href="#tensorbuilder.builder_nn.patch"><code>patch</code></a> monkey-patches all the functions in this module as methods of the Builder and BuilderTree classes.</p>
 <p><strong> Examples </strong></p>
 <div class="codehilite"><pre><span></span>    <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
     <span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
@@ -1222,7 +1222,7 @@ table {
 <span class="sd">* `map_f` functions just map `f` over the tensor inside the Builder.</span>
 <span class="sd">* </span>
 
-<span class="sd">Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder class.</span>
+<span class="sd">Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder and BuilderTree classes.</span>
 
 <span class="sd">** Examples **</span>
 
@@ -1360,6 +1360,7 @@ table {
 <span class="s2">	)</span>
 
 <span class="s2">_patches.append(</span><span class="se">\&quot;</span><span class="s2">tb.Builder.{1} = {1}</span><span class="se">\&quot;</span><span class="s2">)</span>
+<span class="s2">_patches.append(</span><span class="se">\&quot;</span><span class="s2">tb.BuilderTree.{1} = {1}</span><span class="se">\&quot;</span><span class="s2">)</span>
 
 <span class="s2"> 	&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_nn_name</span><span class="p">,</span> <span class="n">_layer_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">))</span>
 
