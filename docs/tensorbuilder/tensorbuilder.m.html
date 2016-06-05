@@ -1136,19 +1136,19 @@ table {
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base</span><span class="p">:</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">root</span><span class="p">:</span>
     <span class="p">[</span>
-        <span class="n">base</span>
+        <span class="n">root</span>
         <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">)</span>
     <span class="p">,</span>
-        <span class="n">base</span>
+        <span class="n">root</span>
         <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base2</span><span class="p">:</span> 
+        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">root2</span><span class="p">:</span> 
         <span class="p">[</span>
-          <span class="n">base2</span>
+          <span class="n">root2</span>
           <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
         <span class="p">,</span>
-          <span class="n">base2</span>
+          <span class="n">root2</span>
           <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
           <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
         <span class="p">])</span>
@@ -1160,6 +1160,7 @@ table {
 
 
 <h2>Documentation</h2>
+<p>The main documentaion is in the <a href="http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html">tensorbuilder module</a>. The documentation for the complete project is <a href="http://cgarciae.github.io/tensorbuilder/">here</a>.</p>
 <h2>Examples</h2>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder', this);">Show source &equiv;</a></p>
@@ -1209,19 +1210,19 @@ table {
 <span class="sd">    h = (</span>
 <span class="sd">        x.builder()</span>
 <span class="sd">        .connect_layer(10)</span>
-<span class="sd">        .branch(lambda base:</span>
+<span class="sd">        .branch(lambda root:</span>
 <span class="sd">        [</span>
-<span class="sd">            base</span>
+<span class="sd">            root</span>
 <span class="sd">            .connect_layer(3, fn=tf.nn.relu)</span>
 <span class="sd">        ,</span>
-<span class="sd">            base</span>
+<span class="sd">            root</span>
 <span class="sd">            .connect_layer(9, fn=tf.nn.tanh)</span>
-<span class="sd">            .branch(lambda base2: </span>
+<span class="sd">            .branch(lambda root2: </span>
 <span class="sd">            [</span>
-<span class="sd">              base2</span>
+<span class="sd">              root2</span>
 <span class="sd">              .connect_layer(6, fn=tf.nn.sigmoid)</span>
 <span class="sd">            ,</span>
-<span class="sd">              base2</span>
+<span class="sd">              root2</span>
 <span class="sd">              .map(tf.nn.dropout, keep_prob)</span>
 <span class="sd">              .connect_layer(8, tf.nn.softmax)</span>
 <span class="sd">            ])</span>
@@ -1231,6 +1232,8 @@ table {
 <span class="sd">    )</span>
 
 <span class="sd">## Documentation</span>
+
+<span class="sd">The main documentaion is in the [tensorbuilder module](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).</span>
 
 <span class="sd">## Examples</span>
 
