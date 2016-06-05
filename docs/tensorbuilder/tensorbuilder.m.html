@@ -1120,6 +1120,41 @@ table {
     <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
     <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span>
+<span class="p">)</span>
+</pre></div>
+
+
+<h2>Branching</h2>
+<p>If you are sufficiently familiar with tensorflow or use prettytensor then you might appreciate the branching capabilities of Tensor Builder in this (overly complex) example</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base</span><span class="p">:</span>
+    <span class="p">[</span>
+        <span class="n">base</span>
+        <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">base</span>
+        <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base2</span><span class="p">:</span> 
+        <span class="p">[</span>
+          <span class="n">base2</span>
+          <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
+        <span class="p">,</span>
+          <span class="n">base2</span>
+          <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
+          <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="p">])</span>
+    <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span>
 <span class="p">)</span>
 </pre></div>
 
@@ -1159,6 +1194,40 @@ table {
 <span class="sd">        x.builder()</span>
 <span class="sd">        .connect_layer(10, fn=tf.nn.tanh)</span>
 <span class="sd">        .connect_layer(3, fn=tf.nn.softmax)</span>
+<span class="sd">        .tensor</span>
+<span class="sd">    )</span>
+
+<span class="sd">## Branching</span>
+<span class="sd">If you are sufficiently familiar with tensorflow or use prettytensor then you might appreciate the branching capabilities of Tensor Builder in this (overly complex) example</span>
+
+<span class="sd">    import tensorflow as tf</span>
+<span class="sd">    import tensorbuilder as tb</span>
+
+<span class="sd">    x = tf.placeholder(tf.float32, shape=[None, 5])</span>
+<span class="sd">    keep_prob = tf.placeholder(tf.float32)</span>
+
+<span class="sd">    h = (</span>
+<span class="sd">        x.builder()</span>
+<span class="sd">        .connect_layer(10)</span>
+<span class="sd">        .branch(lambda base:</span>
+<span class="sd">        [</span>
+<span class="sd">            base</span>
+<span class="sd">            .connect_layer(3, fn=tf.nn.relu)</span>
+<span class="sd">        ,</span>
+<span class="sd">            base</span>
+<span class="sd">            .connect_layer(9, fn=tf.nn.tanh)</span>
+<span class="sd">            .branch(lambda base2: </span>
+<span class="sd">            [</span>
+<span class="sd">              base2</span>
+<span class="sd">              .connect_layer(6, fn=tf.nn.sigmoid)</span>
+<span class="sd">            ,</span>
+<span class="sd">              base2</span>
+<span class="sd">              .map(tf.nn.dropout, keep_prob)</span>
+<span class="sd">              .connect_layer(8, tf.nn.softmax)</span>
+<span class="sd">            ])</span>
+<span class="sd">        ])</span>
+<span class="sd">        .connect_layer(6, fn=tf.nn.sigmoid)</span>
+<span class="sd">        .tensor</span>
 <span class="sd">    )</span>
 
 <span class="sd">## Documentation</span>
