@@ -6,7 +6,7 @@ All functions in this module are automatically generated. They help create custo
 * `map_f` functions just map `f` over the tensor inside the Builder.
 * 
 
-Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder class.
+Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in this module as methods of the Builder and BuilderTree classes.
 
 ** Examples **
 
@@ -144,6 +144,7 @@ Its expected that tf.nn.{0} can receive `builder.tensor` as a first parameter.
 	)
 
 _patches.append(\"tb.Builder.{1} = {1}\")
+_patches.append(\"tb.BuilderTree.{1} = {1}\")
 
  	""".format(_nn_name, _layer_name, _f_signature, _f_docs))
 
