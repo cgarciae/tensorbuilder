@@ -18,6 +18,14 @@ At the moment the easiest way to install it in your project is to do the followi
 2. `git clone https://github.com/cgarciae/tensorbuilder.git`
 3. Erase the .git file/folder`rm tensorbuilder/.git` or `rm -fr tensorbuilder/.git`
 
+### Dependencies
+
+You need these python dependencies to run TensorBuilder
+
+* tensorflow
+* decorator (`pip install decorator`)
+
+
 ## Getting Started
 
 Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer through a Builder and then get back its tensor:

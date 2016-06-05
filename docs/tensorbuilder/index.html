@@ -1041,6 +1041,7 @@ table {
 
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
+        <li class="mono"><a href="builder_nn.m.html">tensorbuilder.builder_nn</a></li>
         <li class="mono"><a href="nn.m.html">tensorbuilder.nn</a></li>
         <li class="mono"><a href="tensorbuilder.m.html">tensorbuilder.tensorbuilder</a></li>
       </ul>
@@ -1065,6 +1066,8 @@ table {
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">builder_nn</span>
+<span class="kn">from</span> <span class="nn">decorator</span> <span class="kn">import</span> <span class="n">decorator</span>
 
 
 <span class="c1"># Monkey Patch TensorFlow</span>
@@ -1072,7 +1075,7 @@ table {
 
 
 <span class="kn">import</span> <span class="nn">tensorbuilder</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tensorbuilder&quot;</span><span class="p">,</span> <span class="s2">&quot;nn&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tensorbuilder&quot;</span><span class="p">,</span> <span class="s2">&quot;nn&quot;</span><span class="p">,</span> <span class="s2">&quot;builder_nn&quot;</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -1084,6 +1087,16 @@ table {
 
 
     <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+      <div class="item">
+      <p class="name"><a href="builder_nn.m.html">tensorbuilder.builder_nn</a></p>
+      
+  
+    <div class="desc"><p>All functions in this module are automatically generated. They help create custom layers and mappings for a Builder based on the functions in <code>tf.nn</code>. It works the following way:</p>
+<ul>
+<li>Let <code>f</code> be a function in <code>tf.nn</code>, then the functions with name <code>f_layer</code> and <code>map_f</code> exists in this module and take a ...</li>
+</ul></div>
+
+      </div>
       <div class="item">
       <p class="name"><a href="nn.m.html">tensorbuilder.nn</a></p>
       
