@@ -23,6 +23,7 @@ Calling `tensorbuilder.builder_nn.patch` monkey-patches all the functions in thi
 		.tanh_layer(10)
 		.map_dropout(keep_prob)
 		.softmax_layer(3)
+		.tensor
 	)
 """
 
