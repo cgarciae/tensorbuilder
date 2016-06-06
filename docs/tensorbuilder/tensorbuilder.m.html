@@ -1104,12 +1104,15 @@ table {
 <p>TensorBuilder has a small set of primitives that enable you to express complex networks while maintaining a consistent API. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.</p>
 <p>TensorBuilder takes inspiration from <a href="https://github.com/google/prettytensor">prettytensor</a> but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.</p>
 <h2>Installation</h2>
-<p>At the moment the easiest way to install it in your project is to do the following</p>
+<p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
+<h4>From source</h4>
 <ol>
-<li><code>cd</code> to your project</li>
 <li><code>git clone https://github.com/cgarciae/tensorbuilder.git</code></li>
-<li>Erase the .git file/folder<code>rm tensorbuilder/.git</code> or <code>rm -fr tensorbuilder/.git</code></li>
+<li><code>cd tensorbuilder</code></li>
+<li><code>python setup.py install</code></li>
 </ol>
+<h4>From pip</h4>
+<p>Coming soon!</p>
 <h2>Getting Started</h2>
 <p>Create neural network with a [5, 10, 3] architecture with a <code>softmax</code> output layer and a <code>tanh</code> hidden layer through a Builder and then get back its tensor:</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
@@ -1144,7 +1147,7 @@ table {
     <span class="p">,</span>
         <span class="n">root</span>
         <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">root2</span><span class="p">:</span> 
+        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">root2</span><span class="p">:</span>
         <span class="p">[</span>
           <span class="n">root2</span>
           <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
@@ -1181,12 +1184,15 @@ table {
 <span class="sd">TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn&#39;t break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.</span>
 
 <span class="sd">## Installation</span>
+<span class="sd">Tensor Builder assumes you have a working `tensorflow` installation. We don&#39;t include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.</span>
 
-<span class="sd">At the moment the easiest way to install it in your project is to do the following</span>
+<span class="sd">#### From source</span>
+<span class="sd">1. `git clone https://github.com/cgarciae/tensorbuilder.git`</span>
+<span class="sd">2. `cd tensorbuilder`</span>
+<span class="sd">3. `python setup.py install`</span>
 
-<span class="sd">1. `cd` to your project</span>
-<span class="sd">2. `git clone https://github.com/cgarciae/tensorbuilder.git`</span>
-<span class="sd">3. Erase the .git file/folder`rm tensorbuilder/.git` or `rm -fr tensorbuilder/.git`</span>
+<span class="sd">#### From pip</span>
+<span class="sd">Coming soon!</span>
 
 <span class="sd">## Getting Started</span>
 
@@ -1223,7 +1229,7 @@ table {
 <span class="sd">        ,</span>
 <span class="sd">            root</span>
 <span class="sd">            .connect_layer(9, fn=tf.nn.tanh)</span>
-<span class="sd">            .branch(lambda root2: </span>
+<span class="sd">            .branch(lambda root2:</span>
 <span class="sd">            [</span>
 <span class="sd">              root2</span>
 <span class="sd">              .connect_layer(6, fn=tf.nn.sigmoid)</span>
@@ -1270,21 +1276,21 @@ table {
 <span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Builder class is a wrapper around a Tensor. Most of its method are immutable in the sense that they don&#39;t modify the caller object but rather always make a copy, they also tend to return a Builder so you you can keep fluently chaining methods.</span>
-<span class="sd">    </span>
+
 <span class="sd">    To create a builder from a method you have these options:</span>
 
 <span class="sd">    1. Use the `tensorbuilder.tensorbuilder.builder` function</span>
-<span class="sd">    </span>
+
 <span class="sd">            tb.builder(tensor)</span>
 
 <span class="sd">    2. Use the monkey-patched method on the Tensor class</span>
 
 <span class="sd">            tensor.builder()</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">{}):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span>
         <span class="sd">&quot;&quot;&quot;A `tensorflow` Tensor.&quot;&quot;&quot;</span>
 
@@ -1300,12 +1306,12 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
-<span class="sd">        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. </span>
+<span class="sd">        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`.</span>
 
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">        * `name`: the name of the tensor (default: &quot;connect_weights&quot;)</span>
 <span class="sd">        * `weights_name`: the name of the **w** tensor of type `tf.Variable`.</span>
@@ -1313,7 +1319,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
 
 <span class="sd">        The following builds `tf.matmul(x, w)`</span>
@@ -1323,7 +1329,7 @@ table {
 
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 5])</span>
 
-<span class="sd">            z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;) </span>
+<span class="sd">            z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
@@ -1347,16 +1353,16 @@ table {
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **b** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `name`: the name of the tensor (default: &quot;connect_bias&quot;)</span>
 <span class="sd">        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: &quot;b&quot;).</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
-<span class="sd">        </span>
+
 <span class="sd">        The following builds `tf.matmul(x, w) + b`</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -1400,7 +1406,7 @@ table {
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **b** and **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `tensor -&gt; tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)</span>
 <span class="sd">        * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">        * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
@@ -1411,23 +1417,23 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
 
 <span class="sd">        The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`</span>
-<span class="sd">            </span>
+
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            import tensorbuilder as tb</span>
 
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 5])</span>
-<span class="sd">            </span>
+
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
 <span class="sd">                .connect_layer(3, fn=tf.nn.sigmoid)</span>
 <span class="sd">            )</span>
 
-<span class="sd">        The previous is equivalent to using </span>
-<span class="sd">        </span>
+<span class="sd">        The previous is equivalent to using</span>
+
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
 <span class="sd">                .connect_weights(3)</span>
@@ -1439,7 +1445,7 @@ table {
 
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            import tensorbuilder as tb</span>
-<span class="sd">        </span>
+
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 40])</span>
 
 <span class="sd">            h = (</span>
@@ -1474,15 +1480,15 @@ table {
 <span class="sd">            builder.tensor = fn(builder.tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `tensor -&gt; tensor`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
-<span class="sd">        </span>
+
 <span class="sd">        The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -1510,13 +1516,13 @@ table {
 <span class="sd">        Expects a function **fn** with type `builder -&gt; builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `builder -&gt; builder`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">        The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.</span>
@@ -1561,16 +1567,16 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
-<span class="sd">        Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later </span>
+<span class="sd">        Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `Builder -&gt; list( Builder | BuilderTree )`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.BuilderTree`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">        The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out</span>
@@ -1594,8 +1600,8 @@ table {
 <span class="sd">                .tensors()</span>
 <span class="sd">            )</span>
 
-<span class="sd">        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. </span>
-<span class="sd">        </span>
+<span class="sd">        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.</span>
+
 <span class="sd">        The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -1614,7 +1620,7 @@ table {
 <span class="sd">                ,</span>
 <span class="sd">                    base</span>
 <span class="sd">                    .connect_layer(9, fn=tf.nn.tanh)</span>
-<span class="sd">                    .branch(lambda base2: </span>
+<span class="sd">                    .branch(lambda base2:</span>
 <span class="sd">                    [</span>
 <span class="sd">                        base2</span>
 <span class="sd">                        .connect_layer(6, fn=tf.nn.sigmoid)</span>
@@ -1652,7 +1658,7 @@ table {
         <span class="nb">super</span><span class="p">(</span><span class="n">BuilderTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">branches</span> <span class="o">=</span> <span class="n">branches</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`. </span>
+<span class="sd">        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1666,7 +1672,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `list( tensorbuilder.tensorbuilder.Builder )`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -1698,7 +1704,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `list( tf.Tensor )`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -1738,7 +1744,7 @@ table {
 <span class="sd">        * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
 <span class="sd">        * `bias`: determines where to use a bias **b** or not (default: `True`)</span>
 <span class="sd">        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Examples **</span>
 
 <span class="sd">        # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]</span>
@@ -1763,7 +1769,7 @@ table {
 
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
-<span class="sd">                .branch(lambda x: </span>
+<span class="sd">                .branch(lambda x:</span>
 <span class="sd">                [</span>
 <span class="sd">                    x</span>
 <span class="sd">                ,</span>
@@ -1802,7 +1808,7 @@ table {
 <span class="sd">    ** Parameters **</span>
 
 <span class="sd">    * `tensor`: a tensorflow Tensor</span>
-<span class="sd">    </span>
+
 <span class="sd">    #### Example</span>
 
 <span class="sd">    The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.</span>
@@ -1828,7 +1834,7 @@ table {
 <span class="sd">    ** Parameters **</span>
 
 <span class="sd">    * `builder_list`: list of type `list( Builder | BuilderTree)`</span>
-<span class="sd">    </span>
+
 <span class="sd">    #### Example</span>
 
 <span class="sd">    Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
@@ -1905,7 +1911,7 @@ table {
 <span class="sd">    ** Parameters **</span>
 
 <span class="sd">    * `builder_list`: list of type `list( Builder | BuilderTree)`</span>
-<span class="sd">    </span>
+
 <span class="sd">    #### Example</span>
 
 <span class="sd">    Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
@@ -1969,7 +1975,7 @@ table {
 <span class="sd">    ** Parameters **</span>
 
 <span class="sd">    * `tensor`: a tensorflow Tensor</span>
-<span class="sd">    </span>
+
 <span class="sd">    #### Example</span>
 
 <span class="sd">    The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.</span>
@@ -2025,21 +2031,21 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Builder class is a wrapper around a Tensor. Most of its method are immutable in the sense that they don&#39;t modify the caller object but rather always make a copy, they also tend to return a Builder so you you can keep fluently chaining methods.</span>
-<span class="sd">    </span>
+
 <span class="sd">    To create a builder from a method you have these options:</span>
 
 <span class="sd">    1. Use the `tensorbuilder.tensorbuilder.builder` function</span>
-<span class="sd">    </span>
+
 <span class="sd">            tb.builder(tensor)</span>
 
 <span class="sd">    2. Use the monkey-patched method on the Tensor class</span>
 
 <span class="sd">            tensor.builder()</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">{}):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span>
         <span class="sd">&quot;&quot;&quot;A `tensorflow` Tensor.&quot;&quot;&quot;</span>
 
@@ -2055,12 +2061,12 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
-<span class="sd">        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. </span>
+<span class="sd">        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`.</span>
 
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">        * `name`: the name of the tensor (default: &quot;connect_weights&quot;)</span>
 <span class="sd">        * `weights_name`: the name of the **w** tensor of type `tf.Variable`.</span>
@@ -2068,7 +2074,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
 
 <span class="sd">        The following builds `tf.matmul(x, w)`</span>
@@ -2078,7 +2084,7 @@ table {
 
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 5])</span>
 
-<span class="sd">            z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;) </span>
+<span class="sd">            z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
@@ -2102,16 +2108,16 @@ table {
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **b** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `name`: the name of the tensor (default: &quot;connect_bias&quot;)</span>
 <span class="sd">        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: &quot;b&quot;).</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
-<span class="sd">        </span>
+
 <span class="sd">        The following builds `tf.matmul(x, w) + b`</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -2155,7 +2161,7 @@ table {
 <span class="sd">        The returned `tensorbuilder.tensorbuilder.Builder` has **b** and **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `tensor -&gt; tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)</span>
 <span class="sd">        * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">        * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
@@ -2166,23 +2172,23 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
 
 <span class="sd">        The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`</span>
-<span class="sd">            </span>
+
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            import tensorbuilder as tb</span>
 
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 5])</span>
-<span class="sd">            </span>
+
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
 <span class="sd">                .connect_layer(3, fn=tf.nn.sigmoid)</span>
 <span class="sd">            )</span>
 
-<span class="sd">        The previous is equivalent to using </span>
-<span class="sd">        </span>
+<span class="sd">        The previous is equivalent to using</span>
+
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
 <span class="sd">                .connect_weights(3)</span>
@@ -2194,7 +2200,7 @@ table {
 
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            import tensorbuilder as tb</span>
-<span class="sd">        </span>
+
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 40])</span>
 
 <span class="sd">            h = (</span>
@@ -2229,15 +2235,15 @@ table {
 <span class="sd">            builder.tensor = fn(builder.tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `tensor -&gt; tensor`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        **Examples**</span>
-<span class="sd">        </span>
+
 <span class="sd">        The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -2265,13 +2271,13 @@ table {
 <span class="sd">        Expects a function **fn** with type `builder -&gt; builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `builder -&gt; builder`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">        The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.</span>
@@ -2316,16 +2322,16 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
-<span class="sd">        Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later </span>
+<span class="sd">        Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later</span>
 
 <span class="sd">        **Parameters**</span>
-<span class="sd">        </span>
+
 <span class="sd">        * `fn`: a function of type `Builder -&gt; list( Builder | BuilderTree )`.</span>
 
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `tensorbuilder.tensorbuilder.BuilderTree`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">        The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out</span>
@@ -2349,8 +2355,8 @@ table {
 <span class="sd">                .tensors()</span>
 <span class="sd">            )</span>
 
-<span class="sd">        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. </span>
-<span class="sd">        </span>
+<span class="sd">        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.</span>
+
 <span class="sd">        The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -2369,7 +2375,7 @@ table {
 <span class="sd">                ,</span>
 <span class="sd">                    base</span>
 <span class="sd">                    .connect_layer(9, fn=tf.nn.tanh)</span>
-<span class="sd">                    .branch(lambda base2: </span>
+<span class="sd">                    .branch(lambda base2:</span>
 <span class="sd">                    [</span>
 <span class="sd">                        base2</span>
 <span class="sd">                        .connect_layer(6, fn=tf.nn.sigmoid)</span>
@@ -2447,7 +2453,6 @@ table {
   <div id="source-tensorbuilder.tensorbuilder.Builder.__init__" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">{}):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-    
     <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span>
     <span class="sd">&quot;&quot;&quot;A `tensorflow` Tensor.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span>
@@ -2469,7 +2474,7 @@ table {
     
   
     <div class="desc"><p><code>@_immutable</code></p>
-<p>Expects a function <strong>fn</strong> with type <code>Builder -&gt; list( Builder | BuilderTree )</code>. This method enables you to <em>branch</em> the computational graph so you can easily create neural networks with more complex topologies. You can later </p>
+<p>Expects a function <strong>fn</strong> with type <code>Builder -&gt; list( Builder | BuilderTree )</code>. This method enables you to <em>branch</em> the computational graph so you can easily create neural networks with more complex topologies. You can later</p>
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>fn</code>: a function of type <code>Builder -&gt; list( Builder | BuilderTree )</code>.</li>
@@ -2501,7 +2506,7 @@ table {
 </pre></div>
 
 
-<p>Note that you have to use the <a href="#tensorbuilder.tensorbuilder.BuilderTree.tensors"><code>tensors</code></a> method from the <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> class to get the tensors back. Remember that you can also contain <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> has methods that help you flatten or reduce the tree. </p>
+<p>Note that you have to use the <a href="#tensorbuilder.tensorbuilder.BuilderTree.tensors"><code>tensors</code></a> method from the <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> class to get the tensors back. Remember that you can also contain <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, <a href="#tensorbuilder.tensorbuilder.BuilderTree"><code>BuilderTree</code></a> has methods that help you flatten or reduce the tree.</p>
 <p>The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single <code>sigmoid</code> layer</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
@@ -2519,7 +2524,7 @@ table {
     <span class="p">,</span>
         <span class="n">base</span>
         <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base2</span><span class="p">:</span> 
+        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base2</span><span class="p">:</span>
         <span class="p">[</span>
             <span class="n">base2</span>
             <span class="o">.</span><span class="n">connect_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
@@ -2548,13 +2553,11 @@ table {
 <span class="k">def</span> <span class="nf">branch</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@_immutable`</span>
-<span class="sd">    Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later </span>
+<span class="sd">    Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `fn`: a function of type `Builder -&gt; list( Builder | BuilderTree )`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.BuilderTree`</span>
-<span class="sd">    </span>
 <span class="sd">    ** Example **</span>
 <span class="sd">    The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out</span>
 <span class="sd">        import tensorflow as tf</span>
@@ -2573,8 +2576,7 @@ table {
 <span class="sd">            ])</span>
 <span class="sd">            .tensors()</span>
 <span class="sd">        )</span>
-<span class="sd">    Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. </span>
-<span class="sd">    </span>
+<span class="sd">    Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don&#39;t worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.</span>
 <span class="sd">    The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
@@ -2590,7 +2592,7 @@ table {
 <span class="sd">            ,</span>
 <span class="sd">                base</span>
 <span class="sd">                .connect_layer(9, fn=tf.nn.tanh)</span>
-<span class="sd">                .branch(lambda base2: </span>
+<span class="sd">                .branch(lambda base2:</span>
 <span class="sd">                [</span>
 <span class="sd">                    base2</span>
 <span class="sd">                    .connect_layer(6, fn=tf.nn.sigmoid)</span>
@@ -2669,14 +2671,11 @@ table {
 <span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **b** be a **tf.Variable** of shape **[n]**. Then `builder.connect_bias()` computes `tf.add(x, b)`.</span>
 <span class="sd">    The returned `tensorbuilder.tensorbuilder.Builder` has **b** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `name`: the name of the tensor (default: &quot;connect_bias&quot;)</span>
 <span class="sd">    * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: &quot;b&quot;).</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">    </span>
 <span class="sd">    **Examples**</span>
-<span class="sd">    </span>
 <span class="sd">    The following builds `tf.matmul(x, w) + b`</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
@@ -2745,7 +2744,7 @@ table {
 </pre></div>
 
 
-<p>The previous is equivalent to using </p>
+<p>The previous is equivalent to using</p>
 <div class="codehilite"><pre><span></span>h = (
     x.builder()
     .connect_weights(3)
@@ -2778,7 +2777,6 @@ table {
 <span class="sd">    Note that **fn** must expose the keyword/named argument `name`, this is compatible with the tensorflow API.</span>
 <span class="sd">    The returned `tensorbuilder.tensorbuilder.Builder` has **b** and **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `fn`: a function of type `tensor -&gt; tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)</span>
 <span class="sd">    * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">    * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
@@ -2787,20 +2785,16 @@ table {
 <span class="sd">    * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">    </span>
 <span class="sd">    **Examples**</span>
 <span class="sd">    The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`</span>
-<span class="sd">        </span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
 <span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 5])</span>
-<span class="sd">        </span>
 <span class="sd">        h = (</span>
 <span class="sd">            x.builder()</span>
 <span class="sd">            .connect_layer(3, fn=tf.nn.sigmoid)</span>
 <span class="sd">        )</span>
-<span class="sd">    The previous is equivalent to using </span>
-<span class="sd">    </span>
+<span class="sd">    The previous is equivalent to using</span>
 <span class="sd">        h = (</span>
 <span class="sd">            x.builder()</span>
 <span class="sd">            .connect_weights(3)</span>
@@ -2810,7 +2804,6 @@ table {
 <span class="sd">    You can chain various `connect_layer`s to get deeper neural networks</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
-<span class="sd">    </span>
 <span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 40])</span>
 <span class="sd">        h = (</span>
 <span class="sd">            x.builder()</span>
@@ -2841,7 +2834,7 @@ table {
     
   
     <div class="desc"><p><code>@_immutable</code></p>
-<p>Let <strong>x</strong> be <a href="#tensorbuilder.tensorbuilder.Builder.tensor"><code>tensor</code></a> of shape <strong>[m, n]</strong>, and let <strong>w</strong> be a <strong>tf.Variable</strong> of shape <strong>[n, size]</strong>. Then <code>builder.connect_weights(size)</code> computes <code>tf.matmul(x, w)</code>. </p>
+<p>Let <strong>x</strong> be <a href="#tensorbuilder.tensorbuilder.Builder.tensor"><code>tensor</code></a> of shape <strong>[m, n]</strong>, and let <strong>w</strong> be a <strong>tf.Variable</strong> of shape <strong>[n, size]</strong>. Then <code>builder.connect_weights(size)</code> computes <code>tf.matmul(x, w)</code>.</p>
 <p>The returned <a href="#tensorbuilder.tensorbuilder.Builder"><code>Builder</code></a> has <strong>w</strong> stored inside <a href="#tensorbuilder.tensorbuilder.Builder.variables"><code>variables</code></a>.</p>
 <p><strong>Parameters</strong></p>
 <ul>
@@ -2869,22 +2862,20 @@ table {
 <span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@_immutable`</span>
-<span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. </span>
+<span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`.</span>
 <span class="sd">    The returned `tensorbuilder.tensorbuilder.Builder` has **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `size`: an `int` representing the size of the layer (number of neurons)</span>
 <span class="sd">    * `name`: the name of the tensor (default: &quot;connect_weights&quot;)</span>
 <span class="sd">    * `weights_name`: the name of the **w** tensor of type `tf.Variable`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">    </span>
 <span class="sd">    **Examples**</span>
 <span class="sd">    The following builds `tf.matmul(x, w)`</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
 <span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 5])</span>
-<span class="sd">        z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;) </span>
+<span class="sd">        z = x.builder().connect_weights(3, weights_name=&quot;weights&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">size</span>
@@ -2978,13 +2969,10 @@ table {
 <span class="sd">    internally results in</span>
 <span class="sd">        builder.tensor = fn(builder.tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `fn`: a function of type `tensor -&gt; tensor`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">    </span>
 <span class="sd">    **Examples**</span>
-<span class="sd">    </span>
 <span class="sd">    The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
@@ -3069,11 +3057,9 @@ table {
 <span class="sd">    `@_immutable`</span>
 <span class="sd">    Expects a function **fn** with type `builder -&gt; builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    </span>
 <span class="sd">    * `fn`: a function of type `builder -&gt; builder`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
-<span class="sd">    </span>
 <span class="sd">    ** Example **</span>
 <span class="sd">    The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.</span>
 <span class="sd">        import tensorflow as tf</span>
@@ -3126,7 +3112,7 @@ table {
         <span class="nb">super</span><span class="p">(</span><span class="n">BuilderTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">branches</span> <span class="o">=</span> <span class="n">branches</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`. </span>
+<span class="sd">        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3140,7 +3126,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `list( tensorbuilder.tensorbuilder.Builder )`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -3172,7 +3158,7 @@ table {
 <span class="sd">        **Return**</span>
 
 <span class="sd">        * `list( tf.Tensor )`</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Example **</span>
 
 <span class="sd">            import tensorflow as tf</span>
@@ -3212,7 +3198,7 @@ table {
 <span class="sd">        * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
 <span class="sd">        * `bias`: determines where to use a bias **b** or not (default: `True`)</span>
 <span class="sd">        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)</span>
-<span class="sd">        </span>
+
 <span class="sd">        ** Examples **</span>
 
 <span class="sd">        # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]</span>
@@ -3237,7 +3223,7 @@ table {
 
 <span class="sd">            h = (</span>
 <span class="sd">                x.builder()</span>
-<span class="sd">                .branch(lambda x: </span>
+<span class="sd">                .branch(lambda x:</span>
 <span class="sd">                [</span>
 <span class="sd">                    x</span>
 <span class="sd">                ,</span>
@@ -3305,7 +3291,7 @@ table {
     <span class="nb">super</span><span class="p">(</span><span class="n">BuilderTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">branches</span> <span class="o">=</span> <span class="n">branches</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`. </span>
+<span class="sd">    A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
@@ -3356,7 +3342,6 @@ table {
 <span class="sd">    Returns a flattened list `tensorbuilder.tensorbuilder.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.tensorbuilder.BuilderTree`s.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `list( tensorbuilder.tensorbuilder.Builder )`</span>
-<span class="sd">    </span>
 <span class="sd">    ** Example **</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>
@@ -3429,7 +3414,7 @@ table {
 
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> 
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
     <span class="p">[</span>
         <span class="n">x</span>
     <span class="p">,</span>
@@ -3454,7 +3439,6 @@ table {
 <span class="sd">    * `name`: the name of the tensor (default: `&quot;layer&quot;`)</span>
 <span class="sd">    * `bias`: determines where to use a bias **b** or not (default: `True`)</span>
 <span class="sd">    * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)</span>
-<span class="sd">    </span>
 <span class="sd">    ** Examples **</span>
 <span class="sd">    # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]</span>
 <span class="sd">        import tensorflow as tf</span>
@@ -3471,7 +3455,7 @@ table {
 <span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 5])</span>
 <span class="sd">        h = (</span>
 <span class="sd">            x.builder()</span>
-<span class="sd">            .branch(lambda x: </span>
+<span class="sd">            .branch(lambda x:</span>
 <span class="sd">            [</span>
 <span class="sd">                x</span>
 <span class="sd">            ,</span>
@@ -3558,7 +3542,6 @@ table {
 <span class="sd">    Same as `tensorbuilder.tensorbuilder.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.tensorbuilder.Builder`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `list( tf.Tensor )`</span>
-<span class="sd">    </span>
 <span class="sd">    ** Example **</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorbuilder as tb</span>

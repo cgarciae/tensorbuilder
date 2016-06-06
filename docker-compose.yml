@@ -7,28 +7,14 @@ services:
   tf:
     build: .
     volumes:
-      - ./notebooks:/notebooks
-      - ./logs:/logs
-      - ./data:/data
       - ./:/tensorbuilder
     ports:
       - "8885:8888"
+    command: bash -c "cd /tensorbuilder && python setup.py install && cd /notebooks && /run_jupyter.sh"
 
   pdoc:
     # Use "git subtree push --prefix docs/tensorbuilder origin gh-pages" to update gh-pages
     build: .
     volumes:
       - ./:/tensorbuilder
-    command: bash -c "cd /tensorbuilder && PYTHONPATH= pdoc --html-dir=./docs --html . --only-pypath --overwrite"
-
-    
-  tb:
-    build: .
-    volumes:
-      - ./notebooks:/notebooks
-      - ./data:/data
-      - ./logs:/logs
-      - ./:/code
-    ports:
-      - "6006:6006"
-    command: bash -c "tensorboard --logdir /logs --host 0.0.0.0"
+    command: bash -c "cd /tensorbuilder && PYTHONPATH= pdoc --html-dir=./docs --html tensorbuilder --only-pypath --overwrite"

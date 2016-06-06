@@ -11,12 +11,15 @@ TensorBuilder has a small set of primitives that enable you to express complex n
 TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.
 
 ## Installation
+Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
-At the moment the easiest way to install it in your project is to do the following
+#### From source
+1. `git clone https://github.com/cgarciae/tensorbuilder.git`
+2. `cd tensorbuilder`
+3. `python setup.py install`
 
-1. `cd` to your project
-2. `git clone https://github.com/cgarciae/tensorbuilder.git`
-3. Erase the .git file/folder`rm tensorbuilder/.git` or `rm -fr tensorbuilder/.git`
+#### From pip
+Coming soon!
 
 ### Dependencies
 
@@ -61,7 +64,7 @@ If you are sufficiently familiar with tensorflow or use prettytensor then you mi
         ,
             root
             .connect_layer(9, fn=tf.nn.tanh)
-            .branch(lambda root2: 
+            .branch(lambda root2:
             [
               root2
               .connect_layer(6, fn=tf.nn.sigmoid)
@@ -139,7 +142,7 @@ The following builds `tf.matmul(x, w)`
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
-    z = x.builder().connect_weights(3, weights_name="weights") 
+    z = x.builder().connect_weights(3, weights_name="weights")
 
 
 
@@ -186,7 +189,7 @@ The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
       .connect_layer(3, fn=tf.nn.sigmoid, weights_name="weights", bias_name="bias")
     )
 
-The previous is equivalent to using 
+The previous is equivalent to using
 
     h = (
       x.builder()
@@ -299,7 +302,7 @@ The following will create a sigmoid layer but will branch the computation at the
         .tensors()
     )
 
-Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. 
+Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.
 
 The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
@@ -319,7 +322,7 @@ The following example will show you how create a (overly) complex tree and then 
         ,
             base
             .connect_layer(9, fn=tf.nn.tanh)
-            .branch(lambda base2: 
+            .branch(lambda base2:
             [
               base2
               .connect_layer(6, fn=tf.nn.sigmoid)
@@ -410,7 +413,7 @@ The next example show you how you can use this to pass the input layer directly 
 
     h = (
       x.builder()
-      .branch(lambda x: 
+      .branch(lambda x:
       [
         x
       ,
