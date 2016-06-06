@@ -8,7 +8,7 @@ TensorBuilder is light wrapper over TensorFlow that enables you to easily create
 
 TensorBuilder has a small set of primitives that enable you to express complex networks while maintaining a consistent API. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.
 
-TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid most a lot of conceptual complexity.
+TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.
 
 ## Installation
 
