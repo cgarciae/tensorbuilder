@@ -1102,7 +1102,7 @@ table {
 <li>Enable the user to create complex branched topologies while maintaining a fluent API (see <a href="http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch">Builder.branch</a>)</li>
 </ul>
 <p>TensorBuilder has a small set of primitives that enable you to express complex networks while maintaining a consistent API. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.</p>
-<p>TensorBuilder takes inspiration from <a href="https://github.com/google/prettytensor">prettytensor</a> but its internals are simpler, its API is smaller but equally powerfull, and its branching mechanism is more expresive and doesn't break the fluent API, and its 100% stateless.</p>
+<p>TensorBuilder takes inspiration from <a href="https://github.com/google/prettytensor">prettytensor</a> but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.</p>
 <h2>Installation</h2>
 <p>At the moment the easiest way to install it in your project is to do the following</p>
 <ol>
@@ -1178,7 +1178,7 @@ table {
 
 <span class="sd">TensorBuilder has a small set of primitives that enable you to express complex networks while maintaining a consistent API. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.</span>
 
-<span class="sd">TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, and its branching mechanism is more expresive and doesn&#39;t break the fluent API, and its 100% stateless.</span>
+<span class="sd">TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn&#39;t break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.</span>
 
 <span class="sd">## Installation</span>
 
@@ -1296,7 +1296,7 @@ table {
         <span class="k">return</span> <span class="n">Builder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_weights&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -1330,14 +1330,15 @@ table {
         <span class="n">n</span> <span class="o">=</span> <span class="n">size</span>
 
         <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">weights_name</span><span class="p">)</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="n">weights_name</span> <span class="k">if</span> <span class="n">weights_name</span> <span class="k">else</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">builder</span>
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_bias&quot;</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -1379,15 +1380,16 @@ table {
         <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">bias_name</span><span class="p">)</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="n">bias_name</span> <span class="k">if</span> <span class="n">bias_name</span> <span class="k">else</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">builder</span>
 
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;layer&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -2049,7 +2051,7 @@ table {
         <span class="k">return</span> <span class="n">Builder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_weights&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -2083,14 +2085,15 @@ table {
         <span class="n">n</span> <span class="o">=</span> <span class="n">size</span>
 
         <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">weights_name</span><span class="p">)</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="n">weights_name</span> <span class="k">if</span> <span class="n">weights_name</span> <span class="k">else</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">builder</span>
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_bias&quot;</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -2132,15 +2135,16 @@ table {
         <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">bias_name</span><span class="p">)</span>
+        <span class="n">var_name</span> <span class="o">=</span> <span class="n">bias_name</span> <span class="k">if</span> <span class="n">bias_name</span> <span class="k">else</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">builder</span>
 
 
     <span class="nd">@_immutable</span>
-    <span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;layer&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@_immutable`</span>
 
@@ -2616,7 +2620,7 @@ table {
             
   <div class="item">
     <div class="name def" id="tensorbuilder.tensorbuilder.Builder.connect_bias">
-    <p>def <span class="ident">connect_bias</span>(</p><p>builder, name=&#39;connect_bias&#39;, bias_name=&#39;b&#39;)</p>
+    <p>def <span class="ident">connect_bias</span>(</p><p>builder, name=None, bias_name=None)</p>
     </div>
     
 
@@ -2659,7 +2663,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder.Builder.connect_bias', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensorbuilder.Builder.connect_bias" class="source">
     <div class="codehilite"><pre><span></span><span class="nd">@_immutable</span>
-<span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_bias&quot;</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">connect_bias</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@_immutable`</span>
 <span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **b** be a **tf.Variable** of shape **[n]**. Then `builder.connect_bias()` computes `tf.add(x, b)`.</span>
@@ -2690,7 +2694,8 @@ table {
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">bias_name</span><span class="p">)</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="n">var_name</span> <span class="o">=</span> <span class="n">bias_name</span> <span class="k">if</span> <span class="n">bias_name</span> <span class="k">else</span> <span class="n">b</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
     <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">builder</span>
 </pre></div>
@@ -2703,7 +2708,7 @@ table {
             
   <div class="item">
     <div class="name def" id="tensorbuilder.tensorbuilder.Builder.connect_layer">
-    <p>def <span class="ident">connect_layer</span>(</p><p>builder, size, fn=None, name=&#39;layer&#39;, weights_name=None, bias=True, bias_name=None)</p>
+    <p>def <span class="ident">connect_layer</span>(</p><p>builder, size, fn=None, name=None, weights_name=None, bias=True, bias_name=None)</p>
     </div>
     
 
@@ -2766,7 +2771,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder.Builder.connect_layer', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensorbuilder.Builder.connect_layer" class="source">
     <div class="codehilite"><pre><span></span><span class="nd">@_immutable</span>
-<span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;layer&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">connect_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bias_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@_immutable`</span>
 <span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, let **w** be a **tf.Variable** of shape **[n, size]**, let **b** be a **tf.Variable** of shape **[n]**, and **fn** be a function from a tensor to a tensor. Then `builder.connect_layer(size, fn=fn)` computes `fn(tf.matmul(x, w) + b)`. If **fn** is not present the layer is linear.</span>
@@ -2829,7 +2834,7 @@ table {
             
   <div class="item">
     <div class="name def" id="tensorbuilder.tensorbuilder.Builder.connect_weights">
-    <p>def <span class="ident">connect_weights</span>(</p><p>builder, size, name=&#39;connect_weights&#39;, weights_name=&#39;w&#39;)</p>
+    <p>def <span class="ident">connect_weights</span>(</p><p>builder, size, name=None, weights_name=None)</p>
     </div>
     
 
@@ -2861,7 +2866,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensorbuilder.Builder.connect_weights', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensorbuilder.Builder.connect_weights" class="source">
     <div class="codehilite"><pre><span></span><span class="nd">@_immutable</span>
-<span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;connect_weights&quot;</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">connect_weights</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weights_name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@_immutable`</span>
 <span class="sd">    Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. </span>
@@ -2884,7 +2889,8 @@ table {
     <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">size</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">weights_name</span><span class="p">)</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+    <span class="n">var_name</span> <span class="o">=</span> <span class="n">weights_name</span> <span class="k">if</span> <span class="n">weights_name</span> <span class="k">else</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
     <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">builder</span>
 </pre></div>
