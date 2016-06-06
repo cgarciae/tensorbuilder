@@ -9,7 +9,7 @@ TensorBuilder is light wrapper over TensorFlow that enables you to easily create
 
 TensorBuilder has a small set of primitives that enable you to express complex networks while maintaining a consistent API. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.
 
-TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, and its branching mechanism is more expresive and doesn't break the fluent API, and its 100% stateless.
+TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid most a lot of conceptual complexity.
 
 ## Installation
 
@@ -127,7 +127,7 @@ class Builder(object):
         return Builder(self.tensor, self.variables.copy())
 
     @_immutable
-    def connect_weights(builder, size, name="connect_weights", weights_name="w"):
+    def connect_weights(builder, size, name=None, weights_name=None):
         """
         `@_immutable`
 
@@ -161,14 +161,15 @@ class Builder(object):
         n = size
 
         w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0), name=weights_name)
+        var_name = weights_name if weights_name else w.name
 
-        builder.variables[w.name] = w
+        builder.variables[var_name] = w
         builder.tensor = tf.matmul(builder.tensor, w, name=name)
 
         return builder
 
     @_immutable
-    def connect_bias(builder, name="connect_bias", bias_name="b"):
+    def connect_bias(builder, name=None, bias_name=None):
         """
         `@_immutable`
 
@@ -210,15 +211,16 @@ class Builder(object):
         m = int(builder.tensor.get_shape()[1])
 
         b = tf.Variable(tf.random_uniform([m], -1.0, 1.0), name=bias_name)
+        var_name = bias_name if bias_name else b.name
 
-        builder.variables[b.name] = b
+        builder.variables[var_name] = b
         builder.tensor = tf.add(builder.tensor, b, name=name)
 
         return builder
 
 
     @_immutable
-    def connect_layer(builder, size, fn=None, name="layer", weights_name=None, bias=True, bias_name=None):
+    def connect_layer(builder, size, fn=None, name=None, weights_name=None, bias=True, bias_name=None):
         """
         `@_immutable`
 

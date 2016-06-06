@@ -15,19 +15,20 @@ services:
       - "8885:8888"
 
   pdoc:
+    # Use "git subtree push --prefix docs/tensorbuilder origin gh-pages" to update gh-pages
     build: .
     volumes:
       - ./:/tensorbuilder
-    command: bash -c "cd /tensorbuilder && PYTHONPATH= pdoc --html-dir=./docs --html . --only-pypath --overwrite "  
+    command: bash -c "cd /tensorbuilder && PYTHONPATH= pdoc --html-dir=./docs --html . --only-pypath --overwrite"
 
     
-  # tb:
-  #   build: .
-  #   volumes:
-  #     - ./notebooks:/notebooks
-  #     - ./data:/data
-  #     - ./logs:/logs
-  #     - ./:/code
-  #   ports:
-  #     - "6006:6006"
-  #   command: bash -c "tensorboard --logdir /logs --host 0.0.0.0"
+  tb:
+    build: .
+    volumes:
+      - ./notebooks:/notebooks
+      - ./data:/data
+      - ./logs:/logs
+      - ./:/code
+    ports:
+      - "6006:6006"
+    command: bash -c "tensorboard --logdir /logs --host 0.0.0.0"
