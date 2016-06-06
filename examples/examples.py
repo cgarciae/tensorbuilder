@@ -14,7 +14,7 @@ import tensorbuilder as tb
 ##### builder
 ##############################
 
-# The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.
+# The following example shows you how to construct a `tensorbuilder.builders.Builder` from a tensorflow Tensor.
 
 import tensorflow as tf
 import tensorbuilder as tb
@@ -30,7 +30,7 @@ a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()
 ##### branches
 ##############################
 
-# Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree`.
+# Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.builders.BuilderTree`.
 
 import tensorflow as tf
 import tensorbuilder as tb
@@ -40,7 +40,7 @@ b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
 
 tree = tb.branches([a, b])
 
-#`tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases
+#`tensorbuilder.builders.BuilderTree`s are usually constructed using `tensorbuilder.builders.Builder.branch` of the `tensorbuilder.builders.Builder` class, but you can use this for special cases
 
 
 
@@ -78,7 +78,7 @@ z = (
 	.connect_bias(bias_name="bias")
 )
 
-# Note, the previous is equivalent to using `tensorbuilder.tensorbuilder.Builder.connect_layer` like this
+# Note, the previous is equivalent to using `tensorbuilder.builders.Builder.connect_layer` like this
 z = (
 	x.builder()
 	.connect_layer(3, weights_name="weights", bias_name="bias")
@@ -214,9 +214,9 @@ y = tf.placeholder(tf.float32, shape=[None, 1])
     .tensors()
 )
 
-# Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back.
+# Note that you have to use the `tensorbuilder.builders.BuilderTree.tensors` method from the `tensorbuilder.builders.BuilderTree` class to get the tensors back.
 
-# Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. 
+# Remember that you can also contain `tensorbuilder.builders.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.builders.BuilderTree` has methods that help you flatten or reduce the tree. 
 #The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
 import tensorflow as tf

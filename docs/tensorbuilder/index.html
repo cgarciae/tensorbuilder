@@ -1042,8 +1042,8 @@ table {
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
         <li class="mono"><a href="builder_nn.m.html">tensorbuilder.builder_nn</a></li>
+        <li class="mono"><a href="builders.m.html">tensorbuilder.builders</a></li>
         <li class="mono"><a href="nn.m.html">tensorbuilder.nn</a></li>
-        <li class="mono"><a href="tensorbuilder.m.html">tensorbuilder.tensorbuilder</a></li>
       </ul>
     </li>
     </ul>
@@ -1064,18 +1064,20 @@ table {
   <div id="source-tensorbuilder" class="source">
     <div class="codehilite"><pre><span></span><span class="c1"># Init code</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">builders</span>
+<span class="kn">from</span> <span class="nn">builders</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">nn</span>
 <span class="kn">import</span> <span class="nn">builder_nn</span>
 <span class="kn">from</span> <span class="nn">decorator</span> <span class="kn">import</span> <span class="n">decorator</span>
+
+<span class="c1">#version</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.1&quot;</span>
 
 
 <span class="c1"># Monkey Patch TensorFlow</span>
 <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="o">.</span><span class="n">builder</span> <span class="o">=</span> <span class="n">builder</span>
 
-
-<span class="kn">import</span> <span class="nn">tensorbuilder</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tensorbuilder&quot;</span><span class="p">,</span> <span class="s2">&quot;nn&quot;</span><span class="p">,</span> <span class="s2">&quot;builder_nn&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;builders&quot;</span><span class="p">,</span> <span class="s2">&quot;nn&quot;</span><span class="p">,</span> <span class="s2">&quot;builder_nn&quot;</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -1098,17 +1100,17 @@ table {
 
       </div>
       <div class="item">
-      <p class="name"><a href="nn.m.html">tensorbuilder.nn</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="tensorbuilder.m.html">tensorbuilder.tensorbuilder</a></p>
+      <p class="name"><a href="builders.m.html">tensorbuilder.builders</a></p>
       
   
     <div class="desc"><h1>Tensor Builder</h1>
 <p>TensorBuilder is light wrapper over TensorFlow that enables you to easily create complex deep neural networks using the Builder Pattern through a functional <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent</a> <a href="https://en.wikipedia.org/wiki/Immutable_object">immutable</a> API. The...</p></div>
+
+      </div>
+      <div class="item">
+      <p class="name"><a href="nn.m.html">tensorbuilder.nn</a></p>
+      
+  
 
       </div>
   </section>

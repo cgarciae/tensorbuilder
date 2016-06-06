@@ -13,7 +13,7 @@ services:
     command: bash -c "cd /tensorbuilder && python setup.py install && cd /notebooks && /run_jupyter.sh"
 
   pdoc:
-    # Use "git subtree push --prefix docs/tensorbuilder origin gh-pages" to update gh-pages
+    # update gh-pages => git subtree push --prefix docs/tensorbuilder origin gh-pages
     build: .
     volumes:
       - ./:/tensorbuilder
