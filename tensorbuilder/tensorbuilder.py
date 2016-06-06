@@ -12,12 +12,15 @@ TensorBuilder has a small set of primitives that enable you to express complex n
 TensorBuilder takes inspiration from [prettytensor](https://github.com/google/prettytensor) but its internals are simpler, its API is smaller but equally powerfull, its branching mechanism is more expresive and doesn't break the fluent API, and its immutable nature helps avoid a lot of conceptual complexity.
 
 ## Installation
+Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
-At the moment the easiest way to install it in your project is to do the following
+#### From source
+1. `git clone https://github.com/cgarciae/tensorbuilder.git`
+2. `cd tensorbuilder`
+3. `python setup.py install`
 
-1. `cd` to your project
-2. `git clone https://github.com/cgarciae/tensorbuilder.git`
-3. Erase the .git file/folder`rm tensorbuilder/.git` or `rm -fr tensorbuilder/.git`
+#### From pip
+Coming soon!
 
 ## Getting Started
 
@@ -54,7 +57,7 @@ If you are sufficiently familiar with tensorflow or use prettytensor then you mi
         ,
             root
             .connect_layer(9, fn=tf.nn.tanh)
-            .branch(lambda root2: 
+            .branch(lambda root2:
             [
               root2
               .connect_layer(6, fn=tf.nn.sigmoid)
@@ -101,21 +104,21 @@ def _immutable(method, self, *args, **kwargs):
 class Builder(object):
     """
     The Builder class is a wrapper around a Tensor. Most of its method are immutable in the sense that they don't modify the caller object but rather always make a copy, they also tend to return a Builder so you you can keep fluently chaining methods.
-    
+
     To create a builder from a method you have these options:
 
     1. Use the `tensorbuilder.tensorbuilder.builder` function
-    
+
             tb.builder(tensor)
 
     2. Use the monkey-patched method on the Tensor class
 
             tensor.builder()
-    
+
     """
     def __init__(self, tensor, variables={}):
         super(Builder, self).__init__()
-        
+
         self.tensor = tensor
         """A `tensorflow` Tensor."""
 
@@ -131,12 +134,12 @@ class Builder(object):
         """
         `@_immutable`
 
-        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`. 
+        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`.
 
         The returned `tensorbuilder.tensorbuilder.Builder` has **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
 
         **Parameters**
-        
+
         * `size`: an `int` representing the size of the layer (number of neurons)
         * `name`: the name of the tensor (default: "connect_weights")
         * `weights_name`: the name of the **w** tensor of type `tf.Variable`.
@@ -144,7 +147,7 @@ class Builder(object):
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
-        
+
         **Examples**
 
         The following builds `tf.matmul(x, w)`
@@ -154,7 +157,7 @@ class Builder(object):
 
             x = tf.placeholder(tf.float32, shape=[None, 5])
 
-            z = x.builder().connect_weights(3, weights_name="weights") 
+            z = x.builder().connect_weights(3, weights_name="weights")
         """
 
         m = int(builder.tensor.get_shape()[1])
@@ -178,16 +181,16 @@ class Builder(object):
         The returned `tensorbuilder.tensorbuilder.Builder` has **b** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
 
         **Parameters**
-        
+
         * `name`: the name of the tensor (default: "connect_bias")
         * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: "b").
 
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
-        
+
         **Examples**
-        
+
         The following builds `tf.matmul(x, w) + b`
 
             import tensorflow as tf
@@ -231,7 +234,7 @@ class Builder(object):
         The returned `tensorbuilder.tensorbuilder.Builder` has **b** and **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
 
         **Parameters**
-        
+
         * `fn`: a function of type `tensor -> tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)
         * `size`: an `int` representing the size of the layer (number of neurons)
         * `name`: the name of the tensor (default: `"layer"`)
@@ -242,23 +245,23 @@ class Builder(object):
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
-        
+
         **Examples**
 
         The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
-            
+
             import tensorflow as tf
             import tensorbuilder as tb
 
             x = tf.placeholder(tf.float32, shape=[None, 5])
-            
+
             h = (
                 x.builder()
                 .connect_layer(3, fn=tf.nn.sigmoid)
             )
 
-        The previous is equivalent to using 
-        
+        The previous is equivalent to using
+
             h = (
                 x.builder()
                 .connect_weights(3)
@@ -270,7 +273,7 @@ class Builder(object):
 
             import tensorflow as tf
             import tensorbuilder as tb
-        
+
             x = tf.placeholder(tf.float32, shape=[None, 40])
 
             h = (
@@ -305,15 +308,15 @@ class Builder(object):
             builder.tensor = fn(builder.tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
 
         **Parameters**
-        
+
         * `fn`: a function of type `tensor -> tensor`.
 
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
-        
+
         **Examples**
-        
+
         The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer
 
             import tensorflow as tf
@@ -341,13 +344,13 @@ class Builder(object):
         Expects a function **fn** with type `builder -> builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.
 
         **Parameters**
-        
+
         * `fn`: a function of type `builder -> builder`.
 
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
-        
+
         ** Example **
 
         The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.
@@ -392,16 +395,16 @@ class Builder(object):
         """
         `@_immutable`
 
-        Expects a function **fn** with type `Builder -> list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later 
+        Expects a function **fn** with type `Builder -> list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later
 
         **Parameters**
-        
+
         * `fn`: a function of type `Builder -> list( Builder | BuilderTree )`.
 
         **Return**
 
         * `tensorbuilder.tensorbuilder.BuilderTree`
-        
+
         ** Example **
 
         The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out
@@ -425,8 +428,8 @@ class Builder(object):
                 .tensors()
             )
 
-        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree. 
-        
+        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.
+
         The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
             import tensorflow as tf
@@ -445,7 +448,7 @@ class Builder(object):
                 ,
                     base
                     .connect_layer(9, fn=tf.nn.tanh)
-                    .branch(lambda base2: 
+                    .branch(lambda base2:
                     [
                         base2
                         .connect_layer(6, fn=tf.nn.sigmoid)
@@ -483,7 +486,7 @@ class BuilderTree(object):
         super(BuilderTree, self).__init__()
         self.branches = branches
         """
-        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`. 
+        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.
         """
 
     def copy(self):
@@ -497,7 +500,7 @@ class BuilderTree(object):
         **Return**
 
         * `list( tensorbuilder.tensorbuilder.Builder )`
-        
+
         ** Example **
 
             import tensorflow as tf
@@ -529,7 +532,7 @@ class BuilderTree(object):
         **Return**
 
         * `list( tf.Tensor )`
-        
+
         ** Example **
 
             import tensorflow as tf
@@ -569,7 +572,7 @@ class BuilderTree(object):
         * `name`: the name of the tensor (default: `"layer"`)
         * `bias`: determines where to use a bias **b** or not (default: `True`)
         * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)
-        
+
         ** Examples **
 
         # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]
@@ -594,7 +597,7 @@ class BuilderTree(object):
 
             h = (
                 x.builder()
-                .branch(lambda x: 
+                .branch(lambda x:
                 [
                     x
                 ,
@@ -633,7 +636,7 @@ def builder(tensor):
     ** Parameters **
 
     * `tensor`: a tensorflow Tensor
-    
+
     #### Example
 
     The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.
@@ -659,7 +662,7 @@ def branches(builder_list):
     ** Parameters **
 
     * `builder_list`: list of type `list( Builder | BuilderTree)`
-    
+
     #### Example
 
     Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this
