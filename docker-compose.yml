@@ -17,4 +17,5 @@ services:
     build: .
     volumes:
       - ./:/tensorbuilder
-    command: bash -c "cd /tensorbuilder && PYTHONPATH= pdoc --html-dir=./docs --html tensorbuilder --only-pypath --overwrite"
+    working_dir: /tensorbuilder
+    command: ./gen_docs

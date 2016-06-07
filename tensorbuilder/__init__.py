@@ -1,16 +1,44 @@
 # Init code
-import tensorflow as tf
-import builders
-from builders import *
+from tensorbuilder import *
+import tensorbuilder
+import extras
+from dsl import *
 import nn
-import builder_nn
-from decorator import decorator
-
 #version
 __version__ = "0.0.1"
 
+__all__ = ["tensorbuilder", "dsl", "extras"]
 
-# Monkey Patch TensorFlow
-tf.python.framework.ops.Tensor.builder = builder
+if __name__ == '__main__':
+    import tensorflow as tf
 
-__all__ = ["builders", "nn", "builder_nn"]
+    x = tf.placeholder(tf.float32, shape=[None, 5])
+
+    h = x.builder().pipe(
+        connect_layer(2)
+        .map_softmax(),
+        [
+            sigmoid_layer(10)
+        ,
+            [
+                tanh_layer(4)
+            ,
+                tanh_layer(4)
+            ]
+        ],
+        connect_layer(3),
+        [
+            map_relu()
+        ,
+            map_softmax()
+        ,
+            [
+                tanh_layer(4)
+            ,
+                tanh_layer(4)
+            ]
+        ],
+        tensors()
+    )
+
+    print(h)
