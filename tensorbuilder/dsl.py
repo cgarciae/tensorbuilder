@@ -33,12 +33,6 @@ class Applicative(object):
 
         return Applicative(_compose2(g, app.f))
 
-    @tb.immutable
-    def tensor(app):
-        """
-        """
-        return app.compose(tensor())
-
 
 def applicative(f):
     return Applicative(f)
@@ -78,12 +72,6 @@ def compile(ast):
 def pipe(builder, *ast):
     f = compile(ast)
     return f(builder)
-
-def tensor():
-    """
-    Takes a Builder and returns its tensor
-    """
-    return lambda builder: builder.tensor
 
 
 #######################

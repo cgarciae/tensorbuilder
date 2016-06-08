@@ -119,15 +119,18 @@ class Builder(object):
     def __init__(self, tensor, variables={}):
         super(Builder, self).__init__()
 
-        self.tensor = tensor
+        self._tensor = tensor
         """A `tensorflow` Tensor."""
 
         self.variables = variables
         """A dictionary that accumulates the **tf.Variable** tensors generated during the building process, it has the form {tensor_name: String -> tensor: tf.Variable}. Since functions like `tensorbuilder.tensorbuilder.Builder.connect_layer` hides you the complexity of creating the **bias** and **weights** of your network, `tensorbuilder.tensorbuilder.Builder` stores them in this field. The methods of this class enables you to set the names of these variables, but take into account that the final name is actually the name of the tensor, with is set by `tensorflow`. Check their documentation to see how the name is defined."""
 
+    def tensor(self):
+        return self._tensor
+    
     def copy(self):
         """Returns a copy of this Builder"""
-        return Builder(self.tensor, self.variables.copy())
+        return Builder(self._tensor, self.variables.copy())
 
 
     @staticmethod
@@ -187,13 +190,13 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         """
         `@immutable`
 
-        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` and **fn** be a function from a tensor to a tensor. Then `builder.map(fn)` computes `fn(x)`. All extra positional and named arguments are forwarded to **fn** such that
+        Let **x** be `tensorbuilder.tensorbuilder.Builder._tensor` and **fn** be a function from a tensor to a tensor. Then `builder.map(fn)` computes `fn(x)`. All extra positional and named arguments are forwarded to **fn** such that
 
             builder.map(fn, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
 
         internally results in
 
-            builder.tensor = fn(builder.tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
+            builder._tensor = fn(builder._tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
 
         **Parameters**
 
@@ -206,7 +209,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         **Examples**
 
         """
-        builder.tensor = fn(builder.tensor, *args, **kwargs)
+        builder._tensor = fn(builder._tensor, *args, **kwargs)
         return builder
 
     @immutable
@@ -351,7 +354,7 @@ This method is a lifted version the function `{1}.{0}`. `{1}.{0}` is expected to
         ** Example **
 
         """
-        return [ builder.tensor for builder in self ]
+        return [ builder._tensor for builder in self ]
 
 
     @immutable

@@ -239,7 +239,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
     keep_prob = tf.placeholder(tf.float32)
 
     def sigmoid_layer(builder, size):
-      m = int(builder.tensor.get_shape()[1])
+      m = int(builder._tensor.get_shape()[1])
       n = size
 
       w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0))
@@ -248,7 +248,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
       builder.variables[w.name] = w
       builder.variables[b.name] = b
 
-      builder.tensor = tf.nn.sigmoid(tf.matmul(builder.tensor, w) + b)
+      builder._tensor = tf.nn.sigmoid(tf.matmul(builder._tensor, w) + b)
 
       return builder
 

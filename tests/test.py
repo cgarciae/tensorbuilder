@@ -12,24 +12,13 @@ h = (
 	.tanh_layer(10)
 	.dropout(keep_prob)
 	.softmax_layer(3)
-	.tensor
+	.tensor()
 )
 
 h2 = x.builder().pipe(
     dl.tanh_layer(10)
     .dropout(keep_prob)
-    .softmax_layer(3),
-    [
-        dl.relu()
-    ,
-        (dl.softmax_layer(4),
-        [
-            dl.relu()
-        ,
-            dl.softmax_layer(4)
-        ])
-    ],
-    dl.relu_layer(7)
+    .softmax_layer(3)
     .tensor()
 )
 
