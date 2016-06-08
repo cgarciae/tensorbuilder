@@ -27,7 +27,7 @@ TensorBuilder knows nothing about tensors until you include some patches, even t
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
 #### From github
-1. `pip install git+https://github.com/cgarciae/tensorbuilder.git`
+1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.2`
 
 #### From pip
 Coming soon!
@@ -199,14 +199,14 @@ Lets see an example, here is the previous example about branching with the the f
         [
             dl.relu_layer(3)
         ,
-            dl.tanh_layer(9),
+            (dl.tanh_layer(9),
             [
               	dl.sigmoid_layer(6)
             ,
           			dl
           			.dropout(keep_prob)
           			.softmax_layer(8)
-            ]
+            ])
         ],
         dl.sigmoid_layer(6)
         .tensor()
@@ -225,10 +225,6 @@ The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/builders
 Here are the examples for each method of the API. If you are understand all examples, then you've understood the complete API.
 
 ##############################
-##### API EXAMPLES
-##############################
-
-##############################
 ##### FUNCTIONS
 ##############################
 
@@ -243,13 +239,16 @@ The following example shows you how to construct a `tensorbuilder.tensorbuilder.
     import tensorbuilder as tb
 
     a = tf.placeholder(tf.float32, shape=[None, 8])
-    a_builder = tb.builder(a)
+    a_builder = tb.build(a)
 
-The previous is the same as
+    print(a_builder)
 
-    a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()
+    # The previous is the same as
 
-since tensorbuilder monkey-patches tensorflow's Tensor with this function as method.
+    a = tf.placeholder(tf.float32, shape=[None, 8])
+    a_builder = a.builder()
+
+    print(a_builder)
 
 ##############################
 ##### branches
@@ -265,6 +264,8 @@ Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tens
 
     tree = tb.branches([a, b])
 
+    print(tree)
+
 `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases
 
 
@@ -273,46 +274,77 @@ Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tens
 ##### BUILDER
 ##############################
 
+
 ##############################
-##### connect_layer
+##### fully_connected
 ##############################
 
-The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
+This method is included by many libraries so its "sort of" part of TensorBuilder. The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
     h = (
-      x.builder()
-      .connect_layer(3, fn=tf.nn.sigmoid, weights_name="weights", bias_name="bias")
+    	x.builder()
+    	.fully_connected(3, activation_fn=tf.nn.sigmoid)
+    	.tensor()
     )
 
-The previous is equivalent to using
+    print(h)
 
-    h = (
-      x.builder()
-      .connect_weights(3, weights_name="weights")
-      .connect_bias(bias_name="bias")
-      .map(tf.nn.sigmoid)
-)
-
-You can chain various `connect_layer`s to get deeper neural networks
+Using `tensorbuilder.patch` the previous is equivalent to
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.patch
+
+    x = tf.placeholder(tf.float32, shape=[None, 5])
+
+    h = (
+    	x.builder()
+    	.sigmoid_layer(3)
+    	.tensor()
+    )
+
+    print(h)
+
+
+You can chain various `fully_connected`s to get deeper neural networks
+
+    import tensorflow as tf
+    import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 40])
 
     h = (
-      x.builder()
-      .connect_layer(100, fn=tf.nn.tanh)
-      .connect_layer(30, fn=tf.nn.softmax)
+    	x.builder()
+    	.fully_connected(100, activation_fn=tf.nn.tanh)
+    	.fully_connected(30, activation_fn=tf.nn.softmax)
+    	.tensor()
     )
 
+    print(h)
 
+Using `tensorbuilder.patch` the previous is equivalent to
 
+    import tensorflow as tf
+    import tensorbuilder as tb
+    import tensorbuilder.patch
+
+    x = tf.placeholder(tf.float32, shape=[None, 5])
+
+    h = (
+    	x.builder()
+    	.tanh_layer(100)
+    	.softmax_layer(30)
+    	.tensor()
+    )
+
+    print(h)
 
 ##############################
 ##### map
@@ -322,18 +354,20 @@ The following constructs a neural network with the architecture `[40 input, 100 
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 40])
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-      x.builder()
-      .connect_layer(100, fn=tf.nn.tanh)
-      .map(tf.nn.dropout, keep_prob)
-      .connect_layer(30, fn=tf.nn.softmax)
+    	x.builder()
+    	.fully_connected(100, activation_fn=tf.nn.tanh)
+    	.map(tf.nn.dropout, keep_prob)
+    	.fully_connected(30, activation_fn=tf.nn.softmax)
+    	.tensor()
     )
 
-
+    print(h)
 
 
 ##############################
@@ -344,54 +378,58 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 40])
     keep_prob = tf.placeholder(tf.float32)
 
     def sigmoid_layer(builder, size):
-      m = int(builder.tensor().get_shape()[1])
-      n = size
+    	x = builder.tensor()
+    	m = int(x.get_shape()[1])
+    	n = size
 
-      w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0))
-      b = tf.Variable(tf.random_uniform([n], -1.0, 1.0))
+    	w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0))
+    	b = tf.Variable(tf.random_uniform([n], -1.0, 1.0))
 
-      builder.variables[w.name] = w
-      builder.variables[b.name] = b
+    	y = tf.nn.sigmoid(tf.matmul(x, w) + b)
 
-      builder = tf.nn.sigmoid(tf.matmul(builder.tensor(), w) + b).builder()
-
-      return builder
+    	return y.builder()
 
     h = (
-      x.builder()
-      .then(lambda builder: sigmoid_layer(builder, 3))
+    	x.builder()
+    	.then(sigmoid_layer, 3)
+    	.tensor()
     )
 
-Note that the previous if rougly equivalent to
+Note that the previous if equivalent to
 
+    import tensorflow as tf
+    import tensorbuilder as tb
+    import tensorbuilder.slim_patch
     h = (
-      x.builder()
-      .connect_layer(3, fn=tf.nn.sigmoid)
+    	x.builder()
+    	.fully_connected(3, activation_fn=tf.nn.sigmoid)
+    	.tensor()
     )
 
-
-
+    print(h)
 
 ##############################
 ##### branch
 ##############################
 
-The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out
+The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `fully_connected(1)` and then its branched out
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h, trainer] = (
         x.builder()
-        .connect_layer(1)
+        .fully_connected(1)
         .branch(lambda z:
         [
             z.map(tf.nn.sigmoid)
@@ -402,56 +440,64 @@ The following will create a sigmoid layer but will branch the computation at the
         .tensors()
     )
 
-Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.
+    print(h)
+    print(trainer)
 
+Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back.
+
+Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.
 The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
         x.builder()
-        .connect_layer(10)
+        .fully_connected(10)
         .branch(lambda base:
         [
             base
-            .connect_layer(3, fn=tf.nn.relu)
+            .fully_connected(3, activation_fn=tf.nn.relu)
         ,
             base
-            .connect_layer(9, fn=tf.nn.tanh)
+            .fully_connected(9, activation_fn=tf.nn.tanh)
             .branch(lambda base2:
             [
-              base2
-              .connect_layer(6, fn=tf.nn.sigmoid)
+            	base2
+            	.fully_connected(6, activation_fn=tf.nn.sigmoid)
             ,
-              base2
-              .map(tf.nn.dropout, keep_prob)
-              .connect_layer(8, tf.nn.softmax)
+            	base2
+            	.map(tf.nn.dropout, keep_prob)
+            	.fully_connected(8, tf.nn.softmax)
             ])
         ])
-        .connect_layer(6, fn=tf.nn.sigmoid)
+        .fully_connected(6, activation_fn=tf.nn.sigmoid)
     )
+
+    print(h)
 
 ##############################
 ##### BUILDER TREE
 ##############################
 
 ##############################
-##### builder
+##### builders
 ##############################
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h_builder, trainer_builder] = (
         x.builder()
-        .connect_layer(1)
+        .fully_connected(1)
         .branch(lambda z:
         [
             z.map(tf.nn.sigmoid)
@@ -462,7 +508,8 @@ The following example will show you how create a (overly) complex tree and then 
         .builders()
     )
 
-
+    print(h_builder)
+    print(trainer_builder)
 
 ##############################
 ##### tensors
@@ -470,13 +517,14 @@ The following example will show you how create a (overly) complex tree and then 
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h_tensor, trainer_tensor] = (
         x.builder()
-        .connect_layer(1)
+        .fully_connected(1)
         .branch(lambda z:
         [
             z.map(tf.nn.sigmoid)
@@ -487,37 +535,46 @@ The following example will show you how create a (overly) complex tree and then 
         .tensors()
     )
 
+    print(h_tensor)
+    print(trainer_tensor)
+
 ##############################
-##### connect_layer
+##### fully_connected
 ##############################
 
 The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
     b = tf.placeholder(tf.float32, shape=[None, 5]).builder()
 
     h = (
-      tb.branches([a, b])
-      .connect_layer(3, fn=tf.nn.softmax)
+    	tb.branches([a, b])
+    	.fully_connected(3, activation_fn=tf.nn.softmax)
     )
+
+    print(h)
 
 The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh layer` filter through the other, both of these are connect to a single `softmax` output layer
 
     import tensorflow as tf
     import tensorbuilder as tb
+    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
     h = (
-      x.builder()
-      .branch(lambda x:
-      [
-        x
-      ,
-        x.connect_layer(10, fn=tf.nn.tanh)
-      ])
-      .connect_layer(3, fn=tf.nn.softmax)
+    	x.builder()
+    	.branch(lambda x:
+    	[
+    		x
+    	,
+    		x.fully_connected(10, activation_fn=tf.nn.tanh)
+    	])
+    	.fully_connected(3, activation_fn=tf.nn.softmax)
     )
+
+    print(h)

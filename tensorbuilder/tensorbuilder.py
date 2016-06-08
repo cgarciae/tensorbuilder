@@ -127,7 +127,7 @@ class Builder(object):
 
     def tensor(self):
         return self._tensor
-    
+
     def copy(self):
         """Returns a copy of this Builder"""
         return Builder(self._tensor, self.variables.copy())
@@ -141,7 +141,7 @@ class Builder(object):
         name = alias if alias else original_name
 
         fn.__name__ = name
-        fn.__docs__ = """
+        fn.__doc__ = """
 THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
@@ -158,6 +158,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
 
         exec("Builder.{0} = fn".format(name))
 
+
     @staticmethod
     def register_map_method(fn, library_path, alias=None):
         fn_signature = utils.get_method_sig(fn)
@@ -167,7 +168,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
 
         lifted = _lift(fn)
         lifted.__name__ = name
-        lifted.__docs__ = """
+        lifted.__doc__ = """
 THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
@@ -213,7 +214,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         return builder
 
     @immutable
-    def then(builder, fn):
+    def then(builder, fn, *args, **kwargs):
         """
         `@immutable`
 
@@ -230,7 +231,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         ** Example **
 
         """
-        return fn(builder)
+        return fn(builder, *args, **kwargs)
 
     @immutable
     def branch(builder, fn):
@@ -285,7 +286,7 @@ class BuilderTree(object):
         name = alias if alias else original_name
 
         fn.__name__ = name
-        fn.__docs__ = """
+        fn.__doc__ = """
 THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
