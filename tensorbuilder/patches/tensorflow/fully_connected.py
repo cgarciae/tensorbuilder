@@ -7,9 +7,9 @@ def _add_builders(builders):
 
     for builder in builders:
         if tensor == None:
-            tensor = builder.tensor
+            tensor = builder._tensor
         else:
-            tensor += builder.tensor
+            tensor += builder._tensor
 
     return tb.Builder(tensor)
 
