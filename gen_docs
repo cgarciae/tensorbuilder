@@ -1,7 +1,0 @@
-#! /bin/bash
-cd /tensorbuilder
-PYTHONPATH= pdoc --html-dir=./docs --html tensorbuilder --only-pypath --overwrite
-
-cd tensorbuilder
-PYTHONPATH= pdoc --html-dir=../docs/tensorbuilder --html dsl.py --only-pypath --overwrite
-PYTHONPATH= pdoc --html-dir=../docs/tensorbuilder --html tensorbuilder.py --only-pypath --overwrite
