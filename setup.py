@@ -23,7 +23,10 @@ setup(
     keywords = "tensorflow deep learning neural networks",
     url = "https://github.com/cgarciae/tensorbuilder",
    	packages = [
-        'tensorbuilder'
+        'tensorbuilder',
+        'tensorbuilder.patches',
+        'tensorbuilder.patches.tensorflow',
+        'tensorbuilder.patches.tflearn'
     ],
     long_description = read('README.md'),
     install_requires = reqs

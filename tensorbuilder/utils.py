@@ -1,5 +1,6 @@
 from collections import namedtuple
-import inspect
+import functools, inspect
+
 
 DefaultArgSpec = namedtuple('DefaultArgSpec', 'has_default default_value')
 
@@ -30,10 +31,10 @@ def _get_default_arg(args, defaults, arg_index):
 
 def get_method_sig(method):
     """ Given a function, it returns a string that pretty much looks how the
-    function signature would be written in python.
+    function signature_ would be written in python.
 
     :param method: a python method
-    :return: A string similar describing the pythong method signature.
+    :return: A string similar describing the pythong method signature_.
     eg: "my_method(first_argArg, second_arg=42, third_arg='something')"
     """
 

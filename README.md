@@ -13,10 +13,8 @@ TensorBuilder takes inspiration from [prettytensor](https://github.com/google/pr
 ## Installation
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
-#### From source
-1. `git clone https://github.com/cgarciae/tensorbuilder.git`
-2. `cd tensorbuilder`
-3. `python setup.py install`
+#### From github
+1. `pip install git+https://github.com/tflearn/tflearn.git`
 
 #### From pip
 Coming soon!

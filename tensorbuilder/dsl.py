@@ -3,7 +3,7 @@
 """
 
 import inspect
-import signature
+import utils
 import functools
 import itertools
 import tensorflow as tf
@@ -28,28 +28,17 @@ class Applicative(object):
     def __call__(self, x):
         return self.f(x)
 
-    @tb._immutable
+    @tb.immutable
     def compose(app, g):
 
         return Applicative(_compose2(g, app.f))
 
-    @tb._immutable
+    @tb.immutable
     def tensor(app):
         """
         """
         return app.compose(tensor())
 
-    # @tb._immutable
-    # def tensors(app):
-    #     """
-    #     """
-    #     return app.compose(tensors())
-    #
-    # @tb._immutable
-    # def builders(app):
-    #     """
-    #     """
-    #     return app.compose(builders())
 
 def applicative(f):
     return Applicative(f)
@@ -74,7 +63,7 @@ def _sequence_function(tuple_ast):
 
 def _branch_function(list_ast):
     fs = [ compile(ast) for ast in list_ast ]
-    return lambda builder: builder.branch(lambda builder: [ fi(builder) for fi in fs ])
+    return lambda builder: builder.branch(lambda builder: [ f(builder) for f in fs ])
 
 def compile(ast):
     if type(ast) is tuple:
@@ -88,9 +77,7 @@ def compile(ast):
 
 def pipe(builder, *ast):
     f = compile(ast)
-    x = f(builder)
-
-    return x.f if type(x) is Applicative else x
+    return f(builder)
 
 def tensor():
     """
@@ -98,17 +85,6 @@ def tensor():
     """
     return lambda builder: builder.tensor
 
-# def tensors():
-#     """
-#     This function is the same as `BuilderTree.tensors`
-#     """
-#     return lambda tree: tree.tensors()
-#
-# def builders():
-#     """
-#     This function is the same as `BuilderTree.builders`
-#     """
-#     return lambda tree: tree.builders()
 
 #######################
 ### CODE GENERATION
@@ -128,7 +104,7 @@ def _builder_tree_methods():
 
 
 for _module_name, _name, f in itertools.chain(_builder_methods(), _builder_tree_methods()):
-    _f_signature = signature.get_method_sig(f)
+    _f_signature = utils.get_method_sig(f)
     _f_docs = inspect.getdoc(f)
     exec("""
 
@@ -139,7 +115,7 @@ THIS FUNCTION IS AUTOMATICALLY GENERATED
 
 This function accepts the same arguments as `{3}.{0}` but instead of getting the class instance as its first arguments, it returns a function that expects a builder and applies the builder plus all \*args and \*\*kwargs to `{3}.{0}`. The returned function is an `tensorbuilder.dsl.Applicative`, so you can use all the methods defined by this class.
 
-** Signature of `{3}.{0}`**
+** utils of `{3}.{0}`**
 
 	def {1}
 
@@ -149,7 +125,7 @@ This function accepts the same arguments as `{3}.{0}` but instead of getting the
 	return Applicative(lambda builder: builder.{0}(*args, **kwargs))
 
 
-@tb._immutable
+@tb.immutable
 def __{0}(app, *args, **kwargs):
     \"\"\"
 THIS METHOD IS AUTOMATICALLY GENERATED
@@ -161,7 +137,7 @@ This method accepts the same arguments as `{3}.{0}` but:
 
 So the result of this method is compose `tensorbuilder.dsl.{0}` with `tensorbuilder.dsl.Applicative.f`.
 
-** Signature of `{3}.{0}`**
+** utils of `{3}.{0}`**
 
 	def {1}
 

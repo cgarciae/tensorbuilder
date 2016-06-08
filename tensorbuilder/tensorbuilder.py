@@ -83,22 +83,22 @@ Here are the examples for each method of the API. If you are understand all exam
 """
 
 __version__ = "0.0.1"
-
-import tensorflow as tf
 import numpy as np
 import functools
 from decorator import decorator
+import utils
+import inspect
+
 
 
 # Decorators
 @decorator
-def _immutable(method, self, *args, **kwargs):
+def immutable(method, self, *args, **kwargs):
     """
     Decorator. Passes a copy of the entity to the method so that the original object remains un touched.
     Used in methods to get a fluent immatable API.
     """
     return method(self.copy(), *args, **kwargs)
-
 
 
 class Builder(object):
@@ -129,175 +129,63 @@ class Builder(object):
         """Returns a copy of this Builder"""
         return Builder(self.tensor, self.variables.copy())
 
-    @_immutable
-    def connect_weights(builder, size, name=None, weights_name=None):
-        """
-        `@_immutable`
 
-        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **w** be a **tf.Variable** of shape **[n, size]**. Then `builder.connect_weights(size)` computes `tf.matmul(x, w)`.
+    @staticmethod
+    def register_method(fn, library_path, alias=None):
+        fn_signature = utils.get_method_sig(fn)
+     	fn_docs = inspect.getdoc(fn)
+        original_name = fn.__name__
+        name = alias if alias else original_name
 
-        The returned `tensorbuilder.tensorbuilder.Builder` has **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
+        fn.__name__ = name
+        fn.__docs__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
 
-        **Parameters**
+**@immutable**
 
-        * `size`: an `int` representing the size of the layer (number of neurons)
-        * `name`: the name of the tensor (default: "connect_weights")
-        * `weights_name`: the name of the **w** tensor of type `tf.Variable`.
-
-        **Return**
-
-        * `tensorbuilder.tensorbuilder.Builder`
-
-        **Examples**
-
-        The following builds `tf.matmul(x, w)`
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-
-            z = x.builder().connect_weights(3, weights_name="weights")
-        """
-
-        m = int(builder.tensor.get_shape()[1])
-        n = size
-
-        w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0), name=weights_name)
-        var_name = weights_name if weights_name else w.name
-
-        builder.variables[var_name] = w
-        builder.tensor = tf.matmul(builder.tensor, w, name=name)
-
-        return builder
-
-    @_immutable
-    def connect_bias(builder, name=None, bias_name=None):
-        """
-        `@_immutable`
-
-        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, and let **b** be a **tf.Variable** of shape **[n]**. Then `builder.connect_bias()` computes `tf.add(x, b)`.
-
-        The returned `tensorbuilder.tensorbuilder.Builder` has **b** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
-
-        **Parameters**
-
-        * `name`: the name of the tensor (default: "connect_bias")
-        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: "b").
-
-        **Return**
-
-        * `tensorbuilder.tensorbuilder.Builder`
-
-        **Examples**
-
-        The following builds `tf.matmul(x, w) + b`
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-
-            z = (
-                x.builder()
-                .connect_weights(3, weights_name="weights")
-                .connect_bias(bias_name="bias")
-            )
-
-        Note, the previous is equivalent to using `tensorbuilder.tensorbuilder.Builder.connect_layer` like this
-
-            z = (
-                x.builder()
-                .connect_layer(3, weights_name="weights", bias_name="bias")
-            )
-        """
-        m = int(builder.tensor.get_shape()[1])
-
-        b = tf.Variable(tf.random_uniform([m], -1.0, 1.0), name=bias_name)
-        var_name = bias_name if bias_name else b.name
-
-        builder.variables[var_name] = b
-        builder.tensor = tf.add(builder.tensor, b, name=name)
-
-        return builder
+This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
 
 
-    @_immutable
-    def connect_layer(builder, size, fn=None, name=None, weights_name=None, bias=True, bias_name=None):
-        """
-        `@_immutable`
+** Original Documentation for `{1}.{0}`**
 
-        Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` of shape **[m, n]**, let **w** be a **tf.Variable** of shape **[n, size]**, let **b** be a **tf.Variable** of shape **[n]**, and **fn** be a function from a tensor to a tensor. Then `builder.connect_layer(size, fn=fn)` computes `fn(tf.matmul(x, w) + b)`. If **fn** is not present the layer is linear.
+	def {3}
 
-        Note that **fn** must expose the keyword/named argument `name`, this is compatible with the tensorflow API.
+{4}
+        """.format(original_name, library_path, name, fn_signature, fn_docs)
 
-        The returned `tensorbuilder.tensorbuilder.Builder` has **b** and **w** stored inside `tensorbuilder.tensorbuilder.Builder.variables`.
+        exec("Builder.{0} = fn".format(name))
 
-        **Parameters**
+    @staticmethod
+    def register_map_method(fn, library_path, alias=None):
+        fn_signature = utils.get_method_sig(fn)
+     	fn_docs = inspect.getdoc(fn)
+        original_name = fn.__name__
+        name = alias if alias else original_name
 
-        * `fn`: a function of type `tensor -> tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)
-        * `size`: an `int` representing the size of the layer (number of neurons)
-        * `name`: the name of the tensor (default: `"layer"`)
-        * `bias`: determines where to use a bias **b** or not (default: `True`)
-        * `weights_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)
-        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)
+        lifted = _lift(fn)
+        lifted.__name__ = name
+        lifted.__docs__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
 
-        **Return**
+**@immutable**
 
-        * `tensorbuilder.tensorbuilder.Builder`
-
-        **Examples**
-
-        The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-
-            h = (
-                x.builder()
-                .connect_layer(3, fn=tf.nn.sigmoid)
-            )
-
-        The previous is equivalent to using
-
-            h = (
-                x.builder()
-                .connect_weights(3)
-                .connect_bias()
-                .map(tf.nn.sigmoid)
-            )
-
-        You can chain various `connect_layer`s to get deeper neural networks
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 40])
-
-            h = (
-                x.builder()
-                .connect_layer(100, fn=tf.nn.tanh)
-                .connect_layer(30, fn=tf.nn.softmax)
-            )
-        """
+This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
 
 
-        builder = builder.connect_weights(size, weights_name=weights_name)
+** Original Documentation for `{1}.{0}`**
 
-        if bias:
-            builder = builder.connect_bias(bias_name=bias_name)
+	def {3}
 
-        if fn:
-            builder.tensor = fn(builder.tensor, name=name)
+{4}
+        """.format(original_name, library_path, name, fn_signature, fn_docs)
 
-        return builder
+        exec("Builder.{0} = lifted".format(name))
 
-    @_immutable
+
+    @immutable
     def map(builder, fn, *args, **kwargs):
         """
-        `@_immutable`
+        `@immutable`
 
         Let **x** be `tensorbuilder.tensorbuilder.Builder.tensor` and **fn** be a function from a tensor to a tensor. Then `builder.map(fn)` computes `fn(x)`. All extra positional and named arguments are forwarded to **fn** such that
 
@@ -317,29 +205,14 @@ class Builder(object):
 
         **Examples**
 
-        The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 40])
-            keep_prob = tf.placeholder(tf.float32)
-
-            h = (
-                x.builder()
-                .connect_layer(100, fn=tf.nn.tanh)
-                .map(tb.nn.dropout, keep_prob)
-                .connect_layer(30, fn=tf.nn.softmax)
-            )
-
         """
         builder.tensor = fn(builder.tensor, *args, **kwargs)
         return builder
 
-    @_immutable
+    @immutable
     def then(builder, fn):
         """
-        `@_immutable`
+        `@immutable`
 
         Expects a function **fn** with type `builder -> builder`. This method is used primarily to manupilate the Builder with very fine grain control through the fluent immutable API.
 
@@ -353,47 +226,13 @@ class Builder(object):
 
         ** Example **
 
-        The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 40])
-            keep_prob = tf.placeholder(tf.float32)
-
-            def sigmoid_layer(builder, size):
-                m = int(builder.tensor.get_shape()[1])
-                n = size
-
-                w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0))
-                b = tf.Variable(tf.random_uniform([n], -1.0, 1.0))
-
-                builder.variables[w.name] = w
-                builder.variables[b.name] = b
-
-                builder.tensor = tf.nn.sigmoid(tf.matmul(builder.tensor, w) + b)
-
-                return builder
-
-            h = (
-                x.builder()
-                .then(lambda builder: sigmoid_layer(builder, 3))
-            )
-
-        Note that the previous if equivalent to
-
-            h = (
-                x.builder()
-                .connect_layer(3, fn=tf.nn.sigmoid)
-            )
-
         """
         return fn(builder)
 
-    @_immutable
+    @immutable
     def branch(builder, fn):
         """
-        `@_immutable`
+        `@immutable`
 
         Expects a function **fn** with type `Builder -> list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later
 
@@ -407,72 +246,11 @@ class Builder(object):
 
         ** Example **
 
-        The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `connect_layer(1)` and then its branched out
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-            y = tf.placeholder(tf.float32, shape=[None, 1])
-
-            [h, trainer] = (
-                x.builder()
-                .connect_layer(1)
-                .branch(lambda z:
-                [
-                    z.map(tf.nn.sigmoid)
-                ,
-                    z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
-                    .map(tf.train.AdamOptimizer(0.01).minimize)
-                ])
-                .tensors()
-            )
-
-        Note that you have to use the `tensorbuilder.tensorbuilder.BuilderTree.tensors` method from the `tensorbuilder.tensorbuilder.BuilderTree` class to get the tensors back. Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, `tensorbuilder.tensorbuilder.BuilderTree` has methods that help you flatten or reduce the tree.
-
-        The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-            keep_prob = tf.placeholder(tf.float32)
-
-            h = (
-                x.builder()
-                .connect_layer(10)
-                .branch(lambda base:
-                [
-                    base
-                    .connect_layer(3, fn=tf.nn.relu)
-                ,
-                    base
-                    .connect_layer(9, fn=tf.nn.tanh)
-                    .branch(lambda base2:
-                    [
-                        base2
-                        .connect_layer(6, fn=tf.nn.sigmoid)
-                    ,
-                        base2
-                        .map(tf.nn.dropout, keep_prob)
-                        .connect_layer(8, tf.nn.softmax)
-                    ])
-                ])
-                .connect_layer(6, fn=tf.nn.sigmoid)
-            )
-
-        ** See Also **
-
-        * `tensorbuilder.tensorbuilder.BuilderTree`
-        * `tensorbuilder.tensorbuilder.BuilderTree.connect_layer`
-        * `tensorbuilder.tensorbuilder.BuilderTree.builders`
-        * `tensorbuilder.tensorbuilder.BuilderTree.tensors`
-
         """
         return branches(fn(builder))
 
-    @_immutable
-    def _leafs(builder):
+    @immutable
+    def __iter__(builder):
         """A generator function that yields the builder, used by `tensorbuilder.tensorbuilder.BuilderTree.leafs` of `tensorbuilder.tensorbuilder.BuilderTree`"""
         yield builder
 
@@ -489,7 +267,64 @@ class BuilderTree(object):
         """
 
     def copy(self):
-        return BuilderTree(self.branches[:])
+        return BuilderTree(list(self.branches))
+
+    @immutable
+    def reduce(tree, fn, initializer=None):
+        tensor = functools.reduce(fn, tree.tensors(), initializer=initializer)
+        return builder(tensor)
+
+    @staticmethod
+    def register_method(fn, library_path, alias=None):
+        fn_signature = utils.get_method_sig(fn)
+     	fn_docs = inspect.getdoc(fn)
+        original_name = fn.__name__
+        name = alias if alias else original_name
+
+        fn.__name__ = name
+        fn.__docs__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.BuilderTree`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
+
+
+** Original Documentation for `{1}.{0}`**
+
+	def {3}
+
+{4}
+        """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+        exec("BuilderTree.{0} = fn".format(name))
+
+    @staticmethod
+    def register_reduce_method(fn, library_path, alias=None):
+        fn_signature = utils.get_method_sig(fn)
+     	fn_docs = inspect.getdoc(fn)
+        original_name = fn.__name__
+        name = alias if alias else original_name
+
+        _tree_method = _lift_tree_reduce(fn)
+
+        _tree_method.__name__ = name
+        _tree_method.__docs__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method is a lifted version the function `{1}.{0}`. `{1}.{0}` is expected to work with a list or iterable of Tensors, this method extracts the tensors and from the branches and applies the same function, and wraps the result inside a Builder.
+
+
+** Original Documentation for `{1}.{0}`**
+
+	def {3}
+
+{4}
+        """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+        exec("Builder.{0} = _tree_method".format(name))
 
     def builders(self):
         """
@@ -501,27 +336,9 @@ class BuilderTree(object):
 
         ** Example **
 
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-            y = tf.placeholder(tf.float32, shape=[None, 1])
-
-            [h_builder, trainer_builder] = (
-                x.builder()
-                .connect_layer(1)
-                .branch(lambda z:
-                [
-                    z.map(tf.nn.sigmoid)
-                ,
-                    z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
-                    .map(tf.train.AdamOptimizer(0.01).minimize)
-                ])
-                .builders()
-            )
 
         """
-        return [builder for builder in self._leafs() ]
+        return [builder for builder in self ]
 
     def tensors(self):
         """
@@ -533,101 +350,35 @@ class BuilderTree(object):
 
         ** Example **
 
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-            y = tf.placeholder(tf.float32, shape=[None, 1])
-
-            [h_tensor, trainer_tensor] = (
-                x.builder()
-                .connect_layer(1)
-                .branch(lambda z:
-                [
-                    z.map(tf.nn.sigmoid)
-                ,
-                    z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
-                    .map(tf.train.AdamOptimizer(0.01).minimize)
-                ])
-                .tensors()
-            )
         """
-        return [builder.tensor for builder in self._leafs() ]
-
-    @_immutable
-    def connect_layer(tree, size, fn=None, name="layer", bias=True, bias_name=None):
-        """
-        Connects all the leaf `tensorbuilder.tensorbuilder.Builder` nodes of this tree to a single layer. The order of computation is done as follows
-
-        1. Each leaf builder node is linearly connected to a layer of size `size` with no bias.
-        2. All these layers of size `size` are added together (reduced with +)
-        3. If `bias` is `True` then a bias added
-        4. If `fn` is not `None` then the function `fn` is mapped
-
-        ** Parameters **
-
-        * `fn`: a function of type `tensor -> tensor`. If `fn` is `None` then its not applied, resulting in just a linear trasformation. (default: None)
-        * `name`: the name of the tensor (default: `"layer"`)
-        * `bias`: determines where to use a bias **b** or not (default: `True`)
-        * `bias_name`: the name of the `w` tensor of type `tf.Variable` (default: `None`)
-
-        ** Examples **
-
-        # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-            b = tf.placeholder(tf.float32, shape=[None, 5]).builder()
-
-            h = (
-                tb.branches([a, b])
-                .connect_layer(3, fn=tf.nn.softmax)
-            )
-
-        The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh layer` filter through the other, both of these are connect to a single `softmax` output layer
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            x = tf.placeholder(tf.float32, shape=[None, 5])
-
-            h = (
-                x.builder()
-                .branch(lambda x:
-                [
-                    x
-                ,
-                    x.connect_layer(10, fn=tf.nn.tanh)
-                ])
-                .connect_layer(3, fn=tf.nn.softmax)
-            )
-        """
-        builders = [ builder.connect_weights(size) for builder in tree._leafs() ]
-        builder = _add_builders(builders)
-
-        if bias:
-            builder = builder.connect_bias(bias_name=bias_name)
-
-        if fn:
-            builder.tensor = fn(builder.tensor, name=name)
-
-        return builder
+        return [ builder.tensor for builder in self ]
 
 
-    @_immutable
-    def _leafs(tree):
+    @immutable
+    def __iter__(tree):
         """A generator function that lazily returns all the Builders contianed by this tree"""
         for branch in tree.branches:
-            for builder in branch._leafs():
+            for builder in branch:
                 yield builder
 
 
 
-
 ## Module Funs
-def builder(tensor):
+def _lift(fn):
+    def _lifted(builder, *args, **kwargs):
+        return builder.map(fn, *args, **kwargs)
+    return _lifted
+
+def _lift_tree_reduce(fn):
+    def _tree_method(tree, *args, **kwargs):
+        tensor = fn(tree.tensors())
+        return builder(tensor)
+    return _tree_method
+
+def _map_partial(fn, *args, **kwargs):
+    return lambda builder: builder.map(fn, *args, **kwargs)
+
+def build(tensor):
     """
     Takes a tensor and returns a `tensorbuilder.tensorbuilder.Builder` that contians it. If function is also used to monkey-patch tensorflow's Tensor class with a method of the same name.
 
@@ -653,8 +404,7 @@ def builder(tensor):
     """
     return Builder(tensor)
 
-# Monkey Patch TensorFlow's Tensor with a `buildler` method
-tf.python.framework.ops.Tensor.builder = builder
+
 
 def branches(builder_list):
     """
@@ -680,17 +430,3 @@ def branches(builder_list):
 
     """
     return BuilderTree(builder_list)
-
-def _add_builders(builders):
-    tensor = None
-    variables = {}
-
-    for builder in builders:
-        if tensor == None:
-            tensor = builder.tensor
-        else:
-            tensor += builder.tensor
-
-        variables.update(builder.variables)
-
-    return Builder(tensor, variables=variables)
