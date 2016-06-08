@@ -22,7 +22,7 @@ h = (
 
 print(h)
 
-#Note that `fully_connected` is functions from `tf.contrib.layers` that is included as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
+#Note that `fully_connected` is actually a function from `tf.contrib.layers`, it is patched as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
 
 import tensorflow as tf
 import tensorbuilder as tb

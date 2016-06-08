@@ -27,7 +27,7 @@ TensorBuilder knows nothing about tensors until you include some patches, even t
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
 #### From github
-1. `pip install git+https://github.com/tflearn/tflearn.git`
+1. `pip install git+https://github.com/cgarciae/tensorbuilder.git`
 
 #### From pip
 Coming soon!
@@ -53,7 +53,7 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
 
     print(h)
 
-Note that `fully_connected` is functions from `tf.contrib.layers` that is included as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
+Note that `fully_connected` is actually a function from `tf.contrib.layers`, it is patched as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
 
     import tensorflow as tf
     import tensorbuilder as tb
@@ -216,8 +216,6 @@ Lets see an example, here is the previous example about branching with the the f
 
 As you see a lot of noise is gone, some `dl` terms appeared, and a few `,`s where introduced, but the end result better reveals the structure of you network, plus its very easy to modify.
 
-
-
 ## Documentation
 
 The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/builders.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
@@ -225,6 +223,10 @@ The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/builders
 ## Examples
 
 Here are the examples for each method of the API. If you are understand all examples, then you've understood the complete API.
+
+##############################
+##### API EXAMPLES
+##############################
 
 ##############################
 ##### FUNCTIONS
@@ -270,48 +272,6 @@ Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tens
 ##############################
 ##### BUILDER
 ##############################
-
-##############################
-##### connect_weights
-##############################
-
-The following builds `tf.matmul(x, w)`
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-
-    z = x.builder().connect_weights(3, weights_name="weights")
-
-
-
-##############################
-##### connect_bias
-##############################
-
-The following builds `tf.matmul(x, w) + b`
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-
-    z = (
-      x.builder()
-      .connect_weights(3, weights_name="weights")
-      .connect_bias(bias_name="bias")
-    )
-
-Note, the previous is equivalent to using `tensorbuilder.tensorbuilder.Builder.connect_layer` like this
-
-    z = (
-      x.builder()
-      .connect_layer(3, weights_name="weights", bias_name="bias")
-    )
-
-
-
 
 ##############################
 ##### connect_layer
@@ -389,7 +349,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
     keep_prob = tf.placeholder(tf.float32)
 
     def sigmoid_layer(builder, size):
-      m = int(builder._tensor.get_shape()[1])
+      m = int(builder.tensor().get_shape()[1])
       n = size
 
       w = tf.Variable(tf.random_uniform([m, n], -1.0, 1.0))
@@ -398,7 +358,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
       builder.variables[w.name] = w
       builder.variables[b.name] = b
 
-      builder._tensor = tf.nn.sigmoid(tf.matmul(builder._tensor, w) + b)
+      builder = tf.nn.sigmoid(tf.matmul(builder.tensor(), w) + b).builder()
 
       return builder
 
@@ -407,7 +367,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
       .then(lambda builder: sigmoid_layer(builder, 3))
     )
 
-Note that the previous if equivalent to
+Note that the previous if rougly equivalent to
 
     h = (
       x.builder()
