@@ -1,16 +1,15 @@
 # Init code
+from tensorbuilder import *
+import tensorbuilder
 import tensorflow as tf
-import builders
-from builders import *
-import nn
-import builder_nn
-from decorator import decorator
+
+# Uncomment to generate docs only
+#import patch
+#import dsl
+
+# Monkey Patch TensorFlow's Tensor with a `build` method as `builder`
+tf.python.framework.ops.Tensor.builder = build
 
 #version
-__version__ = "0.0.1"
-
-
-# Monkey Patch TensorFlow
-tf.python.framework.ops.Tensor.builder = builder
-
-__all__ = ["builders", "nn", "builder_nn"]
+__version__ = "0.0.2"
+__all__ = ["dsl", "tensorbuilder"]
