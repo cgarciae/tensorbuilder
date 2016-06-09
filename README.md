@@ -7,9 +7,8 @@ Tensor Builder has the following goals:
 * Be compatible with any Tensor-based library
 * Be extensible by letting libraries create **patches** that register their functions as methods.
 * Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch))
-* Expose a DSL so experienced users can be even more productive.
 
-TensorBuilder has a small set of primitives that enable you to express complex networks through a consistent API using methods developed by other Tensor-based libraries. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API.
+TensorBuilder has a small set of primitives that enable you to express complex networks through a consistent API using methods developed by other Tensor-based libraries. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API. TensorBuilder also comes with a DSL on top of the Builder API so experienced users can be even more productive.
 
 Currently TensorBuilder comes with **patches** based on the following libraries
 
@@ -218,7 +217,7 @@ As you see a lot of noise is gone, some `dl` terms appeared, and a few `,`s wher
 
 ## Documentation
 
-The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/builders.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
+The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
 
 ## Examples
 
