@@ -202,9 +202,9 @@ Lets see an example, here is the previous example about branching with the the f
             [
               	dl.sigmoid_layer(6)
             ,
-          			dl
-          			.dropout(keep_prob)
-          			.softmax_layer(8)
+                dl
+                .dropout(keep_prob)
+                .softmax_layer(8)
             ])
         ],
         dl.sigmoid_layer(6)
