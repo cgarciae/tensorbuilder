@@ -103,64 +103,63 @@ def immutable(method, self, *args, **kwargs):
 
 class Builder(object):
     """
-    The Builder class is a wrapper around a Tensor. Most of its method are immutable in the sense that they don't modify the caller object but rather always make a copy, they also tend to return a Builder so you you can keep fluently chaining methods.
+    The Builder class is a wrapper around a Tensor. Most of its method are immutable, that is, they don't modify the caller object but always return a new builder.
 
-    To create a builder from a method you have these options:
+    To create a builder from a tensor you have these options:
 
-    1. Use the `tensorbuilder.tensorbuilder.builder` function
+    1. Use the `tensorbuilder.tensorbuilder.build` function
 
-            tb.builder(tensor)
+            tb.build(tensor)
 
     2. Use the monkey-patched method on the Tensor class
 
             tensor.builder()
 
+    This class without patches only includes this basic methods:
+
+    * `tensorbuilder.tensorbuilder.Builder.map`
+    * `tensorbuilder.tensorbuilder.Builder.then`
+    * `tensorbuilder.tensorbuilder.Builder.branch`
+
+    It also includes the following static methods to register external functions as methods of this class. Library authors should use these to create patches:
+
+    * `tensorbuilder.tensorbuilder.Builder.register_method`
+    * `tensorbuilder.tensorbuilder.Builder.register_map_method`
+
+
     """
-    def __init__(self, tensor, variables={}):
+    def __init__(self, tensor):
         super(Builder, self).__init__()
 
         self._tensor = tensor
         """A `tensorflow` Tensor."""
-
-        self.variables = variables
-        """A dictionary that accumulates the **tf.Variable** tensors generated during the building process, it has the form {tensor_name: String -> tensor: tf.Variable}. Since functions like `tensorbuilder.tensorbuilder.Builder.connect_layer` hides you the complexity of creating the **bias** and **weights** of your network, `tensorbuilder.tensorbuilder.Builder` stores them in this field. The methods of this class enables you to set the names of these variables, but take into account that the final name is actually the name of the tensor, with is set by `tensorflow`. Check their documentation to see how the name is defined."""
 
     def tensor(self):
         return self._tensor
 
     def copy(self):
         """Returns a copy of this Builder"""
-        return Builder(self._tensor, self.variables.copy())
+        return Builder(self._tensor)
 
 
     @staticmethod
-    def register_method(fn, library_path, alias=None):
+    def register_method(fn, library_path, alias=None, doc=None):
+        """
+        """
+
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
         name = alias if alias else original_name
 
         fn.__name__ = name
-        fn.__doc__ = """
-THIS METHOD IS AUTOMATICALLY GENERATED
-
-**@immutable**
-
-This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
-
-
-** Original Documentation for `{1}.{0}`**
-
-	def {3}
-
-{4}
-        """.format(original_name, library_path, name, fn_signature, fn_docs)
+        fn.__doc__ = doc if doc else _builder_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
         exec("Builder.{0} = fn".format(name))
 
 
     @staticmethod
-    def register_map_method(fn, library_path, alias=None):
+    def register_map_method(fn, library_path, alias=None, doc=None):
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
@@ -168,20 +167,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
 
         lifted = _lift(fn)
         lifted.__name__ = name
-        lifted.__doc__ = """
-THIS METHOD IS AUTOMATICALLY GENERATED
-
-**@immutable**
-
-This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
-
-
-** Original Documentation for `{1}.{0}`**
-
-	def {3}
-
-{4}
-        """.format(original_name, library_path, name, fn_signature, fn_docs)
+        lifted.__doc__ = doc if doc else _builder_register_map_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
         exec("Builder.{0} = lifted".format(name))
 
@@ -191,23 +177,35 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         """
         `@immutable`
 
-        Let **x** be `tensorbuilder.tensorbuilder.Builder._tensor` and **fn** be a function from a tensor to a tensor. Then `builder.map(fn)` computes `fn(x)`. All extra positional and named arguments are forwarded to **fn** such that
-
-            builder.map(fn, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
-
-        internally results in
-
-            builder._tensor = fn(builder._tensor, arg1, arg2, ..., kwarg1=kwarg1, kwarg2=kwarg2, ...)
+        Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. While TensorBuilder promotes the use **patches** like `tensorbuilder.patch` to make the syntax nicer, the truth is that you could you can do a lot of things just using `map`, all you need is that you have a library or a set of custom functions that accept a tensor as its first argument.
 
         **Parameters**
 
         * `fn`: a function of type `tensor -> tensor`.
+        * All extra positional and named arguments are forwarded to `fn`
 
         **Return**
 
         * `tensorbuilder.tensorbuilder.Builder`
 
         **Examples**
+
+            import tensorflow as tf
+            import tensorflow.contrib.layers
+            import tensorbuilder as tb
+
+            x = tf.placeholder(tf.float32, shape=[None, 40])
+            keep_prob = tf.placeholder(tf.float32)
+
+            h = (
+            	x.builder()
+            	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
+            	.map(tf.nn.dropout, keep_prob)
+            	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
+            	.tensor()
+            )
+
+            print(h)
 
         """
         builder._tensor = fn(builder._tensor, *args, **kwargs)
@@ -275,36 +273,127 @@ class BuilderTree(object):
 
     @immutable
     def reduce(tree, fn, initializer=None):
+        """
+        `@immutable`
+
+        Expects a function **fn** with type `(Tensor, Tensor) -> Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.tensorbuilder.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.
+
+        **Parameters**
+
+        * `fn`: a function of type `(Tensor, Tensor) -> Tensor`.
+        * `initializer`: an optional Tensor as initial element of the folding operation (default: `None`)s
+
+        **Return**
+
+        * `tensorbuilder.tensorbuilder.Builder`
+
+        ** Example **
+
+        In this example we connect the whole tree to single softmax output layer of size 5, to do that we will separately map each leaf Tensor to a linear layer of size 5 and the add all the layers using reduce, finally we will apply a softmax function over the resulting layer.
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+            import tensorflow.contrib.layers as layers
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = (
+                x.builder()
+                .branch(...) #perform some branching operation to obtain a BuilderTree
+                .map_each(layers.fully_connected, 5)
+                .reduce(tf.add)
+                .map(tf.nn.softmax)
+            )
+        """
         tensor = functools.reduce(fn, tree.tensors(), initializer=initializer)
         return builder(tensor)
 
+    @immutable
+    def map_each(tree, fn, *args, **kwargs):
+        """
+        `@immutable`
+
+        Expects a function **fn** with type `Tensor -> Tensor` and applies this function to all leaf Tensors separately, resulting in a new BuilderTree.
+
+        **Parameters**
+
+        * `fn`: a function of type `Tensor -> Tensor`.
+        * All additional \*args and \*\*kwargs are forwarded to `fn`
+
+        **Return**
+
+        * `tensorbuilder.tensorbuilder.BuilderTree`
+
+        ** Example **
+
+        In this example we will applay dropout to all leaf Tensors using `map_each`
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+            keep_prob = tf.placeholder(tf.float32)
+
+            h = (
+                x.builder()
+                .branch(...) #perform some branching operation to obtain a BuilderTree
+                .map_each(tf.nn.dropout, keep_prob)
+            )
+        """
+        tree.branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
+        return tree
+
+    @immutable
+    def extract(tree, fn, *args, **kwargs):
+        """
+        `@immutable`
+
+        Expects a function **fn** with type `list( Tensor ) -> Tensor` and applies this function to `tensorbuilder.tensorbuilder.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function
+
+        **Parameters**
+
+        * `fn`: a function of type `list( Tensor ) -> Tensor`.
+        * All additional \*args and \*\*kwargs are forwarded to `fn`
+
+        **Return**
+
+        * `tensorbuilder.tensorbuilder.Builder`
+
+        ** Example **
+
+        In this example we will applay dropout to all leaf Tensors using `map_each`
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+            keep_prob = tf.placeholder(tf.float32)
+
+            h = (
+                x.builder()
+                .branch(...) #perform some branching operation to obtain a BuilderTree
+                .map_each(tf.nn.dropout, keep_prob)
+            )
+        """
+        tensor = fn(tree.tensors(), *args, **kwargs)
+        return BuilderTree(builders)
+
+
+
     @staticmethod
-    def register_method(fn, library_path, alias=None):
+    def register_method(fn, library_path, alias=None, doc=None):
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
         name = alias if alias else original_name
 
         fn.__name__ = name
-        fn.__doc__ = """
-THIS METHOD IS AUTOMATICALLY GENERATED
-
-**@immutable**
-
-This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.BuilderTree`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
-
-
-** Original Documentation for `{1}.{0}`**
-
-	def {3}
-
-{4}
-        """.format(original_name, library_path, name, fn_signature, fn_docs)
+        fn.__doc__ = doc if doc else _tree_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
         exec("BuilderTree.{0} = fn".format(name))
 
     @staticmethod
-    def register_reduce_method(fn, library_path, alias=None):
+    def register_reduce_method(fn, library_path, alias=None, doc=None):
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
@@ -313,20 +402,7 @@ This method is a lifted version the function `{1}.{0}` to work with `tensorbuild
         _tree_method = _lift_tree_reduce(fn)
 
         _tree_method.__name__ = name
-        _tree_method.__docs__ = """
-THIS METHOD IS AUTOMATICALLY GENERATED
-
-**@immutable**
-
-This method is a lifted version the function `{1}.{0}`. `{1}.{0}` is expected to work with a list or iterable of Tensors, this method extracts the tensors and from the branches and applies the same function, and wraps the result inside a Builder.
-
-
-** Original Documentation for `{1}.{0}`**
-
-	def {3}
-
-{4}
-        """.format(original_name, library_path, name, fn_signature, fn_docs)
+        _tree_method.__doc__ = doc if doc else _tree_register_reduce_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
         exec("Builder.{0} = _tree_method".format(name))
 
@@ -342,7 +418,7 @@ This method is a lifted version the function `{1}.{0}`. `{1}.{0}` is expected to
 
 
         """
-        return [builder for builder in self ]
+        return [ builder for builder in self ]
 
     def tensors(self):
         """
@@ -368,6 +444,70 @@ This method is a lifted version the function `{1}.{0}`. `{1}.{0}` is expected to
 
 
 ## Module Funs
+def _tree_register_reduce_method_docs(original_name, library_path, name, fn_signature, fn_docs):
+    return """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method reduces the whole BuilderTree to a single Builder by applying `tensorbuilder.tensorbuilder.BuilderTree.reduce` with `{1}.{0}`.
+
+** Original Documentation for `{1}.{0}`**
+
+def {3}
+
+{4}
+    """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+def _tree_register_method_docs(original_name, library_path, name, fn_signature, fn_docs):
+    return """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method the same as `{1}.{0}`.
+
+** Original Documentation for `{1}.{0}`**
+
+def {3}
+
+{4}
+    """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+
+def _builder_register_method_docs(original_name, library_path, name, fn_signature, fn_docs):
+    return """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method the same as `{1}.{0}`.
+
+** Original Documentation for `{1}.{0}`**
+
+def {3}
+
+{4}
+    """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+
+def _builder_register_map_method_docs(original_name, library_path, name, fn_signature, fn_docs):
+    return """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+**@immutable**
+
+This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
+
+
+** Original Documentation for `{1}.{0}`**
+
+def {3}
+
+{4}
+    """.format(original_name, library_path, name, fn_signature, fn_docs)
+
+
 def _lift(fn):
     def _lifted(builder, *args, **kwargs):
         return builder.map(fn, *args, **kwargs)

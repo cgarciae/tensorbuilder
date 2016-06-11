@@ -1,41 +1,21 @@
 import tensorflow as tf
 import tensorbuilder as tb
 
-def _add_builders(builders):
-    tensor = None
-    variables = {}
-
-    for builder in builders:
-        if tensor == None:
-            tensor = builder._tensor
-        else:
-            tensor += builder._tensor
-
-    return tb.Builder(tensor)
 
 def _tree_fully_connected(tree, size, *args, **kwargs):
     activation_fn = None
-    fun_args = ()
-    fun_kwargs = {}
-
-    if "fun_args" in kwargs:
-        fun_args = kwargs["fun_args"]
-        del kwargs["fun_args"]
-
-    if "fun_kwargs" in kwargs:
-        fun_kwargs = kwargs["fun_kwargs"]
-        del kwargs["fun_kwargs"]
 
     if "activation_fn" in kwargs:
         activation_fn = kwargs["activation_fn"]
         del kwargs["activation_fn"]
 
-
-    builders = ( builder.fully_connected(size, *args, **kwargs) for builder in tree )
-    builder =  _add_builders(builders)
+    builder = (
+        tree.map_each(tf.contrib.layers.fully_connected, size, *args, **kwargs)
+        .reduce(tf.add)
+    )
 
     if activation_fn:
-        builder = builder.map(activation_fn, *fun_args, **fun_kwargs)
+        builder = builder.map(activation_fn)
 
     return builder
 
