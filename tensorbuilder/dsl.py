@@ -60,14 +60,15 @@ def _branch_function(list_ast):
     return lambda builder: builder.branch(lambda builder: [ f(builder) for f in fs ])
 
 def compile(ast):
-    if type(ast) is tuple:
-        return _sequence_function(ast)
-    elif type(ast) is list:
+    #if type(ast) is tuple:
+
+    if type(ast) is list:
         return _branch_function(ast)
     elif hasattr(ast, '__call__'):
         return ast
     else:
-        raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder")
+        return _sequence_function(ast)
+        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
 
 def pipe(builder, *ast):
     f = compile(ast)

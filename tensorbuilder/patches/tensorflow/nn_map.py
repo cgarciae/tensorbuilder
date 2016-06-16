@@ -8,24 +8,26 @@ All functions in this module are automatically generated. They help create custo
 
 ** Examples **
 
-import tensorflow as tf
-import tensorbuilder as tb
+The following example show you how to 
 
-x = tf.placeholder(tf.float32, shape=[None, 5])
-keep_prob = tf.placeholder(tf.float32)
+	import tensorflow as tf
+	import tensorbuilder as tb
 
-h = (
-	x.builder()
-	.tanh_layer(10)
-	.dropout_map(keep_prob)
-	.softmax_layer(3)
-	.tensor
-)
+	x = tf.placeholder(tf.float32, shape=[None, 5])
+	keep_prob = tf.placeholder(tf.float32)
+
+	h = (
+		x.builder()
+		.tanh_layer(10)
+		.dropout_map(keep_prob)
+		.softmax_layer(3)
+		.tensor
+	)
 """
 
 import tensorflow as tf
 import tensorbuilder as tb
 import inspect
 
-for _nn_name, f in inspect.getmembers(tf.nn, inspect.isfunction):
+for _f_name, f in inspect.getmembers(tf.nn, inspect.isfunction):
     tb.Builder.register_map_method(f, "tensorflow.nn")

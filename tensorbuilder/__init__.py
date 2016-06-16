@@ -2,6 +2,7 @@
 from tensorbuilder import *
 import tensorbuilder
 import tensorflow as tf
+from tensordata import data
 
 # Uncomment to generate docs only
 #import patch
@@ -12,4 +13,4 @@ tf.python.framework.ops.Tensor.builder = build
 
 #version
 __version__ = "0.0.2"
-__all__ = ["dsl", "tensorbuilder"]
+__all__ = ["dsl", "tensorbuilder", "batcher"]

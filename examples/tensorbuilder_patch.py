@@ -3,7 +3,26 @@
 ##### GETTING STARTED
 ##############################
 
-#Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer through a Builder and then get back its tensor:
+# TensorBuilder includes a set of primitives that you can use to wrap, around
+
+import tensorflow as tf
+import tensorflow.contrib.layers as layers
+import tensorbuilder as tb
+
+x = tf.placeholder(tf.float32, shape=[None, 40])
+keep_prob = tf.placeholder(tf.float32)
+
+h = (
+	x.builder()
+	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
+	.map(tf.nn.dropout, keep_prob)
+	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
+	.tensor()
+)
+
+print(h)
+
+# The previous is equivalent to this next example using the `slim_patch`, which includes the `fully_connected` method that is taken from `tf.contrib.layers`
 
 import tensorflow as tf
 import tensorbuilder as tb
@@ -22,7 +41,7 @@ h = (
 
 print(h)
 
-#Note that `fully_connected` is actually a function from `tf.contrib.layers`, it is patched as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
+# The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
 
 import tensorflow as tf
 import tensorbuilder as tb
