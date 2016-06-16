@@ -40,14 +40,16 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
     print(h)
 
 ## Features
-* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches]().
-* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches]().
-* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL]().
+* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).
+* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).
+* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).
+
+## The Guide
+Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.html).
 
 ## Documentation
 
-The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
-
+Check out the complete documentation [here](http://cgarciae.github.io/tensorbuilder/).
 """
 
 # Init code
