@@ -15,7 +15,7 @@ def read(fname):
 
 setup(
     name = "tensorbuilder",
-    version = "0.0.2",
+    version = "0.0.3",
     author = "Cristian Garcia",
     author_email = "cgarcia.e88@gmail.com",
     description = ("A light wrapper over TensorFlow that enables you to easily create complex deep neural networks using the Builder Pattern through a functional fluent immutable API"),
