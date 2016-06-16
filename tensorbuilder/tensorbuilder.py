@@ -507,7 +507,7 @@ This method the same as `{1}.{0}`.
 
 
 def _builder_register_method_docs(original_name, library_path, name, fn_signature, fn_docs):
-    doc =  """
+    return """
 THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
@@ -520,16 +520,6 @@ This method the same as `{1}.{0}`.
 
 {4}
     """.format(original_name, library_path, name, fn_signature, fn_docs)
-
-    print("")
-    print(original_name)
-    print(library_path)
-    print(name)
-    print(fn_signature)
-    print(fn_docs)
-    print(doc)
-    print("")
-    return doc
 
 
 def _builder_register_map_method_docs(original_name, library_path, name, fn_signature, fn_docs):
