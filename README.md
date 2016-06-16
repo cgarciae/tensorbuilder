@@ -1,26 +1,14 @@
 # Tensor Builder
 
-TensorBuilder is light-weight extensible library that enables you to easily create complex deep neural networks using functions from any Tensor-based library through a functional [fluent](https://en.wikipedia.org/wiki/Fluent_interface) [immutable](https://en.wikipedia.org/wiki/Immutable_object) API based on the Builder Pattern. As a side effect, TensorBuilder is a library that gives expressive power to any Tensor-based library that decide to implement a TensorBuilder patch.
+TensorBuilder is light-weight extensible library that enables you to easily create complex deep neural networks through a functional [fluent](https://en.wikipedia.org/wiki/Fluent_interface) [immutable](https://en.wikipedia.org/wiki/Immutable_object) API based on the Builder Pattern. Tensor Builder also comes with a DSL based on [applicatives](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) and function composition that enables you to express more clearly the structure of your network, make changes faster, and reuse code.
 
 Tensor Builder has the following goals:
 
-* Be compatible with any Tensor-based library
-* Be extensible by letting libraries create **patches** that register their functions as methods.
+* Be a light-wrapper around Tensor-based libraries
 * Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch))
+* Let users be expressive and productive through a DSL
 
-TensorBuilder has a small set of primitives that enable you to express complex networks through a consistent API using methods developed by other Tensor-based libraries. Its branching mechanism enables you to express through the structure of your code the structure of the network, even when you have complex sub-branching expansions and reductions, all this while keeping the same fluid API. TensorBuilder also comes with a DSL on top of the Builder API so experienced users can be even more productive.
-
-Currently TensorBuilder comes with **patches** based on the following libraries
-
-* `tensorflow` which you can include with `import tensorbuilder.patches.tensorflow.patch`
-* `tflearn` which you can include with `import tensorbuilder.patches.tflearn.patch`
-* `tensorbuilder` is a curated patch by TensorBuilder that uses functions from both `tensorflow` and `tflearn`, which you can include with `import tensorbuilder.patch`
-
-Users of these libraries can use these patches to create complex networks using the same functions they are used to but expressed as methods of the `Builder` class, which enables them to simplify their code a lot. TensorBuilder's intention is that these patches will someday be moved to their host libraries and all Tensor-based libraries include a TensorBuilder patch to give expressiveness to their API.
-
-**Note**
-
-TensorBuilder knows nothing about tensors until you include some patches, even then you could still use it because its API is set to work with any function that know about tensor, in fact it works with any function that returns anything, the Builder and BuilderTree classes are probably just Monads.
+http://stackoverflow.com/a/194207/2118130
 
 ## Installation
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
@@ -72,7 +60,9 @@ Note that `fully_connected` is actually a function from `tf.contrib.layers`, it 
     print(h)
 
 ## Patches
-Patches enable you to add methods to the `tensorbuilder.tensorbuilder.Builder` class. Library authors are encouraged to create patches. TensorBuider ships with the following general patches:
+Since the Builder class is mostly a [monadic](http://stackoverflow.com/a/194207/2118130) structure which helps you build the computation, in the interest of letting other libraries use Tensor Builder to obtain a fluid API + DSL, TensorBuilder ships the Builder class with no Tensor specific methods but instead contains helpers which enable you to register external functions as methods. Library authors are encouraged to create patches so they can worry about the basic operations and let TensorBuilder add the syntax.
+
+However, TensorBuilder ships with its own main patch, the `tensorbuilder.patch` which adds methods focused on helping you to easily create complex network, it does so (mostly) by registering (cherry picking) methods from other libraries. The intention here is get you the best of what is out there. Here is the list of all the patches you can use.
 
 * `import tensorbuilder.patch`
 * `import tensorbuilder.slim_patch`
@@ -80,9 +70,7 @@ Patches enable you to add methods to the `tensorbuilder.tensorbuilder.Builder` c
 * `import tensorbuilder.patches.tensorflow.slim`
 * `import tensorbuilder.patches.tflearn.patch`
 
-However, these patches are made up of even small patches found in these folders. If you are interested in fine-grain control, check out the documentation or navigate the source code.
-
-Here is an example using `tflearn`
+Check out is an example using the `tflearn` patch
 
     import tflearn
     import tensorbuilder as tb
