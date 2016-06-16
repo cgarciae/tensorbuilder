@@ -2,13 +2,11 @@
 
 TensorBuilder is light-weight extensible library that enables you to easily create complex deep neural networks through a functional [fluent](https://en.wikipedia.org/wiki/Fluent_interface) [immutable](https://en.wikipedia.org/wiki/Immutable_object) API based on the Builder Pattern. Tensor Builder also comes with a DSL based on [applicatives](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) and function composition that enables you to express more clearly the structure of your network, make changes faster, and reuse code.
 
-Tensor Builder has the following goals:
+### Goals
 
 * Be a light-wrapper around Tensor-based libraries
 * Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch))
 * Let users be expressive and productive through a DSL
-
-http://stackoverflow.com/a/194207/2118130
 
 ## Installation
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
@@ -25,191 +23,36 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
 
     import tensorflow as tf
     import tensorbuilder as tb
-    import tensorbuilder.slim_patch
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-    keep_prob = tf.placeholder(tf.float32)
-
-    h = (
-    	x.builder()
-    	.fully_connected(10, activation_fn=tf.nn.tanh) # tanh(x * w + b)
-    	.map(tf.nn.dropout, keep_prob) # dropout(x, keep_prob)
-    	.fully_connected(3, activation_fn=tf.nn.softmax) # softmax(x * w + b)
-    	.tensor()
-    )
-
-    print(h)
-
-Note that `fully_connected` is actually a function from `tf.contrib.layers`, it is patched as a method by the `tensorbuilder.slim_patch`. The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
-
-    import tensorflow as tf
-    import tensorbuilder as tb
     import tensorbuilder.patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-    	x.builder()
-    	.tanh_layer(10) # tanh(x * w + b)
-    	.dropout(keep_prob) # dropout(x, keep_prob)
-    	.softmax_layer(3) # softmax(x * w + b)
-    	.tensor()
+      x.builder()
+      .tanh_layer(10) # tanh(x * w + b)
+      .dropout(keep_prob) # dropout(x, keep_prob)
+      .softmax_layer(3) # softmax(x * w + b)
+      .tensor()
     )
 
     print(h)
 
-## Patches
-Since the Builder class is mostly a [monadic](http://stackoverflow.com/a/194207/2118130) structure which helps you build the computation, in the interest of letting other libraries use Tensor Builder to obtain a fluid API + DSL, TensorBuilder ships the Builder class with no Tensor specific methods but instead contains helpers which enable you to register external functions as methods. Library authors are encouraged to create patches so they can worry about the basic operations and let TensorBuilder add the syntax.
+## Features
+* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).
+* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).
+* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).
 
-However, TensorBuilder ships with its own main patch, the `tensorbuilder.patch` which adds methods focused on helping you to easily create complex network, it does so (mostly) by registering (cherry picking) methods from other libraries. The intention here is get you the best of what is out there. Here is the list of all the patches you can use.
-
-* `import tensorbuilder.patch`
-* `import tensorbuilder.slim_patch`
-* `import tensorbuilder.patches.tensorflow.patch`
-* `import tensorbuilder.patches.tensorflow.slim`
-* `import tensorbuilder.patches.tflearn.patch`
-
-Check out is an example using the `tflearn` patch
-
-    import tflearn
-    import tensorbuilder as tb
-    import tensorbuilder.patches.tflearn.patch
-
-    model = (
-    	tflearn.input_data(shape=[None, 784]).builder()
-    	.fully_connected(64)
-    	.dropout(0.5)
-    	.fully_connected(10, activation='softmax')
-    	.regression(optimizer='adam', loss='categorical_crossentropy')
-    	.map(tflearn.DNN)
-    	.tensor()
-    )
-
-    print(model)
-
-## Branching
-Branching is common in many neural networks that need to resolve complex tasks because each branch to specialize its knowledge while lowering number of weight compared to a network with wider layers, thus giving better performance. TensorBuilder enables you to easily create nested branches. Branching results in a `tensorbuilder.tensorbuilder.BuilderTree`, which has methods for traversing all the `Builder` leaf nodes and reducing the whole tree to a single `Builder`.
-
-To create a branch you just have to use the `tensorbuilder.tensorbuilder.Builder.branch` method
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.slim_patch
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-    keep_prob = tf.placeholder(tf.float32)
-
-    h = (
-        x.builder()
-        .fully_connected(10)
-        .branch(lambda root:
-        [
-            root
-            .fully_connected(3, activation_fn=tf.nn.relu)
-        ,
-            root
-            .fully_connected(9, activation_fn=tf.nn.tanh)
-            .branch(lambda root2:
-            [
-              root2
-              .fully_connected(6, activation_fn=tf.nn.sigmoid)
-            ,
-              root2
-              .map(tf.nn.dropout, keep_prob)
-              .fully_connected(8, tf.nn.softmax)
-            ])
-        ])
-        .fully_connected(6, activation_fn=tf.nn.sigmoid)
-        .tensor()
-    )
-
-    print(h)
-
-Thanks to TensorBuilder's immutable API, each branch is independent. The previous can also be simplified with the full `patch`
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.patch
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-    keep_prob = tf.placeholder(tf.float32)
-
-    h = (
-        x.builder()
-        .fully_connected(10)
-        .branch(lambda root:
-        [
-            root
-            .relu_layer(3)
-        ,
-            root
-            .tanh_layer(9)
-            .branch(lambda root2:
-            [
-              root2
-              .sigmoid_layer(6)
-            ,
-              root2
-              .dropout(keep_prob)
-              .softmax_layer(8)
-            ])
-        ])
-        .sigmoid_layer(6)
-        .tensor()
-    )
-
-    print(h)
-
-## DSL
-TensorBuilder includes a dsl to make creating complex neural networks even easier. Use it if you are experimenting with complex architectures with branches, otherwise stick to basic API. The DSL has these rules:
-
-* All elements in the "AST" must be functions of type `Builder -> Builder`
-* A tuple `()` denotes a sequential operation and results in the composition of all functions within it, since its also an element, it compiles to a function that takes a builder and applies the inner composed function.
-* A list `[]` denotes a branching operation and results in creating a function that applies the `.branch` method to its argument, since its also an element, it compiles to a function of type `Builder -> BuilderTree`.
-
-To use the DSL you have to import the `tensorbuilder.dsl` module, in patches the `tensorbuilder.tensorbuilder.Builder` class with a `tensorbuilder.tensorbuilder.Builder.pipe` methods that takes an "AST" of such form, compiles it to a function which represents the desired transformation, and finally applies it to the instance `Builder`. The extra argument of `pipe` (\*args) are treated as tuple, so you don't need to include on the first layer.
-The `dsl` ships with functions with the same names as all the methods in the `Builder` class, so you get the same API, plus its operations are also chainable so you have to do very little to you code if you want to use the DSL.
-
-Lets see an example, here is the previous example about branching with the the full `patch`, this time using the `dsl` module
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.patch
-    import tensorbuilder.dsl as dl #<== Notice the alias
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-    keep_prob = tf.placeholder(tf.float32)
-
-    h = x.builder().pipe(
-        dl.fully_connected(10),
-        [
-            dl.relu_layer(3)
-        ,
-            (dl.tanh_layer(9),
-            [
-              	dl.sigmoid_layer(6)
-            ,
-                dl
-                .dropout(keep_prob)
-                .softmax_layer(8)
-            ])
-        ],
-        dl.sigmoid_layer(6)
-        .tensor()
-    )
-
-    print(h)
-
-As you see a lot of noise is gone, some `dl` terms appeared, and a few `,`s where introduced, but the end result better reveals the structure of you network, plus its very easy to modify.
+## The Guide
+Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.html).
 
 ## Documentation
 
-The main documentaion is [here](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html). The documentation for the complete project is [here](http://cgarciae.github.io/tensorbuilder/).
+Check out the complete documentaion [here](http://cgarciae.github.io/tensorbuilder/).
 
 ## Examples
 
-Here are the examples for each method of the API. If you are understand all examples, then you've understood the complete API.
+Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.
 
 ##############################
 ##### FUNCTIONS
@@ -230,7 +73,7 @@ The following example shows you how to construct a `tensorbuilder.tensorbuilder.
 
     print(a_builder)
 
-    # The previous is the same as
+The previous is the same as
 
     a = tf.placeholder(tf.float32, shape=[None, 8])
     a_builder = a.builder()
