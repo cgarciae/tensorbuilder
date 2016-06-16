@@ -56,6 +56,7 @@ Check out the complete documentation [here](http://cgarciae.github.io/tensorbuil
 from tensorbuilder import *
 import tensorbuilder
 import tensorflow as tf
+import tensordata
 from tensordata import data
 import guide
 
@@ -67,5 +68,5 @@ import guide
 tf.python.framework.ops.Tensor.builder = build
 
 #version
-__version__ = "0.0.2"
-__all__ = ["dsl", "tensorbuilder", "batcher", "guide"]
+__version__ = "0.0.3"
+__all__ = ["dsl", "tensorbuilder", "batcher", "guide", "tensordata"]
