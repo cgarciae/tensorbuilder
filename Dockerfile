@@ -12,3 +12,4 @@ RUN pip install mako
 RUN pip install markdown
 RUN pip install decorator==4.0.9
 RUN pip install git+https://github.com/tflearn/tflearn.git
+RUN pip install asq==1.2.1

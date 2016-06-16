@@ -1,3 +1,9 @@
+import numpy as np
+import functools
+import utils
+import inspect
+from utils import immutable
+
 """
 # Tensor Builder
 
@@ -82,23 +88,8 @@ Here are the examples for each method of the API. If you are understand all exam
 
 """
 
-__version__ = "0.0.1"
-import numpy as np
-import functools
-from decorator import decorator
-import utils
-import inspect
 
 
-
-# Decorators
-@decorator
-def immutable(method, self, *args, **kwargs):
-    """
-    Decorator. Passes a copy of the entity to the method so that the original object remains un touched.
-    Used in methods to get a fluent immatable API.
-    """
-    return method(self.copy(), *args, **kwargs)
 
 
 class Builder(object):
@@ -135,6 +126,7 @@ class Builder(object):
         """A `tensorflow` Tensor."""
 
     def tensor(self):
+        "Returns the Tensor contianed by the Builder"
         return self._tensor
 
     def copy(self):
@@ -145,6 +137,36 @@ class Builder(object):
     @staticmethod
     def register_method(fn, library_path, alias=None, doc=None):
         """
+        This method enables you to register any function `fn` that takes a Builder as its first argument as a method of the Builder class.
+
+        **Arguments**
+
+        * `fn`: a function that atleast takes a Builder as its first argument.
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        In this example we will create a funtion and register it as a method called `relu_dropout_layer`
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+
+            def relu_dropout(builder, size, keep_prob):
+                \"\"\"Fully connect to a relu layer of size `size` and apply dropout with `keep_prob`\"\"\"
+                return (
+                    builder.map(tf.contrib.layers.fully_connected, size)
+                    .map(tf.nn.relu)
+                    .map(tf.nn.dropout, keep_prob)
+                )
+
+            tb.Builder.register_method(relu_dropout_layer, "my.lib", alias="relu_dropout_layer")
         """
 
         fn_signature = utils.get_method_sig(fn)
@@ -160,6 +182,29 @@ class Builder(object):
 
     @staticmethod
     def register_map_method(fn, library_path, alias=None, doc=None):
+        """
+        This method enables you to register any function `fn` that takes a Tensor as its first argument and returns a Tensor as a method of the Builder class. The resulting method is created by *lifting* the function to work with a Builder.
+
+        **Arguments**
+
+        * `fn`: a function of type `Tensor -> Tensor`.
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        In this example we will register `tf.reshape` as a method of the Builder class
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+            tb.Builder.register_map_method(tf.reshape, "tf")
+        """
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
@@ -208,6 +253,7 @@ class Builder(object):
             print(h)
 
         """
+
         builder._tensor = fn(builder._tensor, *args, **kwargs)
         return builder
 
@@ -253,13 +299,12 @@ class Builder(object):
 
     @immutable
     def __iter__(builder):
-        """A generator function that yields the builder, used by `tensorbuilder.tensorbuilder.BuilderTree.leafs` of `tensorbuilder.tensorbuilder.BuilderTree`"""
         yield builder
 
 
 class BuilderTree(object):
     """
-    BuilderTree is a class that enable you to perform computations over a complex branched builder. It contains methods to get all the leaf `tensorbuilder.tensorbuilder.Builder` nodes, connect all the leaf nodes to a single layer, etc.
+    BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.tensorbuilder.Builder` nodes.
     """
     def __init__(self, branches):
         super(BuilderTree, self).__init__()
@@ -305,8 +350,12 @@ class BuilderTree(object):
                 .map(tf.nn.softmax)
             )
         """
-        tensor = functools.reduce(fn, tree.tensors(), initializer=initializer)
-        return builder(tensor)
+        if initializer != None:
+            tensor = functools.reduce(fn, tree.tensors(), initializer)
+        else:
+            tensor = functools.reduce(fn, tree.tensors())
+
+        return build(tensor)
 
     @immutable
     def map_each(tree, fn, *args, **kwargs):
@@ -382,6 +431,47 @@ class BuilderTree(object):
 
     @staticmethod
     def register_method(fn, library_path, alias=None, doc=None):
+        """
+        This method enables you to register any function `fn` that takes a BuilderTree as its first argument as a method of the Builder class.
+
+        **Arguments**
+
+        * `fn`: a function that atleast takes a BuilderTree as its first argument.
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        In this example we will create the method `fully_connected` for the BuilderTree class
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+
+            def _tree_fully_connected(tree, size, *args, **kwargs):
+                activation_fn = None
+
+                if "activation_fn" in kwargs:
+                    activation_fn = kwargs["activation_fn"]
+                    del kwargs["activation_fn"]
+
+                builder = (
+                    tree.map_each(tf.contrib.layers.fully_connected, size, *args, **kwargs)
+                    .reduce(tf.add)
+                )
+
+                if activation_fn:
+                    builder = builder.map(activation_fn)
+
+                return builder
+
+            tb.BuilderTree.register_method(_tree_fully_connected, "tensorbuilder.patches.tensorflow.fully_connected", alias="fully_connected")
+        """
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
@@ -394,6 +484,29 @@ class BuilderTree(object):
 
     @staticmethod
     def register_reduce_method(fn, library_path, alias=None, doc=None):
+        """
+        This method enables you to register a function `fn` of type `(Tensor, Tensor) -> Tensor` as a method of the Builder class.
+
+        **Arguments**
+
+        * `fn`: a function of type `(Tensor, Tensor) -> Tensor`
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        In this example we will create the method `reduce_add` for the BuilderTree class
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+            tb.BuilderTree.register_reduce_method(tf.add, "tf", alias="reduce_add")
+        """
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         original_name = fn.__name__
