@@ -95,7 +95,8 @@ class Builder(object):
         fn.__name__ = name
         fn.__doc__ = doc if doc else _builder_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        exec("Builder.{0} = fn".format(name))
+        setattr(Builder, name, fn)
+        #exec("Builder.{0} = fn".format(name))
 
 
     @staticmethod
@@ -132,7 +133,8 @@ class Builder(object):
         lifted.__name__ = name
         lifted.__doc__ = doc if doc else _builder_register_map_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        exec("Builder.{0} = lifted".format(name))
+        setattr(Builder, name, lifted)
+        #exec("Builder.{0} = lifted".format(name))
 
 
     @immutable
@@ -398,7 +400,8 @@ class BuilderTree(object):
         fn.__name__ = name
         fn.__doc__ = doc if doc else _tree_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        exec("BuilderTree.{0} = fn".format(name))
+        setattr(BuilderTree, name, fn)
+        #exec("BuilderTree.{0} = fn".format(name))
 
     @staticmethod
     def register_reduce_method(fn, library_path, alias=None, doc=None):
@@ -435,7 +438,8 @@ class BuilderTree(object):
         _tree_method.__name__ = name
         _tree_method.__doc__ = doc if doc else _tree_register_reduce_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        exec("Builder.{0} = _tree_method".format(name))
+        setattr(BuilderTree, name, _tree_method)
+        #exec("BuilderTree.{0} = _tree_method".format(name))
 
     def builders(self):
         """
@@ -546,8 +550,7 @@ def _lift(fn):
 
 def _lift_tree_reduce(fn):
     def _tree_method(tree, *args, **kwargs):
-        tensor = fn(tree.tensors())
-        return builder(tensor)
+        return tree.map_each(fn, *args, **kwargs)
     return _tree_method
 
 def _map_partial(fn, *args, **kwargs):

@@ -8,6 +8,9 @@ import functools
 import itertools
 import tensorflow as tf
 import tensorbuilder as tb
+import sys
+
+_self = sys.modules[__name__]
 
 #######################
 ### FUNCTOR
@@ -75,6 +78,57 @@ def pipe(builder, *ast):
     return f(builder)
 
 
+
+def _get_fun(_name, _f_signature, _f_docs, _module_name):
+    def _fun(*args, **kwargs):
+        def _lambda(builder):
+            f = getattr(builder, _name)
+            return f(*args, **kwargs)
+
+    	return Applicative(_lambda)
+
+    _fun.__name__ = _name
+    _fun.__doc__ = """
+    THIS FUNCTION IS AUTOMATICALLY GENERATED
+
+    This function accepts the same arguments as `{3}.{0}` but instead of getting the class instance as its first arguments, it returns a function that expects a builder and applies the builder plus all \*args and \*\*kwargs to `{3}.{0}`. The returned function is an `tensorbuilder.dsl.Applicative`, so you can use all the methods defined by this class.
+
+    ** Documentation for `{3}.{0}`**
+
+        def {1}
+
+    """.format(_name, _f_signature, _f_docs, _module_name)
+
+    return _fun
+
+
+
+def _get_method(_name, _f_signature, _f_docs, _module_name):
+    @tb.immutable
+    def _method(app, *args, **kwargs):
+        f = getattr(_self, _name)
+        g = f(*args, **kwargs)
+        return app.compose(g)
+
+    _method.__name__ = _name
+    _method.__doc__ = """
+    THIS METHOD IS AUTOMATICALLY GENERATED
+
+    This method accepts the same arguments as `{3}.{0}` but:
+
+    1. Forwards all of its arguments to `tensorbuilder.dsl.{0}`, this returns a function `g`.
+    2. Applies `tensorbuilder.dsl.Applicative.compose` over `g`, this roughly computes the composition `g` of `tensorbuilder.dsl.Applicative.f`.
+
+    So the result of this method is compose `tensorbuilder.dsl.{0}` with `tensorbuilder.dsl.Applicative.f`.
+
+    ** utils of `{3}.{0}`**
+
+        def {1}
+
+    """.format(_name, _f_signature, _f_docs, _module_name)
+
+    return _method
+
 #######################
 ### CODE GENERATION
 #######################
@@ -95,47 +149,12 @@ def _builder_tree_methods():
 for _module_name, _name, f in itertools.chain(_builder_methods(), _builder_tree_methods()):
     _f_signature = utils.get_method_sig(f)
     _f_docs = inspect.getdoc(f)
-    exec("""
+    _fun = _get_fun(_name, _f_signature, _f_docs, _module_name)
+    _method = _get_method(_name, _f_signature, _f_docs, _module_name)
 
-def {0}(*args, **kwargs):
-	\"\"\"
-THIS FUNCTION IS AUTOMATICALLY GENERATED
+    setattr(_self, _name, _fun)
+    setattr(Applicative, _name, _method)
 
-This function accepts the same arguments as `{3}.{0}` but instead of getting the class instance as its first arguments, it returns a function that expects a builder and applies the builder plus all \*args and \*\*kwargs to `{3}.{0}`. The returned function is an `tensorbuilder.dsl.Applicative`, so you can use all the methods defined by this class.
-
-** Documentation for `{3}.{0}`**
-
-	def {1}
-
-
-	\"\"\"
-
-	return Applicative(lambda builder: builder.{0}(*args, **kwargs))
-
-
-@tb.immutable
-def __{0}(app, *args, **kwargs):
-    \"\"\"
-THIS METHOD IS AUTOMATICALLY GENERATED
-
-This method accepts the same arguments as `{3}.{0}` but:
-
-1. Forwards all of its arguments to `tensorbuilder.dsl.{0}`, this returns a function `g`.
-2. Applies `tensorbuilder.dsl.Applicative.compose` over `g`, this roughly computes the composition `g` of `tensorbuilder.dsl.Applicative.f`.
-
-So the result of this method is compose `tensorbuilder.dsl.{0}` with `tensorbuilder.dsl.Applicative.f`.
-
-** utils of `{3}.{0}`**
-
-	def {1}
-
-	\"\"\"
-    g = {0}(*args, **kwargs)
-    return app.compose(g)
-
-Applicative.{0} = __{0}
-
- 	""".format(_name, _f_signature, _f_docs, _module_name))
 
 #######################
 ### CUSTOM FUNCTIONS
