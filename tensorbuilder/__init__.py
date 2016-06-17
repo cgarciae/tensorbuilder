@@ -133,7 +133,7 @@ from tensordata import data
 #import dsl
 
 # Monkey Patch TensorFlow's Tensor with a `build` method as `builder`
-tf.python.framework.ops.Tensor.builder = build
+# tf.python.framework.ops.Tensor.builder = build
 
 #version
 __version__ = "0.0.4"

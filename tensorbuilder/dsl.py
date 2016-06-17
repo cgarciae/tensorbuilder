@@ -12,12 +12,16 @@ import sys
 
 _self = sys.modules[__name__]
 
+def _identity(x):
+    return x
+
+
 #######################
-### FUNCTOR
+### Applicative
 #######################
-class Applicative(object):
+class BaseApplicative(object):
     """docstring for Applicative"""
-    def __init__(self, f):
+    def __init__(self, f = _identity):
         super(Applicative, self).__init__()
         self.f = f
         """
@@ -26,19 +30,25 @@ class Applicative(object):
 
     def copy(self):
         """Returns a compy of the applicative"""
-        return Applicative(self.f)
+        return self.__class__(self.f)
 
     def __call__(self, x):
         return self.f(x)
 
     @tb.immutable
     def compose(app, g):
+        return app.__class__(_compose2(g, app.f))
 
-        return Applicative(_compose2(g, app.f))
 
+    def identity(self):
+    	"""
+        Returns the expression unchanged.
+    	"""
+    	return self
 
-def applicative(f):
-    return Applicative(f)
+class Applicative(BaseApplicative):
+    pass
+
 #######################
 ### FUNCTIONS
 #######################
@@ -159,11 +169,7 @@ for _module_name, _name, f in itertools.chain(_builder_methods(), _builder_tree_
 #######################
 ### CUSTOM FUNCTIONS
 #######################
-def identity():
-	"""
-    Returns the builder unchanged.
-	"""
-	return Applicative(lambda builder: builder)
+
 
 #######################
 ### MONEKY PATCHING
