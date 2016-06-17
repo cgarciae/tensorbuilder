@@ -97,14 +97,13 @@ for _module_name, _name, f in itertools.chain(_builder_methods(), _builder_tree_
     _f_docs = inspect.getdoc(f)
     exec("""
 
-
 def {0}(*args, **kwargs):
 	\"\"\"
 THIS FUNCTION IS AUTOMATICALLY GENERATED
 
 This function accepts the same arguments as `{3}.{0}` but instead of getting the class instance as its first arguments, it returns a function that expects a builder and applies the builder plus all \*args and \*\*kwargs to `{3}.{0}`. The returned function is an `tensorbuilder.dsl.Applicative`, so you can use all the methods defined by this class.
 
-** utils of `{3}.{0}`**
+** Documentation for `{3}.{0}`**
 
 	def {1}
 
@@ -138,6 +137,14 @@ Applicative.{0} = __{0}
 
  	""".format(_name, _f_signature, _f_docs, _module_name))
 
+#######################
+### CUSTOM FUNCTIONS
+#######################
+def identity():
+	"""
+    Returns the builder unchanged.
+	"""
+	return Applicative(lambda builder: builder)
 
 #######################
 ### MONEKY PATCHING
