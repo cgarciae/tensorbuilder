@@ -8,6 +8,11 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 * Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch))
 * Let users be expressive and productive through a DSL
 
+## Features
+* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).
+* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).
+* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).
+
 ## Installation
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
@@ -45,13 +50,13 @@ Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.h
 * Complete documentation: [here](http://cgarciae.github.io/tensorbuilder/).
 * Builder API: [here](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html).
 
-## Features
-* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).
-* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).
-* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).
+
+## Examples
+
+Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.
 
 #### Showoff
-This next is some more involved code for solving the MNIST for images of 20x20 gray-scaled. It is solve using a using 3 relu-CNN branches with max pooling, the branches are merged through a fully connected relu layer with dropout, and finally its connected to a softmax output layer.
+Next is some more involved code so you see all the features in action. Its for learning the MNIST for images of 20x20 gray-scaled by using 3 relu-CNN branches with max pooling, then merging the branches through a fully connected relu layer with dropout, and finally connecting it to a softmax output layer.
 
     import tensorflow as tf
     import tensorbuilder as tb
@@ -108,14 +113,10 @@ This next is some more involved code for solving the MNIST for images of 20x20 g
     print h, loss, trainer
 
 Notice that:
-1. We where able to reuse code by specifying the logic for the branches separately using the same syntax
+
+1. We where able to reuse code easily by specifying the logic for the branches separately using the same syntax
 2. Branches are expressed naturally as a list thanks to the DSL, the indentation levels match the depth of the tree. Nested branches are just as easy.
-3. Most methods presented are functions from `tensorflow` that your are (probably) used to.
-
-
-## Examples
-
-Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.
+3. Most methods presented are functions from `tensorflow` that your are probably used to.
 
 ##############################
 ##### FUNCTIONS
