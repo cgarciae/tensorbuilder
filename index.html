@@ -1046,6 +1046,7 @@ table {
         <li class="mono"><a href="dsl.m.html">tensorbuilder.dsl</a></li>
         <li class="mono"><a href="guide/index.html">tensorbuilder.guide</a></li>
         <li class="mono"><a href="tensorbuilder.m.html">tensorbuilder.tensorbuilder</a></li>
+        <li class="mono"><a href="tensordata.m.html">tensorbuilder.tensordata</a></li>
       </ul>
     </li>
     </ul>
@@ -1072,7 +1073,7 @@ table {
 <p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
 <h4>From github</h4>
 <ol>
-<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.3</code></li>
+<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.4</code></li>
 </ol>
 <h4>From pip</h4>
 <p>Coming soon!</p>
@@ -1097,16 +1098,83 @@ table {
 </pre></div>
 
 
+<h2>The Guide</h2>
+<p>Check out the guide <a href="http://cgarciae.github.io/tensorbuilder/guide/index.html">here</a>.</p>
+<h2>Documentation</h2>
+<ul>
+<li>Complete documentation: <a href="http://cgarciae.github.io/tensorbuilder/">here</a>.</li>
+<li>Builder API: <a href="http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html">here</a>.</li>
+</ul>
 <h2>Features</h2>
 <ul>
 <li><strong>Branches</strong>: Enable to easily express complex complex topologies with a fluent API. See <a href="http://cgarciae.github.io/tensorbuilder/guide/branches.m.html">Branches</a>.</li>
 <li><strong>Patches</strong>: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from <code>TensorFlow</code> and <code>TFLearn</code>, but you can build you own to make TensorBuilder what you want it to be. See <a href="http://cgarciae.github.io/tensorbuilder/guide/patches.m.html">Patches</a>.</li>
 <li><strong>DSL</strong>: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See <a href="http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html">DSL</a>.</li>
 </ul>
-<h2>The Guide</h2>
-<p>Check out the guide <a href="http://cgarciae.github.io/tensorbuilder/guide/index.html">here</a>.</p>
-<h2>Documentation</h2>
-<p>Check out the complete documentation <a href="http://cgarciae.github.io/tensorbuilder/">here</a>.</p>
+<h4>Showoff</h4>
+<p>This next is some more involved code for solving the MNIST for images of 20x20 gray-scaled. It is solve using a using 3 relu-CNN branches with max pooling, the branches are merged through a fully connected relu layer with dropout, and finally its connected to a softmax output layer.</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">import</span> <span class="nn">tensorbuilder.patch</span>
+
+<span class="c1"># Define variables</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
+<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="c1">#Create the convolution function to be used by each brach</span>
+<span class="n">conv_branch</span> <span class="o">=</span> <span class="p">(</span>
+
+    <span class="n">dl</span><span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">max_pool_2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#This method is taken from `tflearn`</span>
+
+    <span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">max_pool_2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">64</span><span class="p">])</span> <span class="c1">#notice that we flatten at the end</span>
+<span class="p">)</span>
+
+<span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+
+    <span class="n">dl</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+    <span class="p">[</span>
+        <span class="n">conv_branch</span> <span class="c1">#Reuse code</span>
+    <span class="p">,</span>
+        <span class="n">conv_branch</span>
+    <span class="p">,</span>
+        <span class="n">conv_branch</span>
+    <span class="p">],</span>
+
+    <span class="n">dl</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span> <span class="c1"># this fully connects all 3 branches into a single relu layer</span>
+    <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
+
+    <span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="c1"># create a linear connection</span>
+    <span class="p">[</span>
+        <span class="n">dl</span><span class="o">.</span><span class="n">softmax</span><span class="p">()</span> <span class="c1"># h</span>
+    <span class="p">,</span>
+        <span class="p">(</span><span class="n">dl</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">),</span> <span class="c1">#calculte loss</span>
+        <span class="p">[</span>
+            <span class="n">dl</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span> <span class="c1"># loss</span>
+        <span class="p">,</span>
+            <span class="n">dl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span> <span class="c1"># trainer</span>
+        <span class="p">])</span>
+    <span class="p">],</span>
+    <span class="n">dl</span><span class="o">.</span><span class="n">tensors</span><span class="p">()</span> <span class="c1">#get the list of tensors from the previous BuilderTree</span>
+<span class="p">)</span>
+
+<span class="k">print</span> <span class="n">h</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">trainer</span>
+</pre></div>
+
+
+<p>Notice that:
+1. We where able to reuse code by specifying the logic for the branches separately using the same syntax
+2. Branches are expressed naturally as a list thanks to the DSL, the indentation levels match the depth of the tree. Nested branches are just as easy.
+3. Most methods presented are functions from <code>tensorflow</code> that your are (probably) used to.</p>
+<h2>Examples</h2>
+<p>Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.</p>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder" class="source">
@@ -1125,7 +1193,7 @@ table {
 <span class="sd">Tensor Builder assumes you have a working `tensorflow` installation. We don&#39;t include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.</span>
 
 <span class="sd">#### From github</span>
-<span class="sd">1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.3`</span>
+<span class="sd">1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.4`</span>
 
 <span class="sd">#### From pip</span>
 <span class="sd">Coming soon!</span>
@@ -1151,27 +1219,96 @@ table {
 
 <span class="sd">    print(h)</span>
 
+<span class="sd">## The Guide</span>
+<span class="sd">Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.html).</span>
+
+<span class="sd">## Documentation</span>
+<span class="sd">* Complete documentation: [here](http://cgarciae.github.io/tensorbuilder/).</span>
+<span class="sd">* Builder API: [here](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html).</span>
+
 <span class="sd">## Features</span>
 <span class="sd">* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).</span>
 <span class="sd">* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).</span>
 <span class="sd">* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).</span>
 
-<span class="sd">## The Guide</span>
-<span class="sd">Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.html).</span>
+<span class="sd">#### Showoff</span>
+<span class="sd">This next is some more involved code for solving the MNIST for images of 20x20 gray-scaled. It is solve using a using 3 relu-CNN branches with max pooling, the branches are merged through a fully connected relu layer with dropout, and finally its connected to a softmax output layer.</span>
 
-<span class="sd">## Documentation</span>
+<span class="sd">    import tensorflow as tf</span>
+<span class="sd">    import tensorbuilder as tb</span>
+<span class="sd">    import tensorbuilder.patch</span>
 
-<span class="sd">Check out the complete documentation [here](http://cgarciae.github.io/tensorbuilder/).</span>
+<span class="sd">    # Define variables</span>
+<span class="sd">    y = tf.placeholder(tf.float32, shape=[None, 400])</span>
+<span class="sd">    x = tf.placeholder(tf.float32, shape=[None, 400])</span>
+<span class="sd">    keep_prob = tf.placeholder(tf.float32)</span>
+
+<span class="sd">    #Create the convolution function to be used by each brach</span>
+<span class="sd">    conv_branch = (</span>
+
+<span class="sd">        dl.convolution2d(32, [5, 5])</span>
+<span class="sd">        .relu()</span>
+<span class="sd">        .max_pool_2d(2) #This method is taken from `tflearn`</span>
+
+<span class="sd">        .convolution2d(64, [5, 5])</span>
+<span class="sd">        .relu()</span>
+<span class="sd">        .max_pool_2d(2)</span>
+
+<span class="sd">        .reshape([-1, 5 * 5 * 64]) #notice that we flatten at the end</span>
+<span class="sd">    )</span>
+
+<span class="sd">    [h, loss, trainer] = x.builder().pipe(</span>
+
+<span class="sd">        dl.reshape([-1, 20, 20, 1]),</span>
+<span class="sd">        [</span>
+<span class="sd">            conv_branch #Reuse code</span>
+<span class="sd">        ,</span>
+<span class="sd">            conv_branch</span>
+<span class="sd">        ,</span>
+<span class="sd">            conv_branch</span>
+<span class="sd">        ],</span>
+
+<span class="sd">        dl.relu_layer(1024) # this fully connects all 3 branches into a single relu layer</span>
+<span class="sd">        .dropout(keep_prob)</span>
+
+<span class="sd">        .fully_connected(10), # create a linear connection</span>
+<span class="sd">        [</span>
+<span class="sd">            dl.softmax() # h</span>
+<span class="sd">        ,</span>
+<span class="sd">            (dl.softmax_cross_entropy_with_logits(y)</span>
+<span class="sd">            .map(tf.reduce_mean), #calculte loss</span>
+<span class="sd">            [</span>
+<span class="sd">                dl.identity() # loss</span>
+<span class="sd">            ,</span>
+<span class="sd">                dl.map(tf.train.AdadeltaOptimizer(0.01).minimize) # trainer</span>
+<span class="sd">            ])</span>
+<span class="sd">        ],</span>
+<span class="sd">        dl.tensors() #get the list of tensors from the previous BuilderTree</span>
+<span class="sd">    )</span>
+
+<span class="sd">    print h, loss, trainer</span>
+
+<span class="sd">Notice that:</span>
+<span class="sd">1. We where able to reuse code by specifying the logic for the branches separately using the same syntax</span>
+<span class="sd">2. Branches are expressed naturally as a list thanks to the DSL, the indentation levels match the depth of the tree. Nested branches are just as easy.</span>
+<span class="sd">3. Most methods presented are functions from `tensorflow` that your are (probably) used to.</span>
+
+
+<span class="sd">## Examples</span>
+
+<span class="sd">Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># Init code</span>
 <span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensordata</span>
 <span class="kn">from</span> <span class="nn">tensordata</span> <span class="kn">import</span> <span class="n">data</span>
-<span class="kn">import</span> <span class="nn">guide</span>
+
 
 <span class="c1"># Uncomment to generate docs only</span>
+<span class="kn">import</span> <span class="nn">guide</span>
 <span class="kn">import</span> <span class="nn">patch</span>
 <span class="kn">import</span> <span class="nn">dsl</span>
 
@@ -1179,8 +1316,8 @@ table {
 <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="o">.</span><span class="n">builder</span> <span class="o">=</span> <span class="n">build</span>
 
 <span class="c1">#version</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.2&quot;</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dsl&quot;</span><span class="p">,</span> <span class="s2">&quot;tensorbuilder&quot;</span><span class="p">,</span> <span class="s2">&quot;batcher&quot;</span><span class="p">,</span> <span class="s2">&quot;guide&quot;</span><span class="p">]</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.4&quot;</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dsl&quot;</span><span class="p">,</span> <span class="s2">&quot;tensorbuilder&quot;</span><span class="p">,</span> <span class="s2">&quot;batcher&quot;</span><span class="p">,</span> <span class="s2">&quot;guide&quot;</span><span class="p">,</span> <span class="s2">&quot;tensordata&quot;</span><span class="p">]</span>
 </pre></div>
 
   </div>
@@ -1210,6 +1347,12 @@ table {
       
   
     <div class="desc"><h1>TODO: List the core methods here. Explain the inclusion of the method from the <code>tensorbuilder.patch</code> module.</h1></div>
+
+      </div>
+      <div class="item">
+      <p class="name"><a href="tensordata.m.html">tensorbuilder.tensordata</a></p>
+      
+  
 
       </div>
   </section>
