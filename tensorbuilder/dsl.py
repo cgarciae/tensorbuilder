@@ -9,6 +9,7 @@ import itertools
 import tensorflow as tf
 import tensorbuilder as tb
 import sys
+from copy import deepcopy
 
 _self = sys.modules[__name__]
 
@@ -19,7 +20,7 @@ def _identity(x):
 #######################
 ### Applicative
 #######################
-class BaseApplicative(object):
+class Applicative(object):
     """docstring for Applicative"""
     def __init__(self, f = _identity):
         super(Applicative, self).__init__()
@@ -28,16 +29,21 @@ class BaseApplicative(object):
         A function of type `a -> b`.
         """
 
+    @tb.immutable
+    def unit(app, f):
+        app.f = f
+        return app
+
     def copy(self):
         """Returns a compy of the applicative"""
-        return self.__class__(self.f)
+        return deepcopy(self)
 
     def __call__(self, x):
         return self.f(x)
 
     @tb.immutable
     def compose(app, g):
-        return app.__class__(_compose2(g, app.f))
+        return app.unit(_compose2(g, app.f))
 
 
     def identity(self):
@@ -46,8 +52,24 @@ class BaseApplicative(object):
     	"""
     	return self
 
-class Applicative(BaseApplicative):
-    pass
+    def pipe(self, builder, *ast):
+        f = self.compile(ast)
+        return f(builder)
+
+    def compile(self, ast):
+        #if type(ast) is tuple:
+
+        if type(ast) is list:
+            return _branch_function(ast)
+        elif hasattr(ast, '__call__'):
+            return ast
+        else:
+            return _sequence_function(ast)
+            #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
+
+    def register_method()
+
+dl = Applicative()
 
 #######################
 ### FUNCTIONS
@@ -56,7 +78,6 @@ class Applicative(BaseApplicative):
 def _compose2(f, g):
     return lambda x: f(g(x))
 
-_identity = lambda x: x
 
 def _compose_reversed(functions):
     functions = functions[:]
@@ -72,20 +93,7 @@ def _branch_function(list_ast):
     fs = [ compile(ast) for ast in list_ast ]
     return lambda builder: builder.branch(lambda builder: [ f(builder) for f in fs ])
 
-def compile(ast):
-    #if type(ast) is tuple:
 
-    if type(ast) is list:
-        return _branch_function(ast)
-    elif hasattr(ast, '__call__'):
-        return ast
-    else:
-        return _sequence_function(ast)
-        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
-
-def pipe(builder, *ast):
-    f = compile(ast)
-    return f(builder)
 
 
 
