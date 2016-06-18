@@ -7,10 +7,16 @@ import functools
 import utils
 import inspect
 from utils import immutable
+from copy import deepcopy, copy
+from types import MethodType
+import sys
+from abc import ABCMeta, abstractmethod
 
+module = sys.modules[__name__]
 
+_count = [0]
 
-class Builder(object):
+class BuilderBase(object):
     """
     The Builder class is a wrapper around a Tensor. Most of its method are immutable, that is, they don't modify the caller object but always return a new builder.
 
@@ -37,11 +43,17 @@ class Builder(object):
 
 
     """
+    __metaclass__ = ABCMeta
+
     def __init__(self, tensor):
-        super(Builder, self).__init__()
+        super(BuilderBase, self).__init__()
 
         self._tensor = tensor
         """A `tensorflow` Tensor."""
+
+    @abstractmethod
+    def BuilderTree(self, builder_iterable):
+        pass
 
     def tensor(self):
         "Returns the Tensor contianed by the Builder"
@@ -49,11 +61,16 @@ class Builder(object):
 
     def copy(self):
         """Returns a copy of this Builder"""
-        return Builder(self._tensor)
+        return self.unit(self.tensor())
 
+    def unit(self, tensor):
+        return self.__class__(tensor)
 
-    @staticmethod
-    def register_method(fn, library_path, alias=None, doc=None):
+    def build(self, tensor):
+        return self.unit(tensor)
+
+    @classmethod
+    def register_method(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register any function `fn` that takes a Builder as its first argument as a method of the Builder class.
 
@@ -95,12 +112,12 @@ class Builder(object):
         fn.__name__ = name
         fn.__doc__ = doc if doc else _builder_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        setattr(Builder, name, fn)
+        setattr(cls, name, fn)
         #exec("Builder.{0} = fn".format(name))
 
 
-    @staticmethod
-    def register_map_method(fn, library_path, alias=None, doc=None):
+    @classmethod
+    def register_map_method(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register any function `fn` that takes a Tensor as its first argument and returns a Tensor as a method of the Builder class. The resulting method is created by *lifting* the function to work with a Builder.
 
@@ -133,8 +150,7 @@ class Builder(object):
         lifted.__name__ = name
         lifted.__doc__ = doc if doc else _builder_register_map_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        setattr(Builder, name, lifted)
-        #exec("Builder.{0} = lifted".format(name))
+        setattr(cls, name, lifted)
 
 
     @immutable
@@ -173,9 +189,8 @@ class Builder(object):
             print(h)
 
         """
-
-        builder._tensor = fn(builder._tensor, *args, **kwargs)
-        return builder
+        tensor = fn(builder.tensor(), *args, **kwargs)
+        return builder.unit(tensor)
 
     @immutable
     def then(builder, fn, *args, **kwargs):
@@ -215,26 +230,63 @@ class Builder(object):
         ** Example **
 
         """
-        return branches(fn(builder))
+        return builder.BuilderTree(fn(builder))
 
     @immutable
     def __iter__(builder):
         yield builder
 
 
-class BuilderTree(object):
+class BuilderTreeBase(object):
     """
     BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.tensorbuilder.Builder` nodes.
     """
-    def __init__(self, branches):
-        super(BuilderTree, self).__init__()
-        self.branches = branches
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, builder_iterable):
+        super(BuilderTreeBase, self).__init__()
+
+        self._branches = list(builder_iterable)
         """
-        A list that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.
+        An iterable that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.
         """
 
+    @abstractmethod
+    def Builder(self, tensor):
+        pass
+
+
     def copy(self):
-        return BuilderTree(list(self.branches))
+        return self.unit(self._branches)
+
+    def unit(self, branches):
+        return self.__class__(branches)
+
+    def branches(builder_iterable):
+        """
+        Takes a list with elements of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree` and returns a `tensorbuilder.tensorbuilder.BuilderTree`
+
+        ** Parameters **
+
+        * `builder_list`: list of type `list( Builder | BuilderTree)`
+
+        #### Example
+
+        Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this
+
+            import tensorflow as tf
+            import tensorbuilder as tb
+
+            a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
+            b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
+
+            tree = tb._branches([a, b])
+
+        `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases
+
+        """
+        return self.unit(builder_iterable)
 
     @immutable
     def reduce(tree, fn, initializer=None):
@@ -275,7 +327,7 @@ class BuilderTree(object):
         else:
             tensor = functools.reduce(fn, tree.tensors())
 
-        return build(tensor)
+        return tree.Builder(tensor)
 
     @immutable
     def map_each(tree, fn, *args, **kwargs):
@@ -309,8 +361,8 @@ class BuilderTree(object):
                 .map_each(tf.nn.dropout, keep_prob)
             )
         """
-        tree.branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
-        return tree
+        branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
+        return tree.unit(branches)
 
     @immutable
     def extract(tree, fn, *args, **kwargs):
@@ -345,12 +397,12 @@ class BuilderTree(object):
             )
         """
         tensor = fn(tree.tensors(), *args, **kwargs)
-        return BuilderTree(builders)
+        return tree.Builder(tensor)
 
 
 
-    @staticmethod
-    def register_method(fn, library_path, alias=None, doc=None):
+    @classmethod
+    def register_method(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register any function `fn` that takes a BuilderTree as its first argument as a method of the Builder class.
 
@@ -400,11 +452,10 @@ class BuilderTree(object):
         fn.__name__ = name
         fn.__doc__ = doc if doc else _tree_register_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        setattr(BuilderTree, name, fn)
-        #exec("BuilderTree.{0} = fn".format(name))
+        setattr(cls, name, fn)
 
-    @staticmethod
-    def register_reduce_method(fn, library_path, alias=None, doc=None):
+    @classmethod
+    def register_reduce_method(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register a function `fn` of type `(Tensor, Tensor) -> Tensor` as a method of the Builder class.
 
@@ -438,8 +489,8 @@ class BuilderTree(object):
         _tree_method.__name__ = name
         _tree_method.__doc__ = doc if doc else _tree_register_reduce_method_docs(original_name, library_path, name, fn_signature, fn_docs)
 
-        setattr(BuilderTree, name, _tree_method)
-        #exec("BuilderTree.{0} = _tree_method".format(name))
+        setattr(cls, name, _tree_method)
+
 
     def builders(self):
         """
@@ -472,7 +523,7 @@ class BuilderTree(object):
     @immutable
     def __iter__(tree):
         """A generator function that lazily returns all the Builders contianed by this tree"""
-        for branch in tree.branches:
+        for branch in tree._branches:
             for builder in branch:
                 yield builder
 
@@ -556,55 +607,7 @@ def _lift_tree_reduce(fn):
 def _map_partial(fn, *args, **kwargs):
     return lambda builder: builder.map(fn, *args, **kwargs)
 
-def build(tensor):
-    """
-    Takes a tensor and returns a `tensorbuilder.tensorbuilder.Builder` that contians it. If function is also used to monkey-patch tensorflow's Tensor class with a method of the same name.
 
-    ** Parameters **
-
-    * `tensor`: a tensorflow Tensor
-
-    #### Example
-
-    The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.
-
-        import tensorflow as tf
-        import tensorbuilder as tb
-
-        a = tf.placeholder(tf.float32, shape=[None, 8])
-        a_builder = tb.builder(a)
-
-    The previous is the same as
-
-        a_builder = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-
-    since tensorbuilder monkey-patches tensorflow's Tensor with this function as method.
-    """
-    return Builder(tensor)
-
-
-
-def branches(builder_list):
-    """
-    Takes a list with elements of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree` and returns a `tensorbuilder.tensorbuilder.BuilderTree`
-
-    ** Parameters **
-
-    * `builder_list`: list of type `list( Builder | BuilderTree)`
-
-    #### Example
-
-    Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this
-
-        import tensorflow as tf
-        import tensorbuilder as tb
-
-        a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-        b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-
-        tree = tb.branches([a, b])
-
-    `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases
-
-    """
-    return BuilderTree(builder_list)
+## SETUP
+BuilderBase.__core__ = [ name for name, f in inspect.getmembers(BuilderBase, predicate=inspect.ismethod) ]
+BuilderTreeBase.__core__ = [ name for name, f in inspect.getmembers(BuilderTreeBase, predicate=inspect.ismethod) ]

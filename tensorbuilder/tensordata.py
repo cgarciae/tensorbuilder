@@ -4,7 +4,7 @@ import asq.queryables
 import random
 from itertools import islice, izip_longest
 import numpy as np
-from utils import immutable
+from core.utils import immutable
 """
 """
 def data(*args, **kwargs):

@@ -68,3 +68,9 @@ def get_method_sig(method):
             args.append(arg)
         arg_index += 1
     return "%s(%s)" % (method.__name__, ", ".join(args))
+
+def get_instance_methods(instance):
+    for method_name in dir(instance):
+        method = getattr(instance, method_name)
+        if hasattr(method, '__call__'):
+            yield method_name, method

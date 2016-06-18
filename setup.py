@@ -26,7 +26,8 @@ setup(
         'tensorbuilder',
         'tensorbuilder.patches',
         'tensorbuilder.patches.tensorflow',
-        'tensorbuilder.patches.tflearn'
+        'tensorbuilder.patches.tflearn',
+        'tensorbuilder.guide'
     ],
     long_description = read('README.md'),
     install_requires = reqs

@@ -10,7 +10,7 @@ services:
       - ./:/tensorbuilder
     ports:
       - "8885:8888"
-    command: bash -c "cd /tensorbuilder && python setup.py install && cd /notebooks && /run_jupyter.sh"
+    command: bash -c "python setup.py install && cd /notebooks && /run_jupyter.sh"
 
   pdoc:
     # update gh-pages => git subtree push --prefix docs/tensorbuilder origin gh-pages
@@ -19,3 +19,10 @@ services:
       - ./:/tensorbuilder
     working_dir: /tensorbuilder
     command: ./gen_docs
+
+  test:
+    build: .
+    volumes:
+      - ./:/tensorbuilder
+    working_dir: /tensorbuilder
+    command: py.test

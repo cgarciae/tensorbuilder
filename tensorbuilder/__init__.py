@@ -120,21 +120,28 @@ Here are many examples to you give a taste of what it feels like to use TensorBu
 """
 
 # Init code
-from tensorbuilder import *
-import tensorbuilder
 import tensorflow as tf
+from core import BuilderBase, BuilderTreeBase, ApplicativeBase
 import tensordata
-from tensordata import data
+import guide
+import extensions
+
+Builder, BuilderTree, Applicative = extensions.tensorbuilder_classes()
 
 
-# Uncomment to generate docs only
-#import guide
-#import patch
-#import dsl
+__builder__ = Builder(None)
+__tree__ = BuilderTree([])
+__applicative__ = Applicative(lambda x: x)
+
+build = __builder__.build
+branches = __tree__.branches
+pipe = __applicative__.pipe
+data = tensordata.data
+dl = __applicative__
 
 # Monkey Patch TensorFlow's Tensor with a `build` method as `builder`
 # tf.python.framework.ops.Tensor.builder = build
 
 #version
 __version__ = "0.0.4"
-__all__ = ["dsl", "tensorbuilder", "batcher", "guide", "tensordata"]
+__all__ = ["core", "guide", "tensordata", "extensions"]
