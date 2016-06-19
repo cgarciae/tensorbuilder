@@ -15,7 +15,7 @@ def read(fname):
 
 setup(
     name = "tensorbuilder",
-    version = "0.0.4",
+    version = "0.0.5",
     author = "Cristian Garcia",
     author_email = "cgarcia.e88@gmail.com",
     description = ("A light wrapper over TensorFlow that enables you to easily create complex deep neural networks using the Builder Pattern through a functional fluent immutable API"),
@@ -24,10 +24,10 @@ setup(
     url = "https://github.com/cgarciae/tensorbuilder",
    	packages = [
         'tensorbuilder',
-        'tensorbuilder.patches',
-        'tensorbuilder.patches.tensorflow',
-        'tensorbuilder.patches.tflearn',
-        'tensorbuilder.guide'
+        'tensorbuilder.core',
+        'tensorbuilder.extensions',
+        'tensorbuilder.guide',
+        'tensorbuilder.extensions.patches',
     ],
     long_description = read('README.md'),
     install_requires = reqs

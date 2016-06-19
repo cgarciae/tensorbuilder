@@ -126,6 +126,8 @@ def _compile(ast):
         return _branch_function(ast)
     elif hasattr(ast, '__call__'):
         return ast
+    elif type(ast) is dict:
+        return _with_function(ast)
     else:
         return _sequence_function(ast)
         #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
@@ -148,6 +150,12 @@ def _sequence_function(tuple_ast):
 def _branch_function(list_ast):
     fs = [ _compile(ast) for ast in list_ast ]
     return lambda builder: builder.branch(lambda builder: [ f(builder) for f in fs ])
+
+def _with_function(dict_ast):
+    scope, body_ast = list(dict_ast.items())[0]
+    body = _compile(body_ast)
+    return lambda builder: builder.then_with(lambda: scope)(body)
+
 
 
 

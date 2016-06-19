@@ -1,9 +1,9 @@
 
-from classes import concrete_classes
+from tensorbuilder.core import concrete_classes
 from tensorbuilder import core
 
 def class_patcher(patch):
-    classes = concrete_classes(core.BuilderBase, core.BuilderTreeBase, core.ApplicativeBase)
+    classes = concrete_classes.get(core.BuilderBase, core.BuilderTreeBase, core.ApplicativeBase)
     patch(*classes)
     return classes
 

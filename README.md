@@ -81,8 +81,8 @@ Next is some more involved code so you see all the features in action. Its for l
         .reshape([-1, 5 * 5 * 64]) #notice that we flatten at the end
     )
 
-    [h, loss, trainer] = x.builder().pipe(
-
+    [h, loss, trainer] = dl.pipe(
+        x,
         dl.reshape([-1, 20, 20, 1]),
         [
             conv_branch #Reuse code
@@ -95,14 +95,14 @@ Next is some more involved code so you see all the features in action. Its for l
         dl.relu_layer(1024) # this fully connects all 3 branches into a single relu layer
         .dropout(keep_prob)
 
-        .fully_connected(10), # create a linear connection
+        .linear_layer(10), # create a linear connection
         [
             dl.softmax() # h
         ,
             (dl.softmax_cross_entropy_with_logits(y)
             .map(tf.reduce_mean), #calculte loss
             [
-                dl.identity() # loss
+                dl # loss
             ,
                 dl.map(tf.train.AdadeltaOptimizer(0.01).minimize) # trainer
             ])

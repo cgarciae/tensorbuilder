@@ -1,6 +1,6 @@
 
 
-def concrete_classes(BuilderBase, BuilderTreeBase, ApplicativeBase):
+def get(BuilderBase, BuilderTreeBase, ApplicativeBase):
     class Builder(BuilderBase):
         """docstring for Builder"""
         def __init__(self, tensor):

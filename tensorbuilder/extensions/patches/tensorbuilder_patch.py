@@ -2,11 +2,31 @@ import tensorflow as tf
 from tensorbuilder.core.builders import BuilderBase, BuilderTreeBase
 from tensorbuilder.core.dsl import ApplicativeBase
 from tensorbuilder.core import utils
+import numpy as np
 import tflearn as tl
 import inspect
 
 
 def patch_classes(Builder, BuilderTree, Applicative):
+
+    scope_functions = ["variable_scope", "device"]
+    builders_blacklist = (
+        ["relu_layer"] +
+        scope_functions +
+        BuilderBase.__core__ + BuilderTreeBase.__core__
+    )
+    applicative_builder_blacklist = (
+        ["copy", "compose"] +
+        scope_functions +
+        ApplicativeBase.__core__ +
+        [ "with_" + v for v in scope_functions ]
+    )
+    applicative_tree_blacklist = (
+        ["copy", "connect_layer", "compose"] +
+        scope_functions +
+        ApplicativeBase.__core__ +
+        [ "with_" + v for v in scope_functions ]
+    )
 
     ###############################
     #### TREE
@@ -47,29 +67,16 @@ def patch_classes(Builder, BuilderTree, Applicative):
 
     def _get_layer_method(f):
         def _layer_method(builder, size, *args, **kwargs):
-            fun_args = ()
-            fun_kwargs = {}
 
-            if "fun_args" in kwargs:
-            	fun_args = kwargs["fun_args"]
-            	del kwargs["fun_args"]
+            kwargs['activation_fn'] = f
+            return builder.fully_connected(size, *args, **kwargs)
 
-            if "fun_kwargs" in kwargs:
-            	fun_kwargs = kwargs["fun_kwargs"]
-            	del kwargs["fun_kwargs"]
-
-            return (
-                builder
-                .fully_connected(size, *args, **kwargs)
-                .map(f, *fun_args, **fun_kwargs)
-            )
         return _layer_method
 
-    _banned = ["relu_layer"] + BuilderBase.__core__ + BuilderTreeBase.__core__
 
     _tf_funs = (
-        [ (name, f, "tf.nn") for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction) if name not in _banned ] +
-        [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name not in _banned ]
+        [ (name, f, "tf.nn") for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction) if name not in builders_blacklist ] +
+        [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name not in builders_blacklist ]
     )
 
 
@@ -91,6 +98,51 @@ def patch_classes(Builder, BuilderTree, Applicative):
         # Tree
         BuilderTree.register_method(_layer_method, _module_name, alias=_layer_name)
 
+    #######################
+    ### linear_layer
+    #######################
+
+    def linear_layer(builder, size, *args, **kwargs):
+        """Computes a `tf.contrib.layers.fully_connected` with `activation_fn = None`"""
+        kwargs['activation_fn'] = None
+        return builder.fully_connected(size, *args, **kwargs)
+
+    Builder.register_method(linear_layer, "tensorbuilder")
+    BuilderTree.register_method(linear_layer, "tensorbuilder")
+
+    #######################
+    ### flatten
+    #######################
+
+    Builder.register_map_method(tl.layers.core.flatten, "tflearn.layers.core.flatten")
+
+    #######################
+    ### scopes
+    #######################
+
+    def get_scope_method(f):
+        def scope_method(builder, *args, **kwargs):
+            return builder.then_with(f, *args, **kwargs)
+        return scope_method
+
+
+    scope_funs = (
+        [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name in scope_functions ]
+    )
+
+
+    for name, f, module_name in scope_funs:
+        method_name = "with_" + name
+        f_signature = utils.get_method_sig(f)
+        f_docs = inspect.getdoc(f)
+
+        scope_method = get_scope_method(f)
+
+        scope_method.__name__ = method_name
+        scope_method.__doc__ = f_docs
+
+        # Builder
+        Builder.register_method(scope_method, module_name, alias=method_name)
 
     ###############################
     # tflearn
@@ -112,12 +164,11 @@ def patch_classes(Builder, BuilderTree, Applicative):
 
         return _method
 
-    _builder_excluded = ["copy", "compose"] + ApplicativeBase.__core__
-    _tree_excluded = ["copy", "connect_layer", "compose"] + ApplicativeBase.__core__
+
 
     _dsl_funs = (
-        [ ("BuilderTree", _name, f) for  _name, f in inspect.getmembers(BuilderTree, inspect.ismethod) if _name[0] != '_' and _name not in _tree_excluded ] +
-        [ ("Builder", _name, f) for  _name, f in inspect.getmembers(Builder, inspect.ismethod) if _name[0] != '_' and _name not in _builder_excluded ]
+        [ ("BuilderTree", _name, f) for  _name, f in inspect.getmembers(BuilderTree, inspect.ismethod) if _name[0] != '_' and _name not in applicative_tree_blacklist ] +
+        [ ("Builder", _name, f) for  _name, f in inspect.getmembers(Builder, inspect.ismethod) if _name[0] != '_' and _name not in applicative_builder_blacklist ]
     )
 
     for _module_name, _name, f in _dsl_funs:

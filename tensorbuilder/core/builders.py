@@ -233,6 +233,14 @@ class BuilderBase(object):
         return builder.BuilderTree(fn(builder))
 
     @immutable
+    def then_with(builder, scope_fn, *args, **kwargs):
+        def _lambda(fn):
+            with scope_fn(*args, **kwargs):
+                y = fn(builder)
+            return y
+        return _lambda
+
+    @immutable
     def __iter__(builder):
         yield builder
 
