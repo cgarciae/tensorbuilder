@@ -318,6 +318,7 @@ class BuilderBase(object):
                     )
                 ])
                 .reduce(tf.add)
+                .softmax()
                 .tensor()
             )
 
@@ -347,6 +348,7 @@ class BuilderBase(object):
                     }
                 ],
                 tb.reduce(tf.add)
+                .softmax()
                 .tensor()
             )
 
