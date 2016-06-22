@@ -148,7 +148,7 @@ class BuilderBase(object):
         **Examples**
 
             import tensorflow as tf
-            import tensorflow.contrib.layers
+            from tensorflow.contrib import layers
             from tensorbuilder import tb
 
             x = tf.placeholder(tf.float32, shape=[None, 40])
@@ -167,16 +167,16 @@ class BuilderBase(object):
         Same using the DSL
 
             import tensorflow as tf
-            import tensorflow.contrib.layers
+            from tensorflow.contrib import layers
             from tensorbuilder import tb
-            from tensorbuilder import dl
+
 
             x = tf.placeholder(tf.float32, shape=[None, 40])
             keep_prob = tf.placeholder(tf.float32)
 
-            h = dl.pipe(
+            h = tb.pipe(
             	x,
-            	dl.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
+            	tb.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
             	.map(tf.nn.dropout, keep_prob)
             	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
             	.tensor()
@@ -223,7 +223,7 @@ class BuilderBase(object):
 
         * `tensorbuilder.core.builders.BuilderTree`
 
-        ** Example **
+        ** Examples **
 
             import tensorflow as tf
             from tensorbuilder import tb
@@ -247,20 +247,19 @@ class BuilderBase(object):
 
             import tensorflow as tf
             from tensorbuilder import tb
-            from tensorbuilder import dl
 
             x = placeholder(tf.float32, shape=[None, 10])
 
-            h = dl.pipe(
+            h = tb.pipe(
                 x,
                 [
-                    dl.relu_layer(20)
+                    tb.relu_layer(20)
                 ,
-                    dl.sigmoid_layer(20)
+                    tb.sigmoid_layer(20)
                 ,
-                    dl.tanh_layer(20)
+                    tb.tanh_layer(20)
                 ],
-                dl.softmax_layer(5)
+                tb.softmax_layer(5)
                 .tensor()
             )
 
@@ -269,6 +268,89 @@ class BuilderBase(object):
 
     @immutable
     def then_with(builder, scope_fn, *args, **kwargs):
+        """
+        `@immutable`
+
+        Expects a function **fn** with that returns a "Disposable" (implement `__enter__` and `__exit__`) plus some \*args and \*\*kwargs, and return a function `g` that expects a function `h` of type `Builder -> Builder` such that
+
+            .then_with(fn, *args, **kwargs)(h)
+
+        roughly perform this computations (given the current `builder`)
+
+            with fn(*args, **kwargs):
+                return h(builder)
+
+        For a more practical understanding look at the example.
+
+        **Parameters**
+
+        * `fn`: a function of type `Builder -> Disposable`.
+
+        **Return**
+
+        * Function of type `(Builder -> Builder)`
+
+        ** Examples **
+
+        Create a network with 3 branches and execute each on the devices "/gpu:0", "/gpu:1", "cpu:3" respectively
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = (
+                tb.build(x)
+                .branch(lambda x: [
+                    x.then_with(tf.device, "/gpu:0")(lambda x:
+                        x.relu_layer(20)
+                        .linear_layer(5)
+                    )
+                ,
+                    x.then_with(tf.device, "/gpu:1")(lambda x:
+                        x.sigmoid_layer(20)
+                        .linear_layer(5)
+                    )
+                ,
+                    x.then_with(tf.device, "/cpu:0")(lambda x:
+                        x.tanh_layer(20)
+                        .linear_layer(5)
+                    )
+                ])
+                .reduce(tf.add)
+                .tensor()
+            )
+
+        This looks much better with the DSL thanks to its support for scopes
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = tb.pipe(
+                x,
+                [
+                    { tf.device("/gpu:0"):
+                        tb.relu_layer(20)
+                        .linear_layer(5)
+                    }
+                ,
+                    { tf.device("/gpu:1"):
+                        tb.sigmoid_layer(20)
+                        .linear_layer(5)
+                    }
+                ,
+                    { tf.device("/cpu:0"):
+                        tb.tanh_layer(20)
+                        .linear_layer(5)
+                    }
+                ],
+                tb.reduce(tf.add)
+                .tensor()
+            )
+
+        """
         def _lambda(fn):
             with scope_fn(*args, **kwargs):
                 y = fn(builder)
@@ -299,14 +381,13 @@ class BuilderTreeBase(object):
     def Builder(self, tensor):
         pass
 
-
     def copy(self):
         return self.unit(self._branches)
 
     def unit(self, branches):
         return self.__class__(branches)
 
-    
+
 
     @immutable
     def reduce(tree, fn, initializer=None):
@@ -346,6 +427,30 @@ class BuilderTreeBase(object):
                     .linear_layer(5)
                 ])
                 .reduce(tf.add)
+                .softmax()
+                .tensor()
+            )
+
+        Same example using the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = tb.pipe(
+                x,
+                [
+                    tb.relu_layer(20)
+                    .linear_layer(5)
+                ,
+                    tb.sigmoid_layer(20)
+                    .linear_layer(5)
+                ,
+                    tb.tanh_layer(20)
+                    .linear_layer(5)
+                ],
+                tb.reduce(tf.add)
                 .softmax()
                 .tensor()
             )
@@ -407,7 +512,27 @@ class BuilderTreeBase(object):
 
             .softmax_layer(5)
 
-        for `BuilderTree`s.
+        for `BuilderTree`s. Same example using the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = tb.pipe(
+                x,
+                [
+                    x.relu_layer(20)
+                ,
+                    x.sigmoid_layer(20)
+                ,
+                    x.tanh_layer(20)
+                ],
+                tb.map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+                .reduce(tf.add)
+                .softmax()
+                .tensor()
+            )
         """
         branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
         return tree.unit(branches)
@@ -447,6 +572,28 @@ class BuilderTreeBase(object):
                     x.tanh_layer(20)
                 ])
                 .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+                .extract(lambda tensors: tf.add_n(tensors)) #or just .extract(tf.add_n)
+                .softmax()
+                .tensor()
+            )
+
+        Same example using the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = (
+                x,
+                [
+                    tb.relu_layer(20)
+                ,
+                    tb.sigmoid_layer(20)
+                ,
+                    tb.tanh_layer(20)
+                ],
+                tb.map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
                 .extract(lambda tensors: tf.add_n(tensors)) #or just .extract(tf.add_n)
                 .softmax()
                 .tensor()
@@ -556,8 +703,58 @@ class BuilderTreeBase(object):
 
         * `list( tensorbuilder.core.builders.Builder )`
 
-        ** Example **
+        ** Examples **
 
+        This examples creates a network to that solves the XOR problem using sigmoid units
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = tf.placeholder(tf.float32, shape=[None, 2])
+            y = tf.placeholder(tf.float32, shape=[None, 1])
+
+
+            #Network
+            [activation_builder, trainer_builder] = (
+                tb.build(x)
+
+                .sigmoid_layer(2)
+                .linear_layer(1)
+
+                .branch(lambda logit:
+                [
+                    logit.sigmoid() # activation
+                ,
+                    logit
+                    .sigmoid_cross_entropy_with_logits(y) # loss
+                    .map(tf.train.AdamOptimizer(0.01).minimize) # trainer
+                ])
+                .builders()
+            )
+
+        Same example using the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = tf.placeholder(tf.float32, shape=[None, 2])
+            y = tf.placeholder(tf.float32, shape=[None, 1])
+
+
+            #Network
+            [activation_builder, trainer_builder] = tb.pipe(
+                x,
+                tb.sigmoid_layer(2)
+                .linear_layer(1),
+                [
+                    tb.sigmoid() # activation
+                ,
+                    tb
+                    .sigmoid_cross_entropy_with_logits(y) # loss
+                    .map(tf.train.AdamOptimizer(0.01).minimize) # trainer
+                ],
+                tb.builders()
+            )
 
         """
         return [ builder for builder in self ]
@@ -571,6 +768,57 @@ class BuilderTreeBase(object):
         * `list( tf.Tensor )`
 
         ** Example **
+
+        This examples creates a network to that solves the XOR problem using sigmoid units
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = tf.placeholder(tf.float32, shape=[None, 2])
+            y = tf.placeholder(tf.float32, shape=[None, 1])
+
+
+            #Network
+            [activation_tensor, trainer_tensor] = (
+                tb.build(x)
+
+                .sigmoid_layer(2)
+                .linear_layer(1)
+
+                .branch(lambda logit:
+                [
+                    logit.sigmoid() # activation
+                ,
+                    logit
+                    .sigmoid_cross_entropy_with_logits(y) # loss
+                    .map(tf.train.AdamOptimizer(0.01).minimize) # trainer
+                ])
+                .tensors()
+            )
+
+        Same example using the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = tf.placeholder(tf.float32, shape=[None, 2])
+            y = tf.placeholder(tf.float32, shape=[None, 1])
+
+
+            #Network
+            [activation_tensor, trainer_tensor] = tb.pipe(
+                x,
+                tb.sigmoid_layer(2)
+                .linear_layer(1),
+                [
+                    tb.sigmoid() # activation
+                ,
+                    tb
+                    .sigmoid_cross_entropy_with_logits(y) # loss
+                    .map(tf.train.AdamOptimizer(0.01).minimize) # trainer
+                ],
+                tb.tensors()
+            )
 
         """
         return [ builder._tensor for builder in self ]

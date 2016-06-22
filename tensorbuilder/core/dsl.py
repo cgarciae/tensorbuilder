@@ -95,7 +95,7 @@ class ApplicativeBase(object):
         fn.__doc__ = doc if doc else """
         THIS METHOD IS AUTOMATICALLY GENERATED
 
-        This method accepts the same arguments as `{3}.{0}
+        This method accepts the same arguments as `{3}.{0}`
 
         ** Documentation from `{3}.{0}`**
 

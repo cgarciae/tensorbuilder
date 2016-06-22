@@ -6,7 +6,7 @@
 # TensorBuilder includes a set of primitives that you can use to wrap, around
 
 import tensorflow as tf
-import tensorflow.contrib.layers as layers
+from tensorflow.contrib import layers as layers
 from tensorbuilder import tb
 
 x = tf.placeholder(tf.float32, shape=[None, 40])
