@@ -1,5 +1,5 @@
 # Summary
 
-* [Basics I](basics/README.md)
-* [Branching II](branching/README.md)
-* [DSL III](dsl/README.md)
+* [1. Basics](basics/README.md)
+* [2. Branching](branching/README.md)
+* [3. DSL](dsl/README.md)
