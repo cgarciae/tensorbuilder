@@ -7,7 +7,6 @@ import utils
 import functools
 import itertools
 import tensorflow as tf
-import tensorbuilder as tb
 import sys
 from copy import deepcopy, copy
 from types import MethodType

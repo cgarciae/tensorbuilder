@@ -7,7 +7,7 @@
 
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
-import tensorbuilder as tb
+from tensorbuilder import tb
 
 x = tf.placeholder(tf.float32, shape=[None, 40])
 keep_prob = tf.placeholder(tf.float32)
@@ -25,7 +25,7 @@ print(h)
 # The previous is equivalent to this next example using the `slim_patch`, which includes the `fully_connected` method that is taken from `tf.contrib.layers`
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -44,7 +44,7 @@ print(h)
 # The `tensorbuilder.patch` includes a lot more methods that register functions from the `tf`, `tf.nn` and `tf.contrib.layers` modules plus some custom methods based on `fully_connected` to create layers:
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -67,7 +67,7 @@ print(h)
 #To create a branch you just have to use the `tensorbuilder.tensorbuilder.Builder.branch` method
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -102,7 +102,7 @@ print(h)
 #Thanks to TensorBuilder's immutable API, each branch is independent. The previous can also be simplified with the full `patch`
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -142,7 +142,7 @@ print(h)
 #Lets see an example, here is the previous example about branching with the the full `patch`, this time using the `dsl` module
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patch
 import tensorbuilder.dsl as dl #<== Notice the alias
 
@@ -185,7 +185,7 @@ print(h)
 # The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 
 a = tf.placeholder(tf.float32, shape=[None, 8])
 a_builder = tb.build(a)
@@ -206,7 +206,7 @@ print(a_builder)
 # Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree`.
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 
 a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
 b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
@@ -230,7 +230,7 @@ print(tree)
 
 # This method is included by many libraries so its "sort of" part of TensorBuilder. The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -246,7 +246,7 @@ print(h)
 # Using `tensorbuilder.patch` the previous is equivalent to
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -263,7 +263,7 @@ print(h)
 # You can chain various `fully_connected`s to get deeper neural networks
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 40])
@@ -280,7 +280,7 @@ print(h)
 # Using `tensorbuilder.patch` the previous is equivalent to
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -301,7 +301,7 @@ print(h)
 #The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 40])
@@ -325,7 +325,7 @@ print(h)
 # The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 40])
@@ -351,7 +351,7 @@ h = (
 
 # Note that the previous if equivalent to
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 h = (
 	x.builder()
@@ -368,7 +368,7 @@ print(h)
 # The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `fully_connected(1)` and then its branched out
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -396,7 +396,7 @@ print(trainer)
 #The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -436,7 +436,7 @@ print(h)
 ##############################
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -463,7 +463,7 @@ print(trainer_builder)
 ##############################
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -492,7 +492,7 @@ print(trainer_tensor)
 # The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
@@ -508,7 +508,7 @@ print(h)
 # The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh layer` filter through the other, both of these are connect to a single `softmax` output layer
 
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.slim_patch
 
 x = tf.placeholder(tf.float32, shape=[None, 5])

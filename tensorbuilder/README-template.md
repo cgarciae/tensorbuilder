@@ -28,7 +28,7 @@ Coming soon!
 Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer through a Builder and then get back its tensor:
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     keep_prob = tf.placeholder(tf.float32)
@@ -60,7 +60,7 @@ Here are many examples to you give a taste of what it feels like to use TensorBu
 Next is some more involved code so you see all the features in action. Its for learning the MNIST for images of 20x20 gray-scaled by using 3 relu-CNN branches with max pooling, then merging the branches through a fully connected relu layer with dropout, and finally connecting it to a softmax output layer.
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.patch
 
     # Define variables
@@ -137,7 +137,7 @@ Notice that:
 The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     a = tf.placeholder(tf.float32, shape=[None, 8])
     a_builder = tb.build(a)
@@ -158,7 +158,7 @@ The previous is the same as
 Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree`.
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
     b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
@@ -183,7 +183,7 @@ Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tens
 This method is included by many libraries so its "sort of" part of TensorBuilder. The following builds the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)`
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
@@ -199,7 +199,7 @@ This method is included by many libraries so its "sort of" part of TensorBuilder
 Using `tensorbuilder.patch` the previous is equivalent to
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
@@ -234,7 +234,7 @@ If you have a function f that takes a tensor as first arguments and then some \*
 We can rewrite it with TensorBuilder simply by using `map`.
 
     import tflearn as tl
-    import tensorbuilder as tb
+    from tensorbuilder import tb
 
     model = (
       tb.build(tl.input_data(shape=[None, 784]))
@@ -257,7 +257,7 @@ We can rewrite it with TensorBuilder simply by using `map`.
 The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, w) + b)` while updating the `tensorbuilder.tensorbuiler.Builder.variables` dictionary.
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 40])
@@ -284,7 +284,7 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
 Note that the previous if equivalent to
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     h = (
     	tb.build(x)
     	.sigmoid_layer(3)
@@ -300,7 +300,7 @@ Note that the previous if equivalent to
 The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor `h` and `trainer` tensor. Observe that first the logit `z` is calculated by creating a linear layer with `fully_connected(1)` and then its branched out
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -328,7 +328,7 @@ Remember that you can also contain `tensorbuilder.tensorbuilder.BuilderTree` ele
 The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single `sigmoid` layer
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -368,7 +368,7 @@ The following example will show you how create a (overly) complex tree and then 
 ##############################
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -395,7 +395,7 @@ The following example will show you how create a (overly) complex tree and then 
 ##############################
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -424,7 +424,7 @@ The following example will show you how create a (overly) complex tree and then 
 The following example shows you how to connect two tensors (rather builders) of different shapes to a single `softmax` layer of shape [None, 3]
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
@@ -440,7 +440,7 @@ The following example shows you how to connect two tensors (rather builders) of 
 The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh_layer` filter through the other, both of these are connect to a single `softmax` output layer
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])

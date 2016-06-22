@@ -1065,7 +1065,6 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.__init__">__init__</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.BuilderTree">BuilderTree</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.branch">branch</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.BuilderBase.build">build</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.copy">copy</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.map">map</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.register_map_method">register_map_method</a></li>
@@ -1084,7 +1083,6 @@ table {
   <ul>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.__init__">__init__</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.Builder">Builder</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.branches">branches</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.builders">builders</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.copy">copy</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.extract">extract</a></li>
@@ -1538,9 +1536,6 @@ table {
     <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
-
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1562,7 +1557,7 @@ table {
 <span class="sd">        In this example we will create a funtion and register it as a method called `relu_dropout_layer`</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 
 <span class="sd">            def relu_dropout(builder, size, keep_prob):</span>
@@ -1609,7 +1604,7 @@ table {
 <span class="sd">        In this example we will register `tf.reshape` as a method of the Builder class</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            tb.Builder.register_map_method(tf.reshape, &quot;tf&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1630,7 +1625,7 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@immutable`</span>
 
-<span class="sd">        Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. While TensorBuilder promotes the use **patches** like `tensorbuilder.patch` to make the syntax nicer, the truth is that you could you can do a lot of things just using `map`, all you need is that you have a library or a set of custom functions that accept a tensor as its first argument.</span>
+<span class="sd">        Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. The Builder class comes with a lot of **patched** methods that help you do things quickly and make the syntax nicer, but if we don&#39;t have the method you need just pass the function you want to use to `map`, or even consider using `tensorbuilder.core.builders.Builder.register_map_method`.</span>
 
 <span class="sd">        **Parameters**</span>
 
@@ -1639,20 +1634,40 @@ table {
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">        * `tensorbuilder.core.builders.Builder`</span>
 
 <span class="sd">        **Examples**</span>
 
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            import tensorflow.contrib.layers</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 40])</span>
 <span class="sd">            keep_prob = tf.placeholder(tf.float32)</span>
 
 <span class="sd">            h = (</span>
-<span class="sd">            	x.builder()</span>
+<span class="sd">            	tb.build(x)</span>
 <span class="sd">            	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)</span>
+<span class="sd">            	.map(tf.nn.dropout, keep_prob)</span>
+<span class="sd">            	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)</span>
+<span class="sd">            	.tensor()</span>
+<span class="sd">            )</span>
+
+<span class="sd">            print(h)</span>
+
+<span class="sd">        Same using the DSL</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            import tensorflow.contrib.layers</span>
+<span class="sd">            from tensorbuilder import tb</span>
+<span class="sd">            from tensorbuilder import dl</span>
+
+<span class="sd">            x = tf.placeholder(tf.float32, shape=[None, 40])</span>
+<span class="sd">            keep_prob = tf.placeholder(tf.float32)</span>
+
+<span class="sd">            h = dl.pipe(</span>
+<span class="sd">            	x,</span>
+<span class="sd">            	dl.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)</span>
 <span class="sd">            	.map(tf.nn.dropout, keep_prob)</span>
 <span class="sd">            	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)</span>
 <span class="sd">            	.tensor()</span>
@@ -1677,7 +1692,7 @@ table {
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">        * `tensorbuilder.core.builders.Builder`</span>
 
 <span class="sd">        ** Example **</span>
 
@@ -1689,17 +1704,56 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@immutable`</span>
 
-<span class="sd">        Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later</span>
+<span class="sd">        Expects a function **fn** with type `Builder -&gt; iterable( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies.</span>
 
 <span class="sd">        **Parameters**</span>
 
-<span class="sd">        * `fn`: a function of type `Builder -&gt; list( Builder | BuilderTree )`.</span>
+<span class="sd">        * `fn`: a function of type `Builder -&gt; iterable( Builder | BuilderTree )`.</span>
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.BuilderTree`</span>
+<span class="sd">        * `tensorbuilder.core.builders.BuilderTree`</span>
 
 <span class="sd">        ** Example **</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            from tensorbuilder import tb</span>
+
+<span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
+
+<span class="sd">            h = (</span>
+<span class="sd">                tb.build(x)</span>
+<span class="sd">                .branch(lambda x: [</span>
+<span class="sd">                    x.relu_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.sigmoid_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.tanh_layer(20)</span>
+<span class="sd">                ])</span>
+<span class="sd">                .softmax_layer(5)</span>
+<span class="sd">                .tensor()</span>
+<span class="sd">            )</span>
+
+<span class="sd">        Same with the DSL</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            from tensorbuilder import tb</span>
+<span class="sd">            from tensorbuilder import dl</span>
+
+<span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
+
+<span class="sd">            h = dl.pipe(</span>
+<span class="sd">                x,</span>
+<span class="sd">                [</span>
+<span class="sd">                    dl.relu_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    dl.sigmoid_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    dl.tanh_layer(20)</span>
+<span class="sd">                ],</span>
+<span class="sd">                dl.softmax_layer(5)</span>
+<span class="sd">                .tensor()</span>
+<span class="sd">            )</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">BuilderTree</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">builder</span><span class="p">))</span>
@@ -1783,16 +1837,56 @@ table {
     
   
     <div class="desc"><p><code>@immutable</code></p>
-<p>Expects a function <strong>fn</strong> with type <code>Builder -&gt; list( Builder | BuilderTree )</code>. This method enables you to <em>branch</em> the computational graph so you can easily create neural networks with more complex topologies. You can later</p>
+<p>Expects a function <strong>fn</strong> with type <code>Builder -&gt; iterable( Builder | BuilderTree )</code>. This method enables you to <em>branch</em> the computational graph so you can easily create neural networks with more complex topologies.</p>
 <p><strong>Parameters</strong></p>
 <ul>
-<li><code>fn</code>: a function of type <code>Builder -&gt; list( Builder | BuilderTree )</code>.</li>
+<li><code>fn</code>: a function of type <code>Builder -&gt; iterable( Builder | BuilderTree )</code>.</li>
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.BuilderTree</code></li>
+<li><code>tensorbuilder.core.builders.BuilderTree</code></li>
 </ul>
-<p><strong> Example </strong></p></div>
+<p><strong> Example </strong></p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+
+
+<p>Same with the DSL</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">dl</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="n">dl</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">dl</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">dl</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">dl</span><span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderBase.branch', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.BuilderBase.branch" class="source">
@@ -1800,35 +1894,46 @@ table {
 <span class="k">def</span> <span class="nf">branch</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@immutable`</span>
-<span class="sd">    Expects a function **fn** with type `Builder -&gt; list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later</span>
+<span class="sd">    Expects a function **fn** with type `Builder -&gt; iterable( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies.</span>
 <span class="sd">    **Parameters**</span>
-<span class="sd">    * `fn`: a function of type `Builder -&gt; list( Builder | BuilderTree )`.</span>
+<span class="sd">    * `fn`: a function of type `Builder -&gt; iterable( Builder | BuilderTree )`.</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.BuilderTree`</span>
+<span class="sd">    * `tensorbuilder.core.builders.BuilderTree`</span>
 <span class="sd">    ** Example **</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
+<span class="sd">        h = (</span>
+<span class="sd">            tb.build(x)</span>
+<span class="sd">            .branch(lambda x: [</span>
+<span class="sd">                x.relu_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.sigmoid_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.tanh_layer(20)</span>
+<span class="sd">            ])</span>
+<span class="sd">            .softmax_layer(5)</span>
+<span class="sd">            .tensor()</span>
+<span class="sd">        )</span>
+<span class="sd">    Same with the DSL</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">        from tensorbuilder import dl</span>
+<span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
+<span class="sd">        h = dl.pipe(</span>
+<span class="sd">            x,</span>
+<span class="sd">            [</span>
+<span class="sd">                dl.relu_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                dl.sigmoid_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                dl.tanh_layer(20)</span>
+<span class="sd">            ],</span>
+<span class="sd">            dl.softmax_layer(5)</span>
+<span class="sd">            .tensor()</span>
+<span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">BuilderTree</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="n">builder</span><span class="p">))</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.BuilderBase.build">
-    <p>def <span class="ident">build</span>(</p><p>self, tensor)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderBase.build', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.BuilderBase.build" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1869,7 +1974,7 @@ table {
     
   
     <div class="desc"><p><code>@immutable</code></p>
-<p>Let <strong>x</strong> be Tensor inside a Builder <code>builder</code> and <strong>fn</strong> be a function from a tensor to a tensor, then <code>builder.map(fn, \*args, **kwargs)</code> computes <code>fn(x, *args, **kwargs) and stores the result inside a Builder</code>. While TensorBuilder promotes the use <strong>patches</strong> like <code>tensorbuilder.patch</code> to make the syntax nicer, the truth is that you could you can do a lot of things just using <code>map</code>, all you need is that you have a library or a set of custom functions that accept a tensor as its first argument.</p>
+<p>Let <strong>x</strong> be Tensor inside a Builder <code>builder</code> and <strong>fn</strong> be a function from a tensor to a tensor, then <code>builder.map(fn, \*args, **kwargs)</code> computes <code>fn(x, *args, **kwargs) and stores the result inside a Builder</code>. The Builder class comes with a lot of <strong>patched</strong> methods that help you do things quickly and make the syntax nicer, but if we don't have the method you need just pass the function you want to use to <code>map</code>, or even consider using <code>tensorbuilder.core.builders.Builder.register_map_method</code>.</p>
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>fn</code>: a function of type <code>tensor -&gt; tensor</code>.</li>
@@ -1877,19 +1982,40 @@ table {
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.Builder</code></li>
+<li><code>tensorbuilder.core.builders.Builder</code></li>
 </ul>
 <p><strong>Examples</strong></p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">tensorflow.contrib.layers</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">])</span>
 <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Same using the DSL</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow.contrib.layers</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">dl</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">])</span>
+<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">dl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">)</span>
     <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
     <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
     <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
@@ -1904,21 +2030,36 @@ table {
 <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@immutable`</span>
-<span class="sd">    Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. While TensorBuilder promotes the use **patches** like `tensorbuilder.patch` to make the syntax nicer, the truth is that you could you can do a lot of things just using `map`, all you need is that you have a library or a set of custom functions that accept a tensor as its first argument.</span>
+<span class="sd">    Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. The Builder class comes with a lot of **patched** methods that help you do things quickly and make the syntax nicer, but if we don&#39;t have the method you need just pass the function you want to use to `map`, or even consider using `tensorbuilder.core.builders.Builder.register_map_method`.</span>
 <span class="sd">    **Parameters**</span>
 <span class="sd">    * `fn`: a function of type `tensor -&gt; tensor`.</span>
 <span class="sd">    * All extra positional and named arguments are forwarded to `fn`</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">    * `tensorbuilder.core.builders.Builder`</span>
 <span class="sd">    **Examples**</span>
 <span class="sd">        import tensorflow as tf</span>
 <span class="sd">        import tensorflow.contrib.layers</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 40])</span>
 <span class="sd">        keep_prob = tf.placeholder(tf.float32)</span>
 <span class="sd">        h = (</span>
-<span class="sd">        	x.builder()</span>
+<span class="sd">        	tb.build(x)</span>
 <span class="sd">        	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)</span>
+<span class="sd">        	.map(tf.nn.dropout, keep_prob)</span>
+<span class="sd">        	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)</span>
+<span class="sd">        	.tensor()</span>
+<span class="sd">        )</span>
+<span class="sd">        print(h)</span>
+<span class="sd">    Same using the DSL</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        import tensorflow.contrib.layers</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">        from tensorbuilder import dl</span>
+<span class="sd">        x = tf.placeholder(tf.float32, shape=[None, 40])</span>
+<span class="sd">        keep_prob = tf.placeholder(tf.float32)</span>
+<span class="sd">        h = dl.pipe(</span>
+<span class="sd">        	x,</span>
+<span class="sd">        	dl.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)</span>
 <span class="sd">        	.map(tf.nn.dropout, keep_prob)</span>
 <span class="sd">        	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)</span>
 <span class="sd">        	.tensor()</span>
@@ -1956,7 +2097,7 @@ table {
 <p><strong>Examples</strong></p>
 <p>In this example we will register <code>tf.reshape</code> as a method of the Builder class</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">tb</span><span class="o">.</span><span class="n">Builder</span><span class="o">.</span><span class="n">register_map_method</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">,</span> <span class="s2">&quot;tf&quot;</span><span class="p">)</span>
 </pre></div></div>
@@ -1977,7 +2118,7 @@ table {
 <span class="sd">    **Examples**</span>
 <span class="sd">    In this example we will register `tf.reshape` as a method of the Builder class</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        tb.Builder.register_map_method(tf.reshape, &quot;tf&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fn_signature</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_method_sig</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
@@ -2017,7 +2158,7 @@ table {
 <p><strong>Examples</strong></p>
 <p>In this example we will create a funtion and register it as a method called <code>relu_dropout_layer</code></p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 
 <span class="k">def</span> <span class="nf">relu_dropout</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">):</span>
@@ -2047,7 +2188,7 @@ table {
 <span class="sd">    **Examples**</span>
 <span class="sd">    In this example we will create a funtion and register it as a method called `relu_dropout_layer`</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        def relu_dropout(builder, size, keep_prob):</span>
 <span class="sd">            \&quot;\&quot;\&quot;Fully connect to a relu layer of size `size` and apply dropout with `keep_prob`\&quot;\&quot;\&quot;</span>
 <span class="sd">            return (</span>
@@ -2111,7 +2252,7 @@ table {
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.Builder</code></li>
+<li><code>tensorbuilder.core.builders.Builder</code></li>
 </ul>
 <p><strong> Example </strong></p></div>
   <div class="source_cont">
@@ -2125,7 +2266,7 @@ table {
 <span class="sd">    **Parameters**</span>
 <span class="sd">    * `fn`: a function of type `builder -&gt; builder`.</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">    * `tensorbuilder.core.builders.Builder`</span>
 <span class="sd">    ** Example **</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2190,13 +2331,13 @@ table {
       <p id="tensorbuilder.core.BuilderTreeBase" class="name">class <span class="ident">BuilderTreeBase</span></p>
       
   
-    <div class="desc"><p>BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf <code>tensorbuilder.tensorbuilder.Builder</code> nodes.</p></div>
+    <div class="desc"><p>BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf <code>tensorbuilder.core.builders.Builder</code> nodes.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderTreeBase', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.BuilderTreeBase" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">BuilderTreeBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.tensorbuilder.Builder` nodes.</span>
+<span class="sd">    BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.core.builders.Builder` nodes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
@@ -2206,7 +2347,7 @@ table {
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_branches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        An iterable that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.</span>
+<span class="sd">        An iterable that can contain elements that are of type `tensorbuilder.core.builders.Builder` or `tensorbuilder.core.builders.BuilderTree`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
@@ -2220,37 +2361,14 @@ table {
     <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">branches</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Takes a list with elements of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree` and returns a `tensorbuilder.tensorbuilder.BuilderTree`</span>
-
-<span class="sd">        ** Parameters **</span>
-
-<span class="sd">        * `builder_list`: list of type `list( Builder | BuilderTree)`</span>
-
-<span class="sd">        #### Example</span>
-
-<span class="sd">        Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
-
-<span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
-
-<span class="sd">            a = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
-<span class="sd">            b = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
-
-<span class="sd">            tree = tb._branches([a, b])</span>
-
-<span class="sd">        `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
+    
 
     <span class="nd">@immutable</span>
     <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@immutable`</span>
 
-<span class="sd">        Expects a function **fn** with type `(Tensor, Tensor) -&gt; Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.tensorbuilder.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.</span>
+<span class="sd">        Expects a function **fn** with type `(Tensor, Tensor) -&gt; Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.core.builders.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.</span>
 
 <span class="sd">        **Parameters**</span>
 
@@ -2259,24 +2377,32 @@ table {
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">        * `tensorbuilder.core.builders.Builder`</span>
 
 <span class="sd">        ** Example **</span>
 
-<span class="sd">        In this example we connect the whole tree to single softmax output layer of size 5, to do that we will separately map each leaf Tensor to a linear layer of size 5 and the add all the layers using reduce, finally we will apply a softmax function over the resulting layer.</span>
+<span class="sd">        Lets reduce the example on `tensorbuilder.core.builders.Builder.branch` this time doing the reduction ourselves instead of relying on the `*_layer` of `tensorbuilder.core.builders.BuilderTree` that do this for us</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
-<span class="sd">            import tensorflow.contrib.layers as layers</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
 
 <span class="sd">            h = (</span>
-<span class="sd">                x.builder()</span>
-<span class="sd">                .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">                .map_each(layers.fully_connected, 5)</span>
+<span class="sd">                tb.build(x)</span>
+<span class="sd">                .branch(lambda x: [</span>
+<span class="sd">                    x.relu_layer(20)</span>
+<span class="sd">                    .linear_layer(5)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.sigmoid_layer(20)</span>
+<span class="sd">                    .linear_layer(5)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.tanh_layer(20)</span>
+<span class="sd">                    .linear_layer(5)</span>
+<span class="sd">                ])</span>
 <span class="sd">                .reduce(tf.add)</span>
-<span class="sd">                .map(tf.nn.softmax)</span>
+<span class="sd">                .softmax()</span>
+<span class="sd">                .tensor()</span>
 <span class="sd">            )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">initializer</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
@@ -2300,23 +2426,43 @@ table {
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.BuilderTree`</span>
+<span class="sd">        * `tensorbuilder.core.builders.BuilderTree`</span>
 
 <span class="sd">        ** Example **</span>
 
-<span class="sd">        In this example we will applay dropout to all leaf Tensors using `map_each`</span>
+<span class="sd">        Lets redu the example in `tensorbuilder.core.builders.BuilderTree.reduce` using `map_each` to reduce some code</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
-<span class="sd">            keep_prob = tf.placeholder(tf.float32)</span>
 
 <span class="sd">            h = (</span>
-<span class="sd">                x.builder()</span>
-<span class="sd">                .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">                .map_each(tf.nn.dropout, keep_prob)</span>
+<span class="sd">                tb.build(x)</span>
+<span class="sd">                .branch(lambda x: [</span>
+<span class="sd">                    x.relu_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.sigmoid_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.tanh_layer(20)</span>
+<span class="sd">                ])</span>
+<span class="sd">                .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">                .reduce(tf.add)</span>
+<span class="sd">                .softmax()</span>
+<span class="sd">                .tensor()</span>
 <span class="sd">            )</span>
+
+<span class="sd">        Remember that this</span>
+
+<span class="sd">            .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">            .reduce(tf.add)</span>
+<span class="sd">            .softmax()</span>
+
+<span class="sd">        is equivalent to just</span>
+
+<span class="sd">            .softmax_layer(5)</span>
+
+<span class="sd">        for `BuilderTree`s.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span> <span class="n">builder</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="n">tree</span> <span class="p">]</span>
         <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
@@ -2326,7 +2472,7 @@ table {
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        `@immutable`</span>
 
-<span class="sd">        Expects a function **fn** with type `list( Tensor ) -&gt; Tensor` and applies this function to `tensorbuilder.tensorbuilder.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function</span>
+<span class="sd">        Expects a function **fn** with type `list( Tensor ) -&gt; Tensor` and applies this function to `tensorbuilder.core.builders.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function</span>
 
 <span class="sd">        **Parameters**</span>
 
@@ -2335,22 +2481,30 @@ table {
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">        * `tensorbuilder.core.builders.Builder`</span>
 
 <span class="sd">        ** Example **</span>
 
-<span class="sd">        In this example we will applay dropout to all leaf Tensors using `map_each`</span>
+<span class="sd">        Lets redu the example in `tensorbuilder.core.builders.BuilderTree.map_each` using `extract`</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
-<span class="sd">            keep_prob = tf.placeholder(tf.float32)</span>
 
 <span class="sd">            h = (</span>
-<span class="sd">                x.builder()</span>
-<span class="sd">                .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">                .map_each(tf.nn.dropout, keep_prob)</span>
+<span class="sd">                tb.build(x)</span>
+<span class="sd">                .branch(lambda x: [</span>
+<span class="sd">                    x.relu_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.sigmoid_layer(20)</span>
+<span class="sd">                ,</span>
+<span class="sd">                    x.tanh_layer(20)</span>
+<span class="sd">                ])</span>
+<span class="sd">                .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">                .extract(lambda tensors: tf.add_n(tensors)) #or just .extract(tf.add_n)</span>
+<span class="sd">                .softmax()</span>
+<span class="sd">                .tensor()</span>
 <span class="sd">            )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">tensors</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2379,7 +2533,7 @@ table {
 <span class="sd">        In this example we will create the method `fully_connected` for the BuilderTree class</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 
 <span class="sd">            def _tree_fully_connected(tree, size, *args, **kwargs):</span>
@@ -2432,7 +2586,7 @@ table {
 <span class="sd">        In this example we will create the method `reduce_add` for the BuilderTree class</span>
 
 <span class="sd">            import tensorflow as tf</span>
-<span class="sd">            import tensorbuilder as tb</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 <span class="sd">            tb.BuilderTree.register_reduce_method(tf.add, &quot;tf&quot;, alias=&quot;reduce_add&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2451,11 +2605,11 @@ table {
 
     <span class="k">def</span> <span class="nf">builders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a flattened list `tensorbuilder.tensorbuilder.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.tensorbuilder.BuilderTree`s.</span>
+<span class="sd">        Returns a flattened list `tensorbuilder.core.builders.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.core.builders.BuilderTree`s.</span>
 
 <span class="sd">        **Return**</span>
 
-<span class="sd">        * `list( tensorbuilder.tensorbuilder.Builder )`</span>
+<span class="sd">        * `list( tensorbuilder.core.builders.Builder )`</span>
 
 <span class="sd">        ** Example **</span>
 
@@ -2465,7 +2619,7 @@ table {
 
     <span class="k">def</span> <span class="nf">tensors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Same as `tensorbuilder.tensorbuilder.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.tensorbuilder.Builder`.</span>
+<span class="sd">        Same as `tensorbuilder.core.builders.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.core.builders.Builder`.</span>
 
 <span class="sd">        **Return**</span>
 
@@ -2512,7 +2666,7 @@ table {
     <span class="nb">super</span><span class="p">(</span><span class="n">BuilderTreeBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_branches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An iterable that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.</span>
+<span class="sd">    An iterable that can contain elements that are of type `tensorbuilder.core.builders.Builder` or `tensorbuilder.core.builders.BuilderTree`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
@@ -2545,58 +2699,6 @@ table {
   
             
   <div class="item">
-    <div class="name def" id="tensorbuilder.core.BuilderTreeBase.branches">
-    <p>def <span class="ident">branches</span>(</p><p>builder_iterable)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Takes a list with elements of type <code>tensorbuilder.tensorbuilder.Builder</code> or <code>tensorbuilder.tensorbuilder.BuilderTree</code> and returns a <code>tensorbuilder.tensorbuilder.BuilderTree</code></p>
-<p><strong> Parameters </strong></p>
-<ul>
-<li><code>builder_list</code>: list of type <code>list( Builder | BuilderTree)</code></li>
-</ul>
-<h4>Example</h4>
-<p>Given a list of Builders and/or BuilderTrees you construct a <code>tensorbuilder.tensorbuilder.BuilderTree</code> like this</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-
-<span class="n">tree</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">_branches</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
-</pre></div>
-
-
-<p><code>tensorbuilder.tensorbuilder.BuilderTree</code>s are usually constructed using <code>tensorbuilder.tensorbuilder.Builder.branch</code> of the <code>tensorbuilder.tensorbuilder.Builder</code> class, but you can use this for special cases</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderTreeBase.branches', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.BuilderTreeBase.branches" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">branches</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Takes a list with elements of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree` and returns a `tensorbuilder.tensorbuilder.BuilderTree`</span>
-<span class="sd">    ** Parameters **</span>
-<span class="sd">    * `builder_list`: list of type `list( Builder | BuilderTree)`</span>
-<span class="sd">    #### Example</span>
-<span class="sd">    Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
-<span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
-<span class="sd">        a = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
-<span class="sd">        b = tf.placeholder(tf.float32, shape=[None, 8]).builder()</span>
-<span class="sd">        tree = tb._branches([a, b])</span>
-<span class="sd">    `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
     <div class="name def" id="tensorbuilder.core.BuilderTreeBase.builders">
     <p>def <span class="ident">builders</span>(</p><p>self)</p>
     </div>
@@ -2604,10 +2706,10 @@ table {
 
     
   
-    <div class="desc"><p>Returns a flattened list <code>tensorbuilder.tensorbuilder.Builder</code>s contained by this tree. The whole result is flattened in case of sub-elements are also <code>tensorbuilder.tensorbuilder.BuilderTree</code>s.</p>
+    <div class="desc"><p>Returns a flattened list <code>tensorbuilder.core.builders.Builder</code>s contained by this tree. The whole result is flattened in case of sub-elements are also <code>tensorbuilder.core.builders.BuilderTree</code>s.</p>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>list( tensorbuilder.tensorbuilder.Builder )</code></li>
+<li><code>list( tensorbuilder.core.builders.Builder )</code></li>
 </ul>
 <p><strong> Example </strong></p></div>
   <div class="source_cont">
@@ -2615,9 +2717,9 @@ table {
   <div id="source-tensorbuilder.core.BuilderTreeBase.builders" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">builders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a flattened list `tensorbuilder.tensorbuilder.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.tensorbuilder.BuilderTree`s.</span>
+<span class="sd">    Returns a flattened list `tensorbuilder.core.builders.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.core.builders.BuilderTree`s.</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `list( tensorbuilder.tensorbuilder.Builder )`</span>
+<span class="sd">    * `list( tensorbuilder.core.builders.Builder )`</span>
 <span class="sd">    ** Example **</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span> <span class="n">builder</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">]</span>
@@ -2659,7 +2761,7 @@ table {
     
   
     <div class="desc"><p><code>@immutable</code></p>
-<p>Expects a function <strong>fn</strong> with type <code>list( Tensor ) -&gt; Tensor</code> and applies this function to <code>tensorbuilder.tensorbuilder.BuilderTree.tensors</code>, the resulting Tensor is wrapped in Builder. This function</p>
+<p>Expects a function <strong>fn</strong> with type <code>list( Tensor ) -&gt; Tensor</code> and applies this function to <code>tensorbuilder.core.builders.BuilderTree.tensors</code>, the resulting Tensor is wrapped in Builder. This function</p>
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>fn</code>: a function of type <code>list( Tensor ) -&gt; Tensor</code>.</li>
@@ -2667,20 +2769,28 @@ table {
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.Builder</code></li>
+<li><code>tensorbuilder.core.builders.Builder</code></li>
 </ul>
 <p><strong> Example </strong></p>
-<p>In this example we will applay dropout to all leaf Tensors using <code>map_each</code></p>
+<p>Lets redu the example in <code>tensorbuilder.core.builders.BuilderTree.map_each</code> using <code>extract</code></p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
-<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1">#perform some branching operation to obtain a BuilderTree</span>
-    <span class="o">.</span><span class="n">map_each</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="o">.</span><span class="n">map_each</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tensors</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">add_n</span><span class="p">(</span><span class="n">tensors</span><span class="p">))</span> <span class="c1">#or just .extract(tf.add_n)</span>
+    <span class="o">.</span><span class="n">softmax</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div></div>
   <div class="source_cont">
@@ -2690,22 +2800,30 @@ table {
 <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@immutable`</span>
-<span class="sd">    Expects a function **fn** with type `list( Tensor ) -&gt; Tensor` and applies this function to `tensorbuilder.tensorbuilder.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function</span>
+<span class="sd">    Expects a function **fn** with type `list( Tensor ) -&gt; Tensor` and applies this function to `tensorbuilder.core.builders.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function</span>
 <span class="sd">    **Parameters**</span>
 <span class="sd">    * `fn`: a function of type `list( Tensor ) -&gt; Tensor`.</span>
 <span class="sd">    * All additional \*args and \*\*kwargs are forwarded to `fn`</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">    * `tensorbuilder.core.builders.Builder`</span>
 <span class="sd">    ** Example **</span>
-<span class="sd">    In this example we will applay dropout to all leaf Tensors using `map_each`</span>
+<span class="sd">    Lets redu the example in `tensorbuilder.core.builders.BuilderTree.map_each` using `extract`</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
-<span class="sd">        keep_prob = tf.placeholder(tf.float32)</span>
 <span class="sd">        h = (</span>
-<span class="sd">            x.builder()</span>
-<span class="sd">            .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">            .map_each(tf.nn.dropout, keep_prob)</span>
+<span class="sd">            tb.build(x)</span>
+<span class="sd">            .branch(lambda x: [</span>
+<span class="sd">                x.relu_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.sigmoid_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.tanh_layer(20)</span>
+<span class="sd">            ])</span>
+<span class="sd">            .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">            .extract(lambda tensors: tf.add_n(tensors)) #or just .extract(tf.add_n)</span>
+<span class="sd">            .softmax()</span>
+<span class="sd">            .tensor()</span>
 <span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tensor</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">tensors</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2735,22 +2853,45 @@ table {
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.BuilderTree</code></li>
+<li><code>tensorbuilder.core.builders.BuilderTree</code></li>
 </ul>
 <p><strong> Example </strong></p>
-<p>In this example we will applay dropout to all leaf Tensors using <code>map_each</code></p>
+<p>Lets redu the example in <code>tensorbuilder.core.builders.BuilderTree.reduce</code> using <code>map_each</code> to reduce some code</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
-<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1">#perform some branching operation to obtain a BuilderTree</span>
-    <span class="o">.</span><span class="n">map_each</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="o">.</span><span class="n">map_each</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">softmax</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
 <span class="p">)</span>
-</pre></div></div>
+</pre></div>
+
+
+<p>Remember that this</p>
+<div class="codehilite"><pre><span></span><span class="na">.map_each</span><span class="p">(</span><span class="no">tf.contrib.layers.fully_connected</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="no">activation_fn</span><span class="err">=</span><span class="no">None</span><span class="p">)</span>
+<span class="na">.reduce</span><span class="p">(</span><span class="no">tf.add</span><span class="p">)</span>
+<span class="na">.softmax</span><span class="p">()</span>
+</pre></div>
+
+
+<p>is equivalent to just</p>
+<div class="codehilite"><pre><span></span><span class="na">.softmax_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+
+<p>for <code>BuilderTree</code>s.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderTreeBase.map_each', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.BuilderTreeBase.map_each" class="source">
@@ -2763,18 +2904,33 @@ table {
 <span class="sd">    * `fn`: a function of type `Tensor -&gt; Tensor`.</span>
 <span class="sd">    * All additional \*args and \*\*kwargs are forwarded to `fn`</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.BuilderTree`</span>
+<span class="sd">    * `tensorbuilder.core.builders.BuilderTree`</span>
 <span class="sd">    ** Example **</span>
-<span class="sd">    In this example we will applay dropout to all leaf Tensors using `map_each`</span>
+<span class="sd">    Lets redu the example in `tensorbuilder.core.builders.BuilderTree.reduce` using `map_each` to reduce some code</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
-<span class="sd">        keep_prob = tf.placeholder(tf.float32)</span>
 <span class="sd">        h = (</span>
-<span class="sd">            x.builder()</span>
-<span class="sd">            .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">            .map_each(tf.nn.dropout, keep_prob)</span>
+<span class="sd">            tb.build(x)</span>
+<span class="sd">            .branch(lambda x: [</span>
+<span class="sd">                x.relu_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.sigmoid_layer(20)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.tanh_layer(20)</span>
+<span class="sd">            ])</span>
+<span class="sd">            .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">            .reduce(tf.add)</span>
+<span class="sd">            .softmax()</span>
+<span class="sd">            .tensor()</span>
 <span class="sd">        )</span>
+<span class="sd">    Remember that this</span>
+<span class="sd">        .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)</span>
+<span class="sd">        .reduce(tf.add)</span>
+<span class="sd">        .softmax()</span>
+<span class="sd">    is equivalent to just</span>
+<span class="sd">        .softmax_layer(5)</span>
+<span class="sd">    for `BuilderTree`s.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span> <span class="n">builder</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="n">tree</span> <span class="p">]</span>
     <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
@@ -2795,7 +2951,7 @@ table {
     
   
     <div class="desc"><p><code>@immutable</code></p>
-<p>Expects a function <strong>fn</strong> with type <code>(Tensor, Tensor) -&gt; Tensor</code> and optionally an <code>initializer</code> and applies python <a href="https://docs.python.org/2/library/functions.html#reduce">reduce</a> function to <code>tensorbuilder.tensorbuilder.BuilderTree.tensors</code> using these arguments; the resulting Tensor is the wrapped inside a Builder.</p>
+<p>Expects a function <strong>fn</strong> with type <code>(Tensor, Tensor) -&gt; Tensor</code> and optionally an <code>initializer</code> and applies python <a href="https://docs.python.org/2/library/functions.html#reduce">reduce</a> function to <code>tensorbuilder.core.builders.BuilderTree.tensors</code> using these arguments; the resulting Tensor is the wrapped inside a Builder.</p>
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>fn</code>: a function of type <code>(Tensor, Tensor) -&gt; Tensor</code>.</li>
@@ -2803,22 +2959,30 @@ table {
 </ul>
 <p><strong>Return</strong></p>
 <ul>
-<li><code>tensorbuilder.tensorbuilder.Builder</code></li>
+<li><code>tensorbuilder.core.builders.Builder</code></li>
 </ul>
 <p><strong> Example </strong></p>
-<p>In this example we connect the whole tree to single softmax output layer of size 5, to do that we will separately map each leaf Tensor to a linear layer of size 5 and the add all the layers using reduce, finally we will apply a softmax function over the resulting layer.</p>
+<p>Lets reduce the example on <code>tensorbuilder.core.builders.Builder.branch</code> this time doing the reduction ourselves instead of relying on the <code>*_layer</code> of <code>tensorbuilder.core.builders.BuilderTree</code> that do this for us</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorflow.contrib.layers</span> <span class="kn">as</span> <span class="nn">layers</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">x</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="c1">#perform some branching operation to obtain a BuilderTree</span>
-    <span class="o">.</span><span class="n">map_each</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="p">,</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="p">])</span>
     <span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">softmax</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div></div>
   <div class="source_cont">
@@ -2828,24 +2992,32 @@ table {
 <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `@immutable`</span>
-<span class="sd">    Expects a function **fn** with type `(Tensor, Tensor) -&gt; Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.tensorbuilder.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.</span>
+<span class="sd">    Expects a function **fn** with type `(Tensor, Tensor) -&gt; Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.core.builders.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.</span>
 <span class="sd">    **Parameters**</span>
 <span class="sd">    * `fn`: a function of type `(Tensor, Tensor) -&gt; Tensor`.</span>
 <span class="sd">    * `initializer`: an optional Tensor as initial element of the folding operation (default: `None`)s</span>
 <span class="sd">    **Return**</span>
-<span class="sd">    * `tensorbuilder.tensorbuilder.Builder`</span>
+<span class="sd">    * `tensorbuilder.core.builders.Builder`</span>
 <span class="sd">    ** Example **</span>
-<span class="sd">    In this example we connect the whole tree to single softmax output layer of size 5, to do that we will separately map each leaf Tensor to a linear layer of size 5 and the add all the layers using reduce, finally we will apply a softmax function over the resulting layer.</span>
+<span class="sd">    Lets reduce the example on `tensorbuilder.core.builders.Builder.branch` this time doing the reduction ourselves instead of relying on the `*_layer` of `tensorbuilder.core.builders.BuilderTree` that do this for us</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
-<span class="sd">        import tensorflow.contrib.layers as layers</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
 <span class="sd">        h = (</span>
-<span class="sd">            x.builder()</span>
-<span class="sd">            .branch(...) #perform some branching operation to obtain a BuilderTree</span>
-<span class="sd">            .map_each(layers.fully_connected, 5)</span>
+<span class="sd">            tb.build(x)</span>
+<span class="sd">            .branch(lambda x: [</span>
+<span class="sd">                x.relu_layer(20)</span>
+<span class="sd">                .linear_layer(5)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.sigmoid_layer(20)</span>
+<span class="sd">                .linear_layer(5)</span>
+<span class="sd">            ,</span>
+<span class="sd">                x.tanh_layer(20)</span>
+<span class="sd">                .linear_layer(5)</span>
+<span class="sd">            ])</span>
 <span class="sd">            .reduce(tf.add)</span>
-<span class="sd">            .map(tf.nn.softmax)</span>
+<span class="sd">            .softmax()</span>
+<span class="sd">            .tensor()</span>
 <span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">initializer</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
@@ -2882,7 +3054,7 @@ table {
 <p><strong>Examples</strong></p>
 <p>In this example we will create the method <code>fully_connected</code> for the BuilderTree class</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 
 <span class="k">def</span> <span class="nf">_tree_fully_connected</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -2921,7 +3093,7 @@ table {
 <span class="sd">    **Examples**</span>
 <span class="sd">    In this example we will create the method `fully_connected` for the BuilderTree class</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        def _tree_fully_connected(tree, size, *args, **kwargs):</span>
 <span class="sd">            activation_fn = None</span>
 <span class="sd">            if &quot;activation_fn&quot; in kwargs:</span>
@@ -2972,7 +3144,7 @@ table {
 <p><strong>Examples</strong></p>
 <p>In this example we will create the method <code>reduce_add</code> for the BuilderTree class</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">tb</span><span class="o">.</span><span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_reduce_method</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="s2">&quot;tf&quot;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;reduce_add&quot;</span><span class="p">)</span>
 </pre></div></div>
@@ -2993,7 +3165,7 @@ table {
 <span class="sd">    **Examples**</span>
 <span class="sd">    In this example we will create the method `reduce_add` for the BuilderTree class</span>
 <span class="sd">        import tensorflow as tf</span>
-<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        from tensorbuilder import tb</span>
 <span class="sd">        tb.BuilderTree.register_reduce_method(tf.add, &quot;tf&quot;, alias=&quot;reduce_add&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fn_signature</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_method_sig</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
@@ -3020,7 +3192,7 @@ table {
 
     
   
-    <div class="desc"><p>Same as <code>tensorbuilder.tensorbuilder.BuilderTree.builders</code> but extracts the tensor from each <code>tensorbuilder.tensorbuilder.Builder</code>.</p>
+    <div class="desc"><p>Same as <code>tensorbuilder.core.builders.BuilderTree.builders</code> but extracts the tensor from each <code>tensorbuilder.core.builders.Builder</code>.</p>
 <p><strong>Return</strong></p>
 <ul>
 <li><code>list( tf.Tensor )</code></li>
@@ -3031,7 +3203,7 @@ table {
   <div id="source-tensorbuilder.core.BuilderTreeBase.tensors" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">tensors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Same as `tensorbuilder.tensorbuilder.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.tensorbuilder.Builder`.</span>
+<span class="sd">    Same as `tensorbuilder.core.builders.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.core.builders.Builder`.</span>
 <span class="sd">    **Return**</span>
 <span class="sd">    * `list( tf.Tensor )`</span>
 <span class="sd">    ** Example **</span>

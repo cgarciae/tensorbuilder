@@ -1,7 +1,5 @@
 import tensorflow as tf
-import tensorbuilder as tb
-dl = tb.dl
-
+from tensorbuilder import tb
 
 def func(x):
     return x + 1
@@ -45,18 +43,33 @@ class TestBuilder(object):
         assert "CPU:0" in h2.device
 
     def test_then_with_2(self):
-        h1 = dl.pipe(
+        h1 = tb.pipe(
             self.x
             ,
             { tf.device("/cpu:0"):
 
-                dl.softmax()
+                tb.softmax()
             }
             ,
-            dl.tensor()
+            tb.tensor()
         )
 
         assert "CPU:0" in h1.device
+
+class TestBuilderTree(object):
+
+    def test_branches(self):
+        a = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))
+        b = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))
+
+        tree = tb.branches([a, b])
+
+        assert type(tree) == tb.BuilderTree
+
+        [a2, b2] = tree.builders()
+
+        assert a.tensor() == a2.tensor() and b.tensor() == b2.tensor()
+
 
 
 if __name__ == '__main__':

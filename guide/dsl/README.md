@@ -12,7 +12,7 @@ The `dsl` ships with functions with the same names as all the methods in the `Bu
 Lets see an example, here is the previous example about branching with the the full `patch`, this time using the `dsl` module
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.patch
     import tensorbuilder.dsl as dl #<== Notice the alias
 

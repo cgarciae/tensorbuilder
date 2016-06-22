@@ -45,9 +45,6 @@ class BuilderBase(object):
     def unit(self, tensor):
         return self.__class__(tensor)
 
-    def build(self, tensor):
-        return self.unit(tensor)
-
     @classmethod
     def register_method(cls, fn, library_path, alias=None, doc=None):
         """
@@ -69,7 +66,7 @@ class BuilderBase(object):
         In this example we will create a funtion and register it as a method called `relu_dropout_layer`
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
 
             def relu_dropout(builder, size, keep_prob):
@@ -116,7 +113,7 @@ class BuilderBase(object):
         In this example we will register `tf.reshape` as a method of the Builder class
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
             tb.Builder.register_map_method(tf.reshape, "tf")
         """
@@ -137,7 +134,7 @@ class BuilderBase(object):
         """
         `@immutable`
 
-        Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. While TensorBuilder promotes the use **patches** like `tensorbuilder.patch` to make the syntax nicer, the truth is that you could you can do a lot of things just using `map`, all you need is that you have a library or a set of custom functions that accept a tensor as its first argument.
+        Let **x** be Tensor inside a Builder `builder` and **fn** be a function from a tensor to a tensor, then `builder.map(fn, \*args, **kwargs)` computes `fn(x, *args, **kwargs) and stores the result inside a Builder`. The Builder class comes with a lot of **patched** methods that help you do things quickly and make the syntax nicer, but if we don't have the method you need just pass the function you want to use to `map`, or even consider using `tensorbuilder.core.builders.Builder.register_map_method`.
 
         **Parameters**
 
@@ -146,20 +143,40 @@ class BuilderBase(object):
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.Builder`
+        * `tensorbuilder.core.builders.Builder`
 
         **Examples**
 
             import tensorflow as tf
             import tensorflow.contrib.layers
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
             x = tf.placeholder(tf.float32, shape=[None, 40])
             keep_prob = tf.placeholder(tf.float32)
 
             h = (
-            	x.builder()
+            	tb.build(x)
             	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
+            	.map(tf.nn.dropout, keep_prob)
+            	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
+            	.tensor()
+            )
+
+            print(h)
+
+        Same using the DSL
+
+            import tensorflow as tf
+            import tensorflow.contrib.layers
+            from tensorbuilder import tb
+            from tensorbuilder import dl
+
+            x = tf.placeholder(tf.float32, shape=[None, 40])
+            keep_prob = tf.placeholder(tf.float32)
+
+            h = dl.pipe(
+            	x,
+            	dl.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
             	.map(tf.nn.dropout, keep_prob)
             	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
             	.tensor()
@@ -184,7 +201,7 @@ class BuilderBase(object):
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.Builder`
+        * `tensorbuilder.core.builders.Builder`
 
         ** Example **
 
@@ -196,17 +213,56 @@ class BuilderBase(object):
         """
         `@immutable`
 
-        Expects a function **fn** with type `Builder -> list( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies. You can later
+        Expects a function **fn** with type `Builder -> iterable( Builder | BuilderTree )`. This method enables you to *branch* the computational graph so you can easily create neural networks with more complex topologies.
 
         **Parameters**
 
-        * `fn`: a function of type `Builder -> list( Builder | BuilderTree )`.
+        * `fn`: a function of type `Builder -> iterable( Builder | BuilderTree )`.
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.BuilderTree`
+        * `tensorbuilder.core.builders.BuilderTree`
 
         ** Example **
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = (
+                tb.build(x)
+                .branch(lambda x: [
+                    x.relu_layer(20)
+                ,
+                    x.sigmoid_layer(20)
+                ,
+                    x.tanh_layer(20)
+                ])
+                .softmax_layer(5)
+                .tensor()
+            )
+
+        Same with the DSL
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+            from tensorbuilder import dl
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = dl.pipe(
+                x,
+                [
+                    dl.relu_layer(20)
+                ,
+                    dl.sigmoid_layer(20)
+                ,
+                    dl.tanh_layer(20)
+                ],
+                dl.softmax_layer(5)
+                .tensor()
+            )
 
         """
         return builder.BuilderTree(fn(builder))
@@ -226,7 +282,7 @@ class BuilderBase(object):
 
 class BuilderTreeBase(object):
     """
-    BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.tensorbuilder.Builder` nodes.
+    BuilderTree is a class that enables you to perform computations over a complex branched builder. It contains methods to handle the leaf `tensorbuilder.core.builders.Builder` nodes.
     """
 
     __metaclass__ = ABCMeta
@@ -236,7 +292,7 @@ class BuilderTreeBase(object):
 
         self._branches = list(builder_iterable)
         """
-        An iterable that can contain elements that are of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree`.
+        An iterable that can contain elements that are of type `tensorbuilder.core.builders.Builder` or `tensorbuilder.core.builders.BuilderTree`.
         """
 
     @abstractmethod
@@ -250,37 +306,14 @@ class BuilderTreeBase(object):
     def unit(self, branches):
         return self.__class__(branches)
 
-    def branches(builder_iterable):
-        """
-        Takes a list with elements of type `tensorbuilder.tensorbuilder.Builder` or `tensorbuilder.tensorbuilder.BuilderTree` and returns a `tensorbuilder.tensorbuilder.BuilderTree`
-
-        ** Parameters **
-
-        * `builder_list`: list of type `list( Builder | BuilderTree)`
-
-        #### Example
-
-        Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this
-
-            import tensorflow as tf
-            import tensorbuilder as tb
-
-            a = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-            b = tf.placeholder(tf.float32, shape=[None, 8]).builder()
-
-            tree = tb._branches([a, b])
-
-        `tensorbuilder.tensorbuilder.BuilderTree`s are usually constructed using `tensorbuilder.tensorbuilder.Builder.branch` of the `tensorbuilder.tensorbuilder.Builder` class, but you can use this for special cases
-
-        """
-        return self.unit(builder_iterable)
+    
 
     @immutable
     def reduce(tree, fn, initializer=None):
         """
         `@immutable`
 
-        Expects a function **fn** with type `(Tensor, Tensor) -> Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.tensorbuilder.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.
+        Expects a function **fn** with type `(Tensor, Tensor) -> Tensor` and optionally an `initializer` and applies python [reduce](https://docs.python.org/2/library/functions.html#reduce) function to `tensorbuilder.core.builders.BuilderTree.tensors` using these arguments; the resulting Tensor is the wrapped inside a Builder.
 
         **Parameters**
 
@@ -289,24 +322,32 @@ class BuilderTreeBase(object):
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.Builder`
+        * `tensorbuilder.core.builders.Builder`
 
         ** Example **
 
-        In this example we connect the whole tree to single softmax output layer of size 5, to do that we will separately map each leaf Tensor to a linear layer of size 5 and the add all the layers using reduce, finally we will apply a softmax function over the resulting layer.
+        Lets reduce the example on `tensorbuilder.core.builders.Builder.branch` this time doing the reduction ourselves instead of relying on the `*_layer` of `tensorbuilder.core.builders.BuilderTree` that do this for us
 
             import tensorflow as tf
-            import tensorbuilder as tb
-            import tensorflow.contrib.layers as layers
+            from tensorbuilder import tb
 
             x = placeholder(tf.float32, shape=[None, 10])
 
             h = (
-                x.builder()
-                .branch(...) #perform some branching operation to obtain a BuilderTree
-                .map_each(layers.fully_connected, 5)
+                tb.build(x)
+                .branch(lambda x: [
+                    x.relu_layer(20)
+                    .linear_layer(5)
+                ,
+                    x.sigmoid_layer(20)
+                    .linear_layer(5)
+                ,
+                    x.tanh_layer(20)
+                    .linear_layer(5)
+                ])
                 .reduce(tf.add)
-                .map(tf.nn.softmax)
+                .softmax()
+                .tensor()
             )
         """
         if initializer != None:
@@ -330,23 +371,43 @@ class BuilderTreeBase(object):
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.BuilderTree`
+        * `tensorbuilder.core.builders.BuilderTree`
 
         ** Example **
 
-        In this example we will applay dropout to all leaf Tensors using `map_each`
+        Lets redu the example in `tensorbuilder.core.builders.BuilderTree.reduce` using `map_each` to reduce some code
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
             x = placeholder(tf.float32, shape=[None, 10])
-            keep_prob = tf.placeholder(tf.float32)
 
             h = (
-                x.builder()
-                .branch(...) #perform some branching operation to obtain a BuilderTree
-                .map_each(tf.nn.dropout, keep_prob)
+                tb.build(x)
+                .branch(lambda x: [
+                    x.relu_layer(20)
+                ,
+                    x.sigmoid_layer(20)
+                ,
+                    x.tanh_layer(20)
+                ])
+                .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+                .reduce(tf.add)
+                .softmax()
+                .tensor()
             )
+
+        Remember that this
+
+            .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+            .reduce(tf.add)
+            .softmax()
+
+        is equivalent to just
+
+            .softmax_layer(5)
+
+        for `BuilderTree`s.
         """
         branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
         return tree.unit(branches)
@@ -356,7 +417,7 @@ class BuilderTreeBase(object):
         """
         `@immutable`
 
-        Expects a function **fn** with type `list( Tensor ) -> Tensor` and applies this function to `tensorbuilder.tensorbuilder.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function
+        Expects a function **fn** with type `list( Tensor ) -> Tensor` and applies this function to `tensorbuilder.core.builders.BuilderTree.tensors`, the resulting Tensor is wrapped in Builder. This function
 
         **Parameters**
 
@@ -365,22 +426,30 @@ class BuilderTreeBase(object):
 
         **Return**
 
-        * `tensorbuilder.tensorbuilder.Builder`
+        * `tensorbuilder.core.builders.Builder`
 
         ** Example **
 
-        In this example we will applay dropout to all leaf Tensors using `map_each`
+        Lets redu the example in `tensorbuilder.core.builders.BuilderTree.map_each` using `extract`
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
             x = placeholder(tf.float32, shape=[None, 10])
-            keep_prob = tf.placeholder(tf.float32)
 
             h = (
-                x.builder()
-                .branch(...) #perform some branching operation to obtain a BuilderTree
-                .map_each(tf.nn.dropout, keep_prob)
+                tb.build(x)
+                .branch(lambda x: [
+                    x.relu_layer(20)
+                ,
+                    x.sigmoid_layer(20)
+                ,
+                    x.tanh_layer(20)
+                ])
+                .map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+                .extract(lambda tensors: tf.add_n(tensors)) #or just .extract(tf.add_n)
+                .softmax()
+                .tensor()
             )
         """
         tensor = fn(tree.tensors(), *args, **kwargs)
@@ -409,7 +478,7 @@ class BuilderTreeBase(object):
         In this example we will create the method `fully_connected` for the BuilderTree class
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
 
             def _tree_fully_connected(tree, size, *args, **kwargs):
@@ -462,7 +531,7 @@ class BuilderTreeBase(object):
         In this example we will create the method `reduce_add` for the BuilderTree class
 
             import tensorflow as tf
-            import tensorbuilder as tb
+            from tensorbuilder import tb
 
             tb.BuilderTree.register_reduce_method(tf.add, "tf", alias="reduce_add")
         """
@@ -481,11 +550,11 @@ class BuilderTreeBase(object):
 
     def builders(self):
         """
-        Returns a flattened list `tensorbuilder.tensorbuilder.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.tensorbuilder.BuilderTree`s.
+        Returns a flattened list `tensorbuilder.core.builders.Builder`s contained by this tree. The whole result is flattened in case of sub-elements are also `tensorbuilder.core.builders.BuilderTree`s.
 
         **Return**
 
-        * `list( tensorbuilder.tensorbuilder.Builder )`
+        * `list( tensorbuilder.core.builders.Builder )`
 
         ** Example **
 
@@ -495,7 +564,7 @@ class BuilderTreeBase(object):
 
     def tensors(self):
         """
-        Same as `tensorbuilder.tensorbuilder.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.tensorbuilder.Builder`.
+        Same as `tensorbuilder.core.builders.BuilderTree.builders` but extracts the tensor from each `tensorbuilder.core.builders.Builder`.
 
         **Return**
 
@@ -523,7 +592,7 @@ THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
 
-This method reduces the whole BuilderTree to a single Builder by applying `tensorbuilder.tensorbuilder.BuilderTree.reduce` with `{1}.{0}`.
+This method reduces the whole BuilderTree to a single Builder by applying `tensorbuilder.core.builders.BuilderTree.reduce` with `{1}.{0}`.
 
 ** Original Documentation for `{1}.{0}`**
 
@@ -570,7 +639,7 @@ THIS METHOD IS AUTOMATICALLY GENERATED
 
 **@immutable**
 
-This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.tensorbuilder.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
+This method is a lifted version the function `{1}.{0}` to work with `tensorbuilder.core.builders.Builder`s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.
 
 
 ** Original Documentation for `{1}.{0}`**

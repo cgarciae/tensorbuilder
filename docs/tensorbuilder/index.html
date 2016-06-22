@@ -1087,7 +1087,7 @@ table {
 <h2>Getting Started</h2>
 <p>Create neural network with a [5, 10, 3] architecture with a <code>softmax</code> output layer and a <code>tanh</code> hidden layer through a Builder and then get back its tensor:</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -1117,7 +1117,7 @@ table {
 <h4>Showoff</h4>
 <p>Next is some more involved code so you see all the features in action. Its for learning the MNIST for images of 20x20 gray-scaled by using 3 relu-CNN branches with max pooling, then merging the branches through a fully connected relu layer with dropout, and finally connecting it to a softmax output layer.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.patch</span>
 
 <span class="c1"># Define variables</span>
@@ -1189,7 +1189,7 @@ table {
 <h6></h6>
 <p>The following example shows you how to construct a <code>tensorbuilder.tensorbuilder.Builder</code> from a tensorflow Tensor.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
 <span class="n">a_builder</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
@@ -1211,7 +1211,7 @@ print(a_builder)
 <h6></h6>
 <p>Given a list of Builders and/or BuilderTrees you construct a <code>tensorbuilder.tensorbuilder.BuilderTree</code>.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
@@ -1231,7 +1231,7 @@ print(a_builder)
 <h6></h6>
 <p>This method is included by many libraries so its "sort of" part of TensorBuilder. The following builds the computation <code>tf.nn.sigmoid(tf.matmul(x, w) + b)</code></p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
@@ -1248,7 +1248,7 @@ print(a_builder)
 
 <p>Using <code>tensorbuilder.patch</code> the previous is equivalent to</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
@@ -1282,7 +1282,7 @@ print(a_builder)
 
 <p>We can rewrite it with TensorBuilder simply by using <code>map</code>.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tflearn</span> <span class="kn">as</span> <span class="nn">tl</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="p">(</span>
   <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">input_data</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">784</span><span class="p">]))</span>
@@ -1303,7 +1303,7 @@ print(a_builder)
 <h6></h6>
 <p>The following <em>manually</em> constructs the computation <code>tf.nn.sigmoid(tf.matmul(x, w) + b)</code> while updating the <code>tensorbuilder.tensorbuiler.Builder.variables</code> dictionary.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">])</span>
@@ -1331,7 +1331,7 @@ print(a_builder)
 
 <p>Note that the previous if equivalent to</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -1347,7 +1347,7 @@ print(a_builder)
 <h6></h6>
 <p>The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor <code>h</code> and <code>trainer</code> tensor. Observe that first the logit <code>z</code> is calculated by creating a linear layer with <code>fully_connected(1)</code> and then its branched out</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -1375,7 +1375,7 @@ print(a_builder)
 <p>Remember that you can also contain <code>tensorbuilder.tensorbuilder.BuilderTree</code> elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, <code>tensorbuilder.tensorbuilder.BuilderTree</code> has methods that help you flatten or reduce the tree.
 The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single <code>sigmoid</code> layer</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -1415,7 +1415,7 @@ The following example will show you how create a (overly) complex tree and then 
 <h5>builders</h5>
 <h6></h6>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -1443,7 +1443,7 @@ The following example will show you how create a (overly) complex tree and then 
 <h5>tensors</h5>
 <h6></h6>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -1472,7 +1472,7 @@ The following example will show you how create a (overly) complex tree and then 
 <h6></h6>
 <p>The following example shows you how to connect two tensors (rather builders) of different shapes to a single <code>softmax</code> layer of shape [None, 3]</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
@@ -1489,7 +1489,7 @@ The following example will show you how create a (overly) complex tree and then 
 
 <p>The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a <code>tanh_layer</code> filter through the other, both of these are connect to a single <code>softmax</code> output layer</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 <span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -1528,8 +1528,7 @@ The following example will show you how create a (overly) complex tree and then 
 <span class="kn">import</span> <span class="nn">tensordata</span>
 <span class="kn">import</span> <span class="nn">extensions</span>
 <span class="kn">import</span> <span class="nn">api</span>
-
-<span class="kn">from</span> <span class="nn">api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">api</span> <span class="kn">import</span> <span class="n">api</span> <span class="k">as</span> <span class="n">tb</span>
 
 
 <span class="c1">#pdoc</span>

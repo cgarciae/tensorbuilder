@@ -1,5 +1,5 @@
 import tensorflow as tf
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patches.tensorflow.patch
 import tensorbuilder.dsl as dl
 
