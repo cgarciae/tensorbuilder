@@ -1057,6 +1057,7 @@ table {
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.copy">copy</a></li>
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.enumerated">enumerated</a></li>
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.epochs">epochs</a></li>
+    <li class="mono"><a href="#tensorbuilder.tensordata.Data.placeholders">placeholders</a></li>
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.raw_data">raw_data</a></li>
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.run">run</a></li>
     <li class="mono"><a href="#tensorbuilder.tensordata.Data.split">split</a></li>
@@ -1088,7 +1089,9 @@ table {
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span><span class="p">,</span> <span class="n">izip_longest</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">immutable</span>
+<span class="kn">from</span> <span class="nn">core.utils</span> <span class="kn">import</span> <span class="n">immutable</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1180,6 +1183,17 @@ table {
             <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">_iterator</span><span class="p">():</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span>
                 <span class="k">yield</span> <span class="n">data</span>
+
+
+    <span class="k">def</span> <span class="nf">placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_placeholders</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+         <span class="k">for</span> <span class="n">source_name</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+             <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">source_name</span><span class="p">]</span>
+             <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+             <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">tensors</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">feed</span><span class="p">):</span>
         <span class="n">feed</span> <span class="o">=</span> <span class="p">{</span> <span class="n">feed</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">feed</span> <span class="p">}</span>
@@ -1342,6 +1356,17 @@ table {
                 <span class="n">data</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span>
                 <span class="k">yield</span> <span class="n">data</span>
 
+
+    <span class="k">def</span> <span class="nf">placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_placeholders</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+         <span class="k">for</span> <span class="n">source_name</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+             <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">source_name</span><span class="p">]</span>
+             <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+             <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
+
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">tensors</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">feed</span><span class="p">):</span>
         <span class="n">feed</span> <span class="o">=</span> <span class="p">{</span> <span class="n">feed</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">feed</span> <span class="p">}</span>
         <span class="n">feed</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tensors</span><span class="p">)</span>
@@ -1484,6 +1509,27 @@ table {
     <span class="n">_iterator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epochs</span><span class="p">(</span><span class="n">epochs</span><span class="p">,</span> <span class="n">_iterator</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tensordata.Data.placeholders">
+    <p>def <span class="ident">placeholders</span>(</p><p>self, *args)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensordata.Data.placeholders', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tensordata.Data.placeholders" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_placeholders</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
 </pre></div>
 
   </div>

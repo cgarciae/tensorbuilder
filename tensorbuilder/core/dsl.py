@@ -14,11 +14,8 @@ from types import MethodType
 from utils import immutable
 from abc import ABCMeta, abstractmethod
 
-module = sys.modules[__name__]
-
 def _identity(x):
     return x
-
 
 #######################
 ### Applicative
@@ -35,7 +32,6 @@ class ApplicativeBase(object):
         A function of type `a -> b`.
         """
 
-    @classmethod
     def Builder(self, tensor):
         pass
 
@@ -113,7 +109,7 @@ class ApplicativeBase(object):
 
 
 
-ApplicativeBase.__core__ = [ name for name, f in inspect.getmembers(ApplicativeBase, predicate=inspect.ismethod) ]
+ApplicativeBase.__core__ = [ _name for _name, f in inspect.getmembers(ApplicativeBase, predicate=inspect.ismethod) ]
 
 #######################
 ### FUNCTIONS

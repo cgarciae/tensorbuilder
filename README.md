@@ -17,7 +17,7 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
 #### From github
-1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.4`
+1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.5`
 
 #### From pip
 Coming soon!
@@ -28,13 +28,13 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
 
     import tensorflow as tf
     import tensorbuilder as tb
-    import tensorbuilder.patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-      x.builder()
+      tb
+      .build(x)
       .tanh_layer(10) # tanh(x * w + b)
       .dropout(keep_prob) # dropout(x, keep_prob)
       .softmax_layer(3) # softmax(x * w + b)
@@ -78,7 +78,7 @@ Next is some more involved code so you see all the features in action. Its for l
         .relu()
         .max_pool_2d(2)
 
-        .reshape([-1, 5 * 5 * 64]) #notice that we flatten at the end
+        .flatten()
     )
 
     [h, loss, trainer] = dl.pipe(
@@ -92,14 +92,16 @@ Next is some more involved code so you see all the features in action. Its for l
             conv_branch
         ],
 
-        dl.relu_layer(1024) # this fully connects all 3 branches into a single relu layer
+        dl
+        .relu_layer(1024) # this fully connects all 3 branches into a single relu layer
         .dropout(keep_prob)
 
         .linear_layer(10), # create a linear connection
         [
             dl.softmax() # h
         ,
-            (dl.softmax_cross_entropy_with_logits(y)
+            (dl
+            .softmax_cross_entropy_with_logits(y)
             .map(tf.reduce_mean), #calculte loss
             [
                 dl # loss
@@ -177,12 +179,12 @@ This method is included by many libraries so its "sort of" part of TensorBuilder
 
     import tensorflow as tf
     import tensorbuilder as tb
-    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
     h = (
-    	x.builder()
+    	tb
+      .build(x)
     	.fully_connected(3, activation_fn=tf.nn.sigmoid)
     	.tensor()
     )
@@ -193,12 +195,12 @@ Using `tensorbuilder.patch` the previous is equivalent to
 
     import tensorflow as tf
     import tensorbuilder as tb
-    import tensorbuilder.patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
     h = (
-    	x.builder()
+    	tb
+      .build(x)
     	.sigmoid_layer(3)
     	.tensor()
     )
@@ -206,62 +208,41 @@ Using `tensorbuilder.patch` the previous is equivalent to
     print(h)
 
 
-You can chain various `fully_connected`s to get deeper neural networks
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.slim_patch
-
-    x = tf.placeholder(tf.float32, shape=[None, 40])
-
-    h = (
-    	x.builder()
-    	.fully_connected(100, activation_fn=tf.nn.tanh)
-    	.fully_connected(30, activation_fn=tf.nn.softmax)
-    	.tensor()
-    )
-
-    print(h)
-
-Using `tensorbuilder.patch` the previous is equivalent to
-
-    import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.patch
-
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-
-    h = (
-    	x.builder()
-    	.tanh_layer(100)
-    	.softmax_layer(30)
-    	.tensor()
-    )
-
-    print(h)
 
 ##############################
 ##### map
 ##############################
 
-The following constructs a neural network with the architecture `[40 input, 100 tanh, 30 softmax]` and and applies `dropout` to the tanh layer
+If you have a function f that takes a tensor as first arguments and then some \*args and \*\*kwargs, you can use the `map` method to use that function naturally. Take this TFLearn code for example
 
-    import tensorflow as tf
+    import tflearn as tl
+
+    net = tl.input_data(shape=[None, 784])
+    net = tl.fully_connected(net, 64)
+    net = tl.dropout(net, 0.5)
+    net = tl.fully_connected(net, 10, activation='softmax')
+    net = tl.regression(net, optimizer='adam', loss='categorical_crossentropy')
+
+    model = tl.DNN(net)
+    model.fit(X, Y)
+
+We can rewrite it with TensorBuilder simply by using `map`.
+
+    import tflearn as tl
     import tensorbuilder as tb
-    import tensorbuilder.slim_patch
 
-    x = tf.placeholder(tf.float32, shape=[None, 40])
-    keep_prob = tf.placeholder(tf.float32)
-
-    h = (
-    	x.builder()
-    	.fully_connected(100, activation_fn=tf.nn.tanh)
-    	.map(tf.nn.dropout, keep_prob)
-    	.fully_connected(30, activation_fn=tf.nn.softmax)
-    	.tensor()
+    model = (
+      tb.build(tl.input_data(shape=[None, 784]))
+      .map(tl.fully_connected, 64)
+      .map(tl.dropout, 0.5)
+      .map(tl.fully_connected, 10, activation='softmax')
+      .map(tl.regression, optimizer='adam', loss='categorical_crossentropy')
+      .map(tl.DNN)
+      .tensor()
     )
 
-    print(h)
+    model.fit(X, Y)
+
 
 
 ##############################
@@ -287,10 +268,10 @@ The following *manually* constructs the computation `tf.nn.sigmoid(tf.matmul(x, 
 
     	y = tf.nn.sigmoid(tf.matmul(x, w) + b)
 
-    	return y.builder()
+    	return tb.build(y)
 
     h = (
-    	x.builder()
+    	tb.build(x)
     	.then(sigmoid_layer, 3)
     	.tensor()
     )
@@ -299,10 +280,9 @@ Note that the previous if equivalent to
 
     import tensorflow as tf
     import tensorbuilder as tb
-    import tensorbuilder.slim_patch
     h = (
-    	x.builder()
-    	.fully_connected(3, activation_fn=tf.nn.sigmoid)
+    	tb.build(x)
+    	.sigmoid_layer(3)
     	.tensor()
     )
 
@@ -322,13 +302,13 @@ The following will create a sigmoid layer but will branch the computation at the
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h, trainer] = (
-        x.builder()
-        .fully_connected(1)
+        tb.build(x)
+        .linear_layer(1)
         .branch(lambda z:
         [
-            z.map(tf.nn.sigmoid)
+            z.sigmoid()
         ,
-            z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
+            z.sigmoid_cross_entropy_with_logits(y)
             .map(tf.train.AdamOptimizer(0.01).minimize)
         ])
         .tensors()
@@ -350,26 +330,26 @@ The following example will show you how create a (overly) complex tree and then 
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-        x.builder()
-        .fully_connected(10)
+        tb.build(x)
+        .linear_layer(10)
         .branch(lambda base:
         [
             base
-            .fully_connected(3, activation_fn=tf.nn.relu)
+            .relu_layer(3)
         ,
             base
-            .fully_connected(9, activation_fn=tf.nn.tanh)
+            .tanh_layer(9)
             .branch(lambda base2:
             [
             	base2
-            	.fully_connected(6, activation_fn=tf.nn.sigmoid)
+            	.sigmoid_layer(6)
             ,
             	base2
-            	.map(tf.nn.dropout, keep_prob)
-            	.fully_connected(8, tf.nn.softmax)
+            	.dropout(keep_prob)
+            	.softmax_layer(8)
             ])
         ])
-        .fully_connected(6, activation_fn=tf.nn.sigmoid)
+        .sigmoid_layer(6)
     )
 
     print(h)
@@ -390,13 +370,13 @@ The following example will show you how create a (overly) complex tree and then 
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h_builder, trainer_builder] = (
-        x.builder()
-        .fully_connected(1)
+        tb.build(x)
+        .linear_layer(1)
         .branch(lambda z:
         [
-            z.map(tf.nn.sigmoid)
+            z.sigmoid()
         ,
-            z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
+            z.sigmoid_cross_entropy_with_logits(y)
             .map(tf.train.AdamOptimizer(0.01).minimize)
         ])
         .builders()
@@ -417,13 +397,13 @@ The following example will show you how create a (overly) complex tree and then 
     y = tf.placeholder(tf.float32, shape=[None, 1])
 
     [h_tensor, trainer_tensor] = (
-        x.builder()
-        .fully_connected(1)
+        tb.build(x)
+        .linear_layer(1)
         .branch(lambda z:
         [
-            z.map(tf.nn.sigmoid)
+            z.sigmoid())
         ,
-            z.map(tf.nn.sigmoid_cross_entropy_with_logits, y)
+            z.sigmoid_cross_entropy_with_logits(y)
             .map(tf.train.AdamOptimizer(0.01).minimize)
         ])
         .tensors()
@@ -452,7 +432,7 @@ The following example shows you how to connect two tensors (rather builders) of 
 
     print(h)
 
-The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh layer` filter through the other, both of these are connect to a single `softmax` output layer
+The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a `tanh_layer` filter through the other, both of these are connect to a single `softmax` output layer
 
     import tensorflow as tf
     import tensorbuilder as tb
@@ -461,14 +441,14 @@ The next example show you how you can use this to pass the input layer directly 
     x = tf.placeholder(tf.float32, shape=[None, 5])
 
     h = (
-    	x.builder()
+    	tb.build(x)
     	.branch(lambda x:
     	[
     		x
     	,
-    		x.fully_connected(10, activation_fn=tf.nn.tanh)
+    		x.tanh_layer(10)
     	])
-    	.fully_connected(3, activation_fn=tf.nn.softmax)
+    	.softmax_layer(3)
     )
 
     print(h)

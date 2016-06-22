@@ -12,34 +12,13 @@ from types import MethodType
 import sys
 from abc import ABCMeta, abstractmethod
 
-module = sys.modules[__name__]
-
 _count = [0]
 
 class BuilderBase(object):
     """
     The Builder class is a wrapper around a Tensor. Most of its method are immutable, that is, they don't modify the caller object but always return a new builder.
 
-    To create a builder from a tensor you have these options:
-
-    1. Use the `tensorbuilder.tensorbuilder.build` function
-
-            tb.build(tensor)
-
-    2. Use the monkey-patched method on the Tensor class
-
-            tensor.builder()
-
-    This class without patches only includes this basic methods:
-
-    * `tensorbuilder.tensorbuilder.Builder.map`
-    * `tensorbuilder.tensorbuilder.Builder.then`
-    * `tensorbuilder.tensorbuilder.Builder.branch`
-
-    It also includes the following static methods to register external functions as methods of this class. Library authors should use these to create patches:
-
-    * `tensorbuilder.tensorbuilder.Builder.register_method`
-    * `tensorbuilder.tensorbuilder.Builder.register_map_method`
+    This class is a Functor because it has the `map` method, to be a Monad is only missing the `bind` method which is trivial to implement. This means that even if its expected that the inner element contained within a Builder is a Tensor, it can actually contian anything and you may use this to your advantage.
 
 
     """
