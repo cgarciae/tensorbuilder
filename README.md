@@ -9,9 +9,10 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 * Let users be expressive and productive through a DSL
 
 ## Features
-* **Branches**: Enable to easily express complex complex topologies with a fluent API. See [Branches](http://cgarciae.github.io/tensorbuilder/guide/branches.m.html).
-* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](http://cgarciae.github.io/tensorbuilder/guide/patches.m.html).
-* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](http://cgarciae.github.io/tensorbuilder/guide/dsl.m.html).
+* **Branching**: Enable to easily express complex complex topologies with a fluent API. See [Branching](https://cgarciae.gitbooks.io/tensorbuilder/content/branching/).
+* **Scoping**: Enable you to express scopes for your tensor graph using methods such as `tf.device` and `tf.variable_scope` with the same fluent API. [Scoping](https://cgarciae.gitbooks.io/tensorbuilder/content/scoping/).
+* **DSL**: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See [DSL](https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/).
+* **Patches**: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from `TensorFlow` and `TFLearn`, but you can build you own to make TensorBuilder what you want it to be. See [Patches](https://cgarciae.gitbooks.io/tensorbuilder/content/patches/).
 
 ## Installation
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
