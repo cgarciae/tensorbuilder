@@ -45,7 +45,7 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
     print(h)
 
 ## The Guide
-Check out the guide [here](http://cgarciae.github.io/tensorbuilder/guide/index.html).
+Check out the guide [here](https://cgarciae.gitbooks.io/tensorbuilder/content/).
 
 ## Documentation
 * Complete documentation: [here](http://cgarciae.github.io/tensorbuilder/).
@@ -120,6 +120,10 @@ Notice that:
 1. We where able to reuse code easily by specifying the logic for the branches separately using the same syntax
 2. Branches are expressed naturally as a list thanks to the DSL, the indentation levels match the depth of the tree. Nested branches are just as easy.
 3. Most methods presented are functions from `tensorflow` that your are probably used to.
+
+
+**WARNING: Examples next probably work but might be removed**
+
 
 ##############################
 ##### FUNCTIONS
