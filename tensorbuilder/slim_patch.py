@@ -1,1 +1,0 @@
-import patches.tensorflow.slim

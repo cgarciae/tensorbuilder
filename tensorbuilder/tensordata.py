@@ -4,7 +4,9 @@ import asq.queryables
 import random
 from itertools import islice, izip_longest
 import numpy as np
-from utils import immutable
+from core.utils import immutable
+import tensorflow as tf
+
 """
 """
 def data(*args, **kwargs):
@@ -96,6 +98,17 @@ class Data(object):
             for data in _iterator():
                 data.epoch = epoch
                 yield data
+
+
+    def placeholders(self, *args):
+        return list(self._placeholders(*args))
+
+    def _placeholders(self, *args):
+         for source_name in args:
+             source = self.sources[source_name]
+             shape = [None] + list(source.shape)[1:]
+             yield tf.placeholder(tf.float32, shape=shape)
+
 
     def run(self, sess, tensor, tensors={}, **feed):
         feed = { feed[k]: self.sources[k] for k in feed }
