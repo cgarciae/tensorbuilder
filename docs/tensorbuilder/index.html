@@ -1072,7 +1072,7 @@ table {
 <p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
 <h4>From github</h4>
 <ol>
-<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.6</code></li>
+<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.8</code></li>
 </ol>
 <h4>From pip</h4>
 <p>Coming soon!</p>
@@ -1092,8 +1092,6 @@ table {
   <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># softmax(x * w + b)</span>
   <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
 <span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 </pre></div>
 
 
@@ -1111,7 +1109,7 @@ table {
 <li><a href="http://cgarciae.github.io/tensorbuilder/index.html">Complete Documentation</a></li>
 </ul>
 <h2>The Guide</h2>
-<p>Check out <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/">The Guide</a>.</p>
+<p>Check out <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/">The Guide</a> to learn to code in TensorBuilder.</p>
 <h2>Full Example</h2>
 <p>Next is an example with all the features of TensorBuilder including the DSL, branching and scoping. It creates a branched computation where each branch is executed on a different device. All branches are then reduced to a single layer, but the computation is the branched again to obtain both the activation function and the trainer.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
