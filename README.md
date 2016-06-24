@@ -11,7 +11,7 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
 #### From github
-1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.6`
+1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.8`
 
 #### From pip
 Coming soon!
@@ -35,8 +35,6 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
       .tensor()
     )
 
-    print(h)
-
 ## Features
 * **Branching**: Enable to easily express complex complex topologies with a fluent API. See [Branching](https://cgarciae.gitbooks.io/tensorbuilder/content/branching/).
 * **Scoping**: Enable you to express scopes for your tensor graph using methods such as `tf.device` and `tf.variable_scope` with the same fluent API. [Scoping](https://cgarciae.gitbooks.io/tensorbuilder/content/scoping/).
@@ -49,7 +47,7 @@ Create neural network with a [5, 10, 3] architecture with a `softmax` output lay
 * [Complete Documentation](http://cgarciae.github.io/tensorbuilder/index.html)
 
 ## The Guide
-Check out [The Guide](https://cgarciae.gitbooks.io/tensorbuilder/content/).
+Check out [The Guide](https://cgarciae.gitbooks.io/tensorbuilder/content/) to learn to code in TensorBuilder.
 
 ## Full Example
 Next is an example with all the features of TensorBuilder including the DSL, branching and scoping. It creates a branched computation where each branch is executed on a different device. All branches are then reduced to a single layer, but the computation is the branched again to obtain both the activation function and the trainer.
