@@ -1,7 +1,3 @@
-"""
-
-"""
-
 import inspect
 import utils
 import functools
@@ -20,7 +16,33 @@ def _identity(x):
 ### Applicative
 #######################
 class ApplicativeBase(object):
-    """docstring for Applicative"""
+    """
+    An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.
+
+    The `Applicative` class contains a inner field `f` that must be a function, internal methods rely on this fact to give you the nice syntax of the DSL. The `Applicative` class is also a function, meaning it implements the `__call__` method, which very simply delegates the computation to the function it contains.
+
+    > **Note:** The `tb` object with is contains the whole TensorBuilder API is an Applicative itself, it contians the identity function.
+
+    **DSL**
+
+    Check out the description of the DSL [here](https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/).
+
+    **Properties**
+
+    Many methods registered/patched by TensorBuilder onto `Applicative` actually use `tensorbuilder.core.applicative.Applicative.compose` internally, therefore, an expression of the DSL like this
+
+        (tb.softmax(),
+        tb.dropout(keep_prob),
+        tb.relu_layer(10)) # Notice the begging and ending '()' tuple parenthesis
+
+    is equivalent to this
+
+        tb.softmax()
+        .dropout(keep_prob),
+        .relu_layer(10)
+
+
+    """
 
     __metaclass__ = ABCMeta
 
@@ -35,27 +57,79 @@ class ApplicativeBase(object):
         pass
 
 
-    def unit(self, f):
+    def _unit(self, f):
+        "Monadic unit, also known as `return`"
         return self.__class__(f)
 
     def copy(self):
         """Returns a compy of the applicative"""
-        return self.unit(self.f)
+        return self._unit(self.f)
 
-    def __call__(self, x):
-        return self.f(x)
+    def __call__(self, *args, **kwargs):
+        return self.f(*args, **kwargs)
 
-    def compose(app, g):
-        return app.unit(_compose2(g, app.f))
+    def compose(app, g, *args, **kwargs):
+        """
+        Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
+
+        **Arguments**
+
+        * `g`: A function
+        * All \*args and \*\* are forwarded to `g`
+
+        **Return**
+
+        Applicative
+
+        **Examples**
+
+            import tensorflow as tf
+            from tensorbuilder import tb
 
 
-    def identity(self):
-    	"""
-        Returns the expression unchanged.
-    	"""
-    	return self
+        """
+        return app._unit(lambda x: g(app.f(x), *args, **kwargs))
 
     def pipe(self, builder, *ast):
+        """
+        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Tensor` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
+
+        **Arguments**
+
+        * `builder`: a `Builder`, `BuilderTree` or `Tensor` preferably.
+        * `*ast`: a sequence of elements of the DSL.
+
+        **Return**
+
+        An object with the result of the computation, probable types: `Tensor | Builder | BuilderTree | list(Tensor) |  `
+
+        **Examples**
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            h = tb.pipe(
+                x,
+                [
+                    { tf.device("/gpu:0"):
+                        tb.relu_layer(20)
+                    }
+                ,
+                    { tf.device("/gpu:1"):
+                        tb.sigmoid_layer(20)
+                    }
+                ,
+                    { tf.device("/cpu:0"):
+                        tb.tanh_layer(20)
+                    }
+                ],
+                tb.relu_layer(10)
+                .tensor()
+            )
+        """
+
         f = _compile(ast)
 
         #if the input is a Tensor, create a Builder
@@ -64,7 +138,47 @@ class ApplicativeBase(object):
 
         return f(builder)
 
-    def compile(self, ast):
+    def compile(self, *ast):
+        """
+        `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Tensor/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
+
+        **Arguments**
+
+        * `*ast`: a sequence of elements of the DSL.
+
+        **Return**
+
+        A function
+
+        **Examples**
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+            x = placeholder(tf.float32, shape=[None, 10])
+
+            f = tb.compile(
+                tb.build, #accept a Tensor as a parameter and create a builder so you can use the rest of the methods
+                [
+                    { tf.device("/gpu:0"):
+                        tb.relu_layer(20)
+                    }
+                ,
+                    { tf.device("/gpu:1"):
+                        tb.sigmoid_layer(20)
+                    }
+                ,
+                    { tf.device("/cpu:0"):
+                        tb.tanh_layer(20)
+                    }
+                ],
+                tb.relu_layer(10)
+                .tensor()
+            )
+
+            h = f(x)
+
+        """
         return _compile(ast)
 
     @classmethod
@@ -160,7 +274,7 @@ def _get_fun(_name, _f_signature, _f_docs, _module_name):
             f = getattr(builder, _name)
             return f(*args, **kwargs)
 
-    	return app.unit(_lambda)
+    	return app._unit(_lambda)
 
     _fun.__name__ = _name
     _fun.__doc__ = """

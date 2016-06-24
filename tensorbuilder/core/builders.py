@@ -40,9 +40,9 @@ class BuilderBase(object):
 
     def copy(self):
         """Returns a copy of this Builder"""
-        return self.unit(self.tensor())
+        return self._unit(self.tensor())
 
-    def unit(self, tensor):
+    def _unit(self, tensor):
         return self.__class__(tensor)
 
     @classmethod
@@ -186,7 +186,7 @@ class BuilderBase(object):
 
         """
         tensor = fn(builder.tensor(), *args, **kwargs)
-        return builder.unit(tensor)
+        return builder._unit(tensor)
 
     @immutable
     def then(builder, fn, *args, **kwargs):
@@ -384,9 +384,9 @@ class BuilderTreeBase(object):
         pass
 
     def copy(self):
-        return self.unit(self._branches)
+        return self._unit(self._branches)
 
-    def unit(self, branches):
+    def _unit(self, branches):
         return self.__class__(branches)
 
 
@@ -537,7 +537,7 @@ class BuilderTreeBase(object):
             )
         """
         branches = [ builder.map(fn, *args, **kwargs) for builder in tree ]
-        return tree.unit(branches)
+        return tree._unit(branches)
 
     @immutable
     def extract(tree, fn, *args, **kwargs):
@@ -628,7 +628,6 @@ class BuilderTreeBase(object):
 
             import tensorflow as tf
             from tensorbuilder import tb
-
 
             def _tree_fully_connected(tree, size, *args, **kwargs):
                 activation_fn = None

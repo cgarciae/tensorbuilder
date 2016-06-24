@@ -1,5 +1,5 @@
 from builders import BuilderBase, BuilderTreeBase
-from dsl import ApplicativeBase
+from applicative import ApplicativeBase
 import utils
 import concrete_classes
 

@@ -1050,10 +1050,8 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.compile">compile</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.compose">compose</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.copy">copy</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.identity">identity</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.pipe">pipe</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.register_method">register_method</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.unit">unit</a></li>
   </ul>
 
         </li>
@@ -1072,7 +1070,6 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.tensor">tensor</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.then">then</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.then_with">then_with</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.BuilderBase.unit">unit</a></li>
   </ul>
 
         </li>
@@ -1091,7 +1088,6 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.register_method">register_method</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.register_reduce_method">register_reduce_method</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.tensors">tensors</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.BuilderTreeBase.unit">unit</a></li>
   </ul>
 
         </li>
@@ -1121,7 +1117,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core" class="source">
     <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">builders</span> <span class="kn">import</span> <span class="n">BuilderBase</span><span class="p">,</span> <span class="n">BuilderTreeBase</span>
-<span class="kn">from</span> <span class="nn">dsl</span> <span class="kn">import</span> <span class="n">ApplicativeBase</span>
+<span class="kn">from</span> <span class="nn">applicative</span> <span class="kn">import</span> <span class="n">ApplicativeBase</span>
 <span class="kn">import</span> <span class="nn">utils</span>
 <span class="kn">import</span> <span class="nn">concrete_classes</span>
 
@@ -1141,12 +1137,57 @@ table {
       <p id="tensorbuilder.core.ApplicativeBase" class="name">class <span class="ident">ApplicativeBase</span></p>
       
   
-    <div class="desc"><p>docstring for Applicative</p></div>
+    <div class="desc"><p>An <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">Applicative</a> is an object who wraps around a function and posses the means to apply it.</p>
+<p>The <code>Applicative</code> class contains a inner field <code>f</code> that must be a function, internal methods rely on this fact to give you the nice syntax of the DSL. The <code>Applicative</code> class is also a function, meaning it implements the <code>__call__</code> method, which very simply delegates the computation to the function it contains.</p>
+<blockquote>
+<p><strong>Note:</strong> The <code>tb</code> object with is contains the whole TensorBuilder API is an Applicative itself, it contians the identity function.</p>
+</blockquote>
+<p><strong>DSL</strong></p>
+<p>Check out the description of the DSL <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/">here</a>.</p>
+<p><strong>Properties</strong></p>
+<p>Many methods registered/patched by TensorBuilder onto <code>Applicative</code> actually use <code>tensorbuilder.core.applicative.Applicative.compose</code> internally, therefore, an expression of the DSL like this</p>
+<div class="codehilite"><pre><span></span>(tb.softmax(),
+tb.dropout(keep_prob),
+tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesis
+</pre></div>
+
+
+<p>is equivalent to this</p>
+<div class="codehilite"><pre><span></span>tb.softmax()
+.dropout(keep_prob),
+.relu_layer(10)
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.ApplicativeBase" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ApplicativeBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;docstring for Applicative&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.</span>
+
+<span class="sd">    The `Applicative` class contains a inner field `f` that must be a function, internal methods rely on this fact to give you the nice syntax of the DSL. The `Applicative` class is also a function, meaning it implements the `__call__` method, which very simply delegates the computation to the function it contains.</span>
+
+<span class="sd">    &gt; **Note:** The `tb` object with is contains the whole TensorBuilder API is an Applicative itself, it contians the identity function.</span>
+
+<span class="sd">    **DSL**</span>
+
+<span class="sd">    Check out the description of the DSL [here](https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/).</span>
+
+<span class="sd">    **Properties**</span>
+
+<span class="sd">    Many methods registered/patched by TensorBuilder onto `Applicative` actually use `tensorbuilder.core.applicative.Applicative.compose` internally, therefore, an expression of the DSL like this</span>
+
+<span class="sd">        (tb.softmax(),</span>
+<span class="sd">        tb.dropout(keep_prob),</span>
+<span class="sd">        tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesis</span>
+
+<span class="sd">    is equivalent to this</span>
+
+<span class="sd">        tb.softmax()</span>
+<span class="sd">        .dropout(keep_prob),</span>
+<span class="sd">        .relu_layer(10)</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
 
@@ -1161,27 +1202,79 @@ table {
         <span class="k">pass</span>
 
 
-    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="s2">&quot;Monadic unit, also known as `return`&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a compy of the applicative&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">_compose2</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">f</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `g`: A function</span>
+<span class="sd">        * All \*args and \*\* are forwarded to `g`</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        Applicative</span>
+
+<span class="sd">        **Examples**</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            from tensorbuilder import tb</span>
 
 
-    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the expression unchanged.</span>
-<span class="sd">    	&quot;&quot;&quot;</span>
-    	<span class="k">return</span> <span class="bp">self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">g</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">pipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span> <span class="o">*</span><span class="n">ast</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Tensor` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -&gt; Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `builder`: a `Builder`, `BuilderTree` or `Tensor` preferably.</span>
+<span class="sd">        * `*ast`: a sequence of elements of the DSL.</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        An object with the result of the computation, probable types: `Tensor | Builder | BuilderTree | list(Tensor) |  `</span>
+
+<span class="sd">        **Examples**</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            from tensorbuilder import tb</span>
+
+<span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
+
+<span class="sd">            h = tb.pipe(</span>
+<span class="sd">                x,</span>
+<span class="sd">                [</span>
+<span class="sd">                    { tf.device(&quot;/gpu:0&quot;):</span>
+<span class="sd">                        tb.relu_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ,</span>
+<span class="sd">                    { tf.device(&quot;/gpu:1&quot;):</span>
+<span class="sd">                        tb.sigmoid_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ,</span>
+<span class="sd">                    { tf.device(&quot;/cpu:0&quot;):</span>
+<span class="sd">                        tb.tanh_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ],</span>
+<span class="sd">                tb.relu_layer(10)</span>
+<span class="sd">                .tensor()</span>
+<span class="sd">            )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">f</span> <span class="o">=</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
 
         <span class="c1">#if the input is a Tensor, create a Builder</span>
@@ -1190,7 +1283,47 @@ table {
 
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">ast</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Tensor/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `*ast`: a sequence of elements of the DSL.</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        A function</span>
+
+<span class="sd">        **Examples**</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            from tensorbuilder import tb</span>
+
+<span class="sd">            x = placeholder(tf.float32, shape=[None, 10])</span>
+
+<span class="sd">            f = tb.compile(</span>
+<span class="sd">                tb.build, #accept a Tensor as a parameter and create a builder so you can use the rest of the methods</span>
+<span class="sd">                [</span>
+<span class="sd">                    { tf.device(&quot;/gpu:0&quot;):</span>
+<span class="sd">                        tb.relu_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ,</span>
+<span class="sd">                    { tf.device(&quot;/gpu:1&quot;):</span>
+<span class="sd">                        tb.sigmoid_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ,</span>
+<span class="sd">                    { tf.device(&quot;/cpu:0&quot;):</span>
+<span class="sd">                        tb.tanh_layer(20)</span>
+<span class="sd">                    }</span>
+<span class="sd">                ],</span>
+<span class="sd">                tb.relu_layer(10)</span>
+<span class="sd">                .tensor()</span>
+<span class="sd">            )</span>
+
+<span class="sd">            h = f(x)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -1305,16 +1438,80 @@ table {
             
   <div class="item">
     <div class="name def" id="tensorbuilder.core.ApplicativeBase.compile">
-    <p>def <span class="ident">compile</span>(</p><p>self, ast)</p>
+    <p>def <span class="ident">compile</span>(</p><p>self, *ast)</p>
     </div>
     
 
     
   
+    <div class="desc"><p><code>compile</code> an object <code>ast</code> which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Tensor/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.</p>
+<p><strong>Arguments</strong></p>
+<ul>
+<li><code>*ast</code>: a sequence of elements of the DSL.</li>
+</ul>
+<p><strong>Return</strong></p>
+<p>A function</p>
+<p><strong>Examples</strong></p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">,</span> <span class="c1">#accept a Tensor as a parameter and create a builder so you can use the rest of the methods</span>
+    <span class="p">[</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">,</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:1&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">,</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/cpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.compile', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.ApplicativeBase.compile" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">):</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">ast</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Tensor/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.</span>
+<span class="sd">    **Arguments**</span>
+<span class="sd">    * `*ast`: a sequence of elements of the DSL.</span>
+<span class="sd">    **Return**</span>
+<span class="sd">    A function</span>
+<span class="sd">    **Examples**</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
+<span class="sd">        f = tb.compile(</span>
+<span class="sd">            tb.build, #accept a Tensor as a parameter and create a builder so you can use the rest of the methods</span>
+<span class="sd">            [</span>
+<span class="sd">                { tf.device(&quot;/gpu:0&quot;):</span>
+<span class="sd">                    tb.relu_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ,</span>
+<span class="sd">                { tf.device(&quot;/gpu:1&quot;):</span>
+<span class="sd">                    tb.sigmoid_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ,</span>
+<span class="sd">                { tf.device(&quot;/cpu:0&quot;):</span>
+<span class="sd">                    tb.tanh_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ],</span>
+<span class="sd">            tb.relu_layer(10)</span>
+<span class="sd">            .tensor()</span>
+<span class="sd">        )</span>
+<span class="sd">        h = f(x)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
 </pre></div>
 
@@ -1326,17 +1523,40 @@ table {
             
   <div class="item">
     <div class="name def" id="tensorbuilder.core.ApplicativeBase.compose">
-    <p>def <span class="ident">compose</span>(</p><p>app, g)</p>
+    <p>def <span class="ident">compose</span>(</p><p>app, g, *args, **kwargs)</p>
     </div>
     
 
     
   
+    <div class="desc"><p>Takes in a function <code>g</code> and composes it with <code>tensorbuilder.core.Applicative.f</code> as <code>g o f</code>. All *args and ** are forwarded to g. This is an essential method since most registered methods use this.</p>
+<p><strong>Arguments</strong></p>
+<ul>
+<li><code>g</code>: A function</li>
+<li>All *args and ** are forwarded to <code>g</code></li>
+</ul>
+<p><strong>Return</strong></p>
+<p>Applicative</p>
+<p><strong>Examples</strong></p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.compose', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.ApplicativeBase.compose" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">_compose2</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">f</span><span class="p">))</span>
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.</span>
+<span class="sd">    **Arguments**</span>
+<span class="sd">    * `g`: A function</span>
+<span class="sd">    * All \*args and \*\* are forwarded to `g`</span>
+<span class="sd">    **Return**</span>
+<span class="sd">    Applicative</span>
+<span class="sd">    **Examples**</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">g</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -1359,32 +1579,7 @@ table {
   <div id="source-tensorbuilder.core.ApplicativeBase.copy" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a compy of the applicative&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.ApplicativeBase.identity">
-    <p>def <span class="ident">identity</span>(</p><p>self)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Returns the expression unchanged.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.identity', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.ApplicativeBase.identity" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the expression unchanged.</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">return</span> <span class="bp">self</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1401,10 +1596,73 @@ table {
 
     
   
+    <div class="desc"><p><code>pipe</code> takes in a <code>builder</code> of type <code>Builder</code>, <code>BuilderTree</code> or <code>Tensor</code> preferably and an object <code>ast</code> which must be part of the domain of the DSL, and compiles <code>ast</code> to a function of type <code>Builder -&gt; Builder</code> and applies it to the input <code>builder</code>. All *args after <code>builder</code> are taken as a tuple, therefore, it makes it easier to define an initial tuple <code>()</code> element to define a sequential operation.</p>
+<p><strong>Arguments</strong></p>
+<ul>
+<li><code>builder</code>: a <code>Builder</code>, <code>BuilderTree</code> or <code>Tensor</code> preferably.</li>
+<li><code>*ast</code>: a sequence of elements of the DSL.</li>
+</ul>
+<p><strong>Return</strong></p>
+<p>An object with the result of the computation, probable types: <code>Tensor | Builder | BuilderTree | list(Tensor) |</code></p>
+<p><strong>Examples</strong></p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">,</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:1&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">,</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/cpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.pipe', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.ApplicativeBase.pipe" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span> <span class="o">*</span><span class="n">ast</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Tensor` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -&gt; Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.</span>
+<span class="sd">    **Arguments**</span>
+<span class="sd">    * `builder`: a `Builder`, `BuilderTree` or `Tensor` preferably.</span>
+<span class="sd">    * `*ast`: a sequence of elements of the DSL.</span>
+<span class="sd">    **Return**</span>
+<span class="sd">    An object with the result of the computation, probable types: `Tensor | Builder | BuilderTree | list(Tensor) |  `</span>
+<span class="sd">    **Examples**</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        from tensorbuilder import tb</span>
+<span class="sd">        x = placeholder(tf.float32, shape=[None, 10])</span>
+<span class="sd">        h = tb.pipe(</span>
+<span class="sd">            x,</span>
+<span class="sd">            [</span>
+<span class="sd">                { tf.device(&quot;/gpu:0&quot;):</span>
+<span class="sd">                    tb.relu_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ,</span>
+<span class="sd">                { tf.device(&quot;/gpu:1&quot;):</span>
+<span class="sd">                    tb.sigmoid_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ,</span>
+<span class="sd">                { tf.device(&quot;/cpu:0&quot;):</span>
+<span class="sd">                    tb.tanh_layer(20)</span>
+<span class="sd">                }</span>
+<span class="sd">            ],</span>
+<span class="sd">            tb.relu_layer(10)</span>
+<span class="sd">            .tensor()</span>
+<span class="sd">        )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
     <span class="c1">#if the input is a Tensor, create a Builder</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -1472,27 +1730,6 @@ table {
 
   </div>
   
-            
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.ApplicativeBase.unit">
-    <p>def <span class="ident">unit</span>(</p><p>self, f)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.unit', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.ApplicativeBase.unit" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
       </div>
       </div>
       
@@ -1531,9 +1768,9 @@ table {
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a copy of this Builder&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -1677,7 +1914,7 @@ table {
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
     <span class="nd">@immutable</span>
     <span class="k">def</span> <span class="nf">then</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -2038,7 +2275,7 @@ table {
   <div id="source-tensorbuilder.core.BuilderBase.copy" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a copy of this Builder&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">())</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">())</span>
 </pre></div>
 
   </div>
@@ -2148,7 +2385,7 @@ table {
 <span class="sd">        print(h)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tensor</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -2532,27 +2769,6 @@ table {
 
   </div>
   
-            
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.BuilderBase.unit">
-    <p>def <span class="ident">unit</span>(</p><p>self, tensor)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderBase.unit', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.BuilderBase.unit" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
       </div>
       </div>
       
@@ -2584,9 +2800,9 @@ table {
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_branches</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_branches</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
 
 
@@ -2737,7 +2953,7 @@ table {
 <span class="sd">            )</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span> <span class="n">builder</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="n">tree</span> <span class="p">]</span>
-        <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
 
     <span class="nd">@immutable</span>
     <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -2828,7 +3044,6 @@ table {
 
 <span class="sd">            import tensorflow as tf</span>
 <span class="sd">            from tensorbuilder import tb</span>
-
 
 <span class="sd">            def _tree_fully_connected(tree, size, *args, **kwargs):</span>
 <span class="sd">                activation_fn = None</span>
@@ -3228,7 +3443,7 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderTreeBase.copy', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.core.BuilderTreeBase.copy" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_branches</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_branches</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -3496,7 +3711,7 @@ table {
 <span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span> <span class="n">builder</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="n">tree</span> <span class="p">]</span>
-    <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">_unit</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -3663,7 +3878,6 @@ table {
 <p>In this example we will create the method <code>fully_connected</code> for the BuilderTree class</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
-
 
 <span class="k">def</span> <span class="nf">_tree_fully_connected</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">activation_fn</span> <span class="o">=</span> <span class="bp">None</span>
@@ -3907,27 +4121,6 @@ table {
 <span class="sd">        )</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span> <span class="n">builder</span><span class="o">.</span><span class="n">_tensor</span> <span class="k">for</span> <span class="n">builder</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">]</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-            
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.BuilderTreeBase.unit">
-    <p>def <span class="ident">unit</span>(</p><p>self, branches)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderTreeBase.unit', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.BuilderTreeBase.unit" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
 </pre></div>
 
   </div>

@@ -15,7 +15,7 @@ class TestBuilder(object):
 
     def test_unit(self):
         h = tf.nn.softmax(self.x)
-        h2 = tb.build(self.x).unit(h).tensor()
+        h2 = tb.build(self.x)._unit(h).tensor()
 
         assert h2 == h
 
