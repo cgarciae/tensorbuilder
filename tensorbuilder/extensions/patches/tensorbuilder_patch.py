@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorbuilder.core.builders import BuilderBase, BuilderTreeBase
-from tensorbuilder.core.dsl import ApplicativeBase
+from tensorbuilder.core.applicative import ApplicativeBase
 from tensorbuilder.core import utils
 import numpy as np
 import tflearn as tl
