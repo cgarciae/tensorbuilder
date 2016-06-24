@@ -5,7 +5,7 @@ Branching is common in many neural networks that need to resolve complex tasks b
 To create a branch you just have to use the `Builder.branch` method
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
@@ -40,7 +40,7 @@ To create a branch you just have to use the `Builder.branch` method
 Thanks to TensorBuilder's immutable API, each branch is independent. The previous can also be simplified with the full `patch`
 
     import tensorflow as tf
-    import tensorbuilder as tb
+    from tensorbuilder import tb
     import tensorbuilder.patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])

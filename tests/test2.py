@@ -1,5 +1,5 @@
 import tflearn
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patches.tflearn.patch
 import tensorbuilder.dsl as dl
 

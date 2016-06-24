@@ -32,6 +32,22 @@ def patch_classes(Builder, BuilderTree, Applicative):
     #### TREE
     ###############################
     def _tree_fully_connected(tree, size, *args, **kwargs):
+        """
+        Reduces all leaf nodes of a to a single layer. To do this, it first creates a `fully_connected` linear layer of size `size` for each leaf node, then it adds all these together to create a single layer. At this point if `activation_fn` is defined it applies it to this sum.
+
+        > **Note:** This function behaves slightly different to `tf.contrib.layers.fully_connected` since that function has `tf.nn.relu` as the default for `activation_fn`, that behavior might be unexpected so we initialize it as `None`.
+
+        **Arguments**
+
+        * `size`: the size of the resulting layer
+        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`
+
+        **Return**
+
+        Builder
+
+        **Examples**
+        """
         activation_fn = None
 
         if "activation_fn" in kwargs:
@@ -49,7 +65,12 @@ def patch_classes(Builder, BuilderTree, Applicative):
 
         return builder
 
-    BuilderTree.register_method(_tree_fully_connected, "tensorbuilder.patches.tensorflow.fully_connected", alias="fully_connected")
+    BuilderTree.register_method(
+        _tree_fully_connected,
+        "tensorbuilder.patches.tensorflow.fully_connected",
+        alias = "fully_connected",
+        doc = _tree_fully_connected.__doc__
+    )
 
     ###############################
     #### BUILDER
@@ -67,7 +88,6 @@ def patch_classes(Builder, BuilderTree, Applicative):
 
     def _get_layer_method(f):
         def _layer_method(builder, size, *args, **kwargs):
-
             kwargs['activation_fn'] = f
             return builder.fully_connected(size, *args, **kwargs)
 
@@ -88,22 +108,52 @@ def patch_classes(Builder, BuilderTree, Applicative):
         _layer_method = _get_layer_method(f)
 
         _layer_method.__name__ = _layer_name
-        _layer_method.__doc__ = _f_docs
+        _layer_method.__doc__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+Alias for `.fully_connected(size, activation_fn = {1}.{0}, ...)`
+
+**Arguments**
+
+* `size`: the size of the resulting layer
+* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`
+
+**Return**
+
+Builder
+
+**Origial documentation for {1}.{0}**
+
+    def {2}:
+
+{3}
+        """.format(_name, _module_name, _f_signature, _f_docs)
 
         # Builder
         Builder.register_map_method(f, _module_name) #This should go first
-        Builder.register_method(_layer_method, _module_name, alias=_layer_name)
+        Builder.register_method(_layer_method, _module_name, alias = _layer_name, doc = _layer_method.__doc__)
 
 
         # Tree
-        BuilderTree.register_method(_layer_method, _module_name, alias=_layer_name)
+        BuilderTree.register_method(_layer_method, _module_name, alias=_layer_name, doc = _layer_method.__doc__)
 
     #######################
     ### linear_layer
     #######################
 
     def linear_layer(builder, size, *args, **kwargs):
-        """Computes a `tf.contrib.layers.fully_connected` with `activation_fn = None`"""
+        """
+        Alias for `.fully_connected(size, activation_fn = None, ...)`
+
+        **Arguments**
+
+        * `size`: the size of the resulting layer
+        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`
+
+        **Return**
+
+        Builder
+        """
         kwargs['activation_fn'] = None
         return builder.fully_connected(size, *args, **kwargs)
 
@@ -139,10 +189,28 @@ def patch_classes(Builder, BuilderTree, Applicative):
         scope_method = get_scope_method(f)
 
         scope_method.__name__ = method_name
-        scope_method.__doc__ = f_docs
+        scope_method.__doc__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
+
+Alias for `.then_with({1}.{0}, ...)`
+
+**Arguments**
+
+* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`
+
+**Return**
+
+Function of type `(Builder -> Builder) -> Builder`
+
+**Origial documentation for {1}.{0}**
+
+    def {2}:
+
+{3}
+        """.format(name, module_name, f_signature, f_docs)
 
         # Builder
-        Builder.register_method(scope_method, module_name, alias=method_name)
+        Builder.register_method(scope_method, module_name, alias=method_name, doc = scope_method.__doc__)
 
     ###############################
     # tflearn
@@ -159,9 +227,7 @@ def patch_classes(Builder, BuilderTree, Applicative):
             def _lambda(builder):
                 g = getattr(builder, f.__name__)
                 return g(*args, **kwargs)
-
             return app.compose(_lambda)
-
         return _method
 
 
@@ -178,6 +244,24 @@ def patch_classes(Builder, BuilderTree, Applicative):
         _method = _get_app_method(f)
 
         _method.__name__ = _name
-        _method.__doc__ = _f_docs
+        _method.__doc__ = """
+THIS METHOD IS AUTOMATICALLY GENERATED
 
-        Applicative.register_method(_method, _module_name)
+Alias for `.compose({1}.{0}, ...)`
+
+**Arguments**
+
+* All other \*args and \*\*kwargs are forwarded to `{1}.{0}`
+
+**Return**
+
+Applicative
+
+**Origial documentation for {1}.{0}**
+
+    def {2}:
+
+{3}
+        """.format(_name, _module_name, _f_signature, _f_docs)
+
+        Applicative.register_method(_method, _module_name, doc = _method.__doc__)

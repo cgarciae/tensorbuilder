@@ -5,8 +5,7 @@
 
     <title>tensorbuilder API documentation</title>
     <meta name="description" content="# Tensor Builder
-
-TensorBuilder is light-weight extensible library that enables you to easily create..." />
+TensorBuilder is light-weight extensible library that enables you to easily create ..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -1043,7 +1042,7 @@ table {
 
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
-        <li class="mono"><a href="api.m.html">tensorbuilder.api</a></li>
+        <li class="mono"><a href="api/index.html">tensorbuilder.api</a></li>
         <li class="mono"><a href="core/index.html">tensorbuilder.core</a></li>
         <li class="mono"><a href="extensions/index.html">tensorbuilder.extensions</a></li>
         <li class="mono"><a href="tensordata.m.html">tensorbuilder.tensordata</a></li>
@@ -1069,25 +1068,18 @@ table {
 <li>Enable users to easily create complex branched topologies while maintaining a fluent API (see <a href="http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch">Builder.branch</a>)</li>
 <li>Let users be expressive and productive through a DSL</li>
 </ul>
-<h2>Features</h2>
-<ul>
-<li><strong>Branching</strong>: Enable to easily express complex complex topologies with a fluent API. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/branching/">Branching</a>.</li>
-<li><strong>Scoping</strong>: Enable you to express scopes for your tensor graph using methods such as <code>tf.device</code> and <code>tf.variable_scope</code> with the same fluent API. <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/scoping/">Scoping</a>.</li>
-<li><strong>DSL</strong>: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/">DSL</a>.</li>
-<li><strong>Patches</strong>: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from <code>TensorFlow</code> and <code>TFLearn</code>, but you can build you own to make TensorBuilder what you want it to be. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/patches/">Patches</a>.</li>
-</ul>
 <h2>Installation</h2>
 <p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
 <h4>From github</h4>
 <ol>
-<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.5</code></li>
+<li><code>pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.6</code></li>
 </ol>
 <h4>From pip</h4>
 <p>Coming soon!</p>
 <h2>Getting Started</h2>
 <p>Create neural network with a [5, 10, 3] architecture with a <code>softmax</code> output layer and a <code>tanh</code> hidden layer through a Builder and then get back its tensor:</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
@@ -1105,407 +1097,54 @@ table {
 </pre></div>
 
 
-<h2>The Guide</h2>
-<p>Check out the guide <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/">here</a>.</p>
+<h2>Features</h2>
+<ul>
+<li><strong>Branching</strong>: Enable to easily express complex complex topologies with a fluent API. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/branching/">Branching</a>.</li>
+<li><strong>Scoping</strong>: Enable you to express scopes for your tensor graph using methods such as <code>tf.device</code> and <code>tf.variable_scope</code> with the same fluent API. <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/scoping/">Scoping</a>.</li>
+<li><strong>DSL</strong>: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/">DSL</a>.</li>
+<li><strong>Patches</strong>: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from <code>TensorFlow</code> and <code>TFLearn</code>, but you can build you own to make TensorBuilder what you want it to be. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/patches/">Patches</a>.</li>
+</ul>
 <h2>Documentation</h2>
 <ul>
-<li>Complete documentation: <a href="http://cgarciae.github.io/tensorbuilder/">here</a>.</li>
-<li>Builder API: <a href="http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html">here</a>.</li>
+<li><a href="http://cgarciae.github.io/tensorbuilder/api/index.html">Complete API</a>.</li>
+<li><a href="http://cgarciae.github.io/tensorbuilder/core/index.html">Core API</a>.</li>
+<li><a href="http://cgarciae.github.io/tensorbuilder/index.html">Complete Documentation</a></li>
 </ul>
-<h2>Examples</h2>
-<p>Here are many examples to you give a taste of what it feels like to use TensorBuilder and teach you some basic patterns.</p>
-<h4>Showoff</h4>
-<p>Next is some more involved code so you see all the features in action. Its for learning the MNIST for images of 20x20 gray-scaled by using 3 relu-CNN branches with max pooling, then merging the branches through a fully connected relu layer with dropout, and finally connecting it to a softmax output layer.</p>
+<h2>The Guide</h2>
+<p>Check out <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/">The Guide</a>.</p>
+<h2>Full Example</h2>
+<p>Next is an example with all the features of TensorBuilder including the DSL, branching and scoping. It creates a branched computation where each branch is executed on a different device. All branches are then reduced to a single layer, but the computation is the branched again to obtain both the activation function and the trainer.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.patch</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
 
-<span class="c1"># Define variables</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">400</span><span class="p">])</span>
-<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
-<span class="c1">#Create the convolution function to be used by each brach</span>
-<span class="n">conv_branch</span> <span class="o">=</span> <span class="p">(</span>
-
-    <span class="n">dl</span><span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">max_pool_2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#This method is taken from `tflearn`</span>
-
-    <span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">max_pool_2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-
-    <span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+<span class="p">[</span><span class="n">activation</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span>
-    <span class="n">dl</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
     <span class="p">[</span>
-        <span class="n">conv_branch</span> <span class="c1">#Reuse code</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
     <span class="p">,</span>
-        <span class="n">conv_branch</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:1&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
     <span class="p">,</span>
-        <span class="n">conv_branch</span>
+        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/cpu:0&quot;</span><span class="p">):</span>
+            <span class="n">tb</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
     <span class="p">],</span>
-
-    <span class="n">dl</span>
-    <span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span> <span class="c1"># this fully connects all 3 branches into a single relu layer</span>
-    <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
-
-    <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="c1"># create a linear connection</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
     <span class="p">[</span>
-        <span class="n">dl</span><span class="o">.</span><span class="n">softmax</span><span class="p">()</span> <span class="c1"># h</span>
+        <span class="n">tb</span><span class="o">.</span><span class="n">softmax</span><span class="p">()</span> <span class="c1"># activation</span>
     <span class="p">,</span>
-        <span class="p">(</span><span class="n">dl</span>
-        <span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">),</span> <span class="c1">#calculte loss</span>
-        <span class="p">[</span>
-            <span class="n">dl</span> <span class="c1"># loss</span>
-        <span class="p">,</span>
-            <span class="n">dl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span> <span class="c1"># trainer</span>
-        <span class="p">])</span>
+        <span class="n">tb</span>
+        <span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="c1"># loss</span>
+        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span> <span class="c1"># trainer</span>
     <span class="p">],</span>
-    <span class="n">dl</span><span class="o">.</span><span class="n">tensors</span><span class="p">()</span> <span class="c1">#get the list of tensors from the previous BuilderTree</span>
+    <span class="n">tb</span><span class="o">.</span><span class="n">tensors</span><span class="p">()</span>
 <span class="p">)</span>
-
-<span class="k">print</span> <span class="n">h</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">trainer</span>
-</pre></div>
-
-
-<p>Notice that:</p>
-<ol>
-<li>We where able to reuse code easily by specifying the logic for the branches separately using the same syntax</li>
-<li>Branches are expressed naturally as a list thanks to the DSL, the indentation levels match the depth of the tree. Nested branches are just as easy.</li>
-<li>Most methods presented are functions from <code>tensorflow</code> that your are probably used to.</li>
-</ol>
-<p><strong>WARNING: Examples next probably work but might be removed</strong></p>
-<h6></h6>
-<h5>FUNCTIONS</h5>
-<h6></h6>
-<h6></h6>
-<h5>builder</h5>
-<h6></h6>
-<p>The following example shows you how to construct a <code>tensorbuilder.tensorbuilder.Builder</code> from a tensorflow Tensor.</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
-<span class="n">a_builder</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">a_builder</span><span class="p">)</span>
-</pre></div>
-
-
-<p>The previous is the same as</p>
-<div class="codehilite"><pre><span></span>a = tf.placeholder(tf.float32, shape=[None, 8])
-a_builder = a.builder()
-
-print(a_builder)
-</pre></div>
-
-
-<h6></h6>
-<h5>branches</h5>
-<h6></h6>
-<p>Given a list of Builders and/or BuilderTrees you construct a <code>tensorbuilder.tensorbuilder.BuilderTree</code>.</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-
-<span class="n">tree</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">branches</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-</pre></div>
-
-
-<p><code>tensorbuilder.tensorbuilder.BuilderTree</code>s are usually constructed using <code>tensorbuilder.tensorbuilder.Builder.branch</code> of the <code>tensorbuilder.tensorbuilder.Builder</code> class, but you can use this for special cases</p>
-<h6></h6>
-<h5>BUILDER</h5>
-<h6></h6>
-<h6></h6>
-<h5>fully_connected</h5>
-<h6></h6>
-<p>This method is included by many libraries so its "sort of" part of TensorBuilder. The following builds the computation <code>tf.nn.sigmoid(tf.matmul(x, w) + b)</code></p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span>
-  <span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-</pre></div>
-
-
-<p>Using <code>tensorbuilder.patch</code> the previous is equivalent to</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span>
-  <span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>map</h5>
-<h6></h6>
-<p>If you have a function f that takes a tensor as first arguments and then some *args and **kwargs, you can use the <code>map</code> method to use that function naturally. Take this TFLearn code for example</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tflearn</span> <span class="kn">as</span> <span class="nn">tl</span>
-
-<span class="n">net</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">input_data</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">784</span><span class="p">])</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">regression</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">DNN</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
-</pre></div>
-
-
-<p>We can rewrite it with TensorBuilder simply by using <code>map</code>.</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tflearn</span> <span class="kn">as</span> <span class="nn">tl</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="p">(</span>
-  <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">input_data</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">784</span><span class="p">]))</span>
-  <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">dropout</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">regression</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;categorical_crossentropy&#39;</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tl</span><span class="o">.</span><span class="n">DNN</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>then</h5>
-<h6></h6>
-<p>The following <em>manually</em> constructs the computation <code>tf.nn.sigmoid(tf.matmul(x, w) + b)</code> while updating the <code>tensorbuilder.tensorbuiler.Builder.variables</code> dictionary.</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">40</span><span class="p">])</span>
-<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">sigmoid_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">size</span>
-
-    <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">([</span><span class="n">n</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
-
-    <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">sigmoid_layer</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-<span class="p">)</span>
-</pre></div>
-
-
-<p>Note that the previous if equivalent to</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>branch</h5>
-<h6></h6>
-<p>The following will create a sigmoid layer but will branch the computation at the logit (z) so you get both the output tensor <code>h</code> and <code>trainer</code> tensor. Observe that first the logit <code>z</code> is calculated by creating a linear layer with <code>fully_connected(1)</code> and then its branched out</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-<span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span>
-    <span class="p">[</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">()</span>
-    <span class="p">,</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
-    <span class="p">])</span>
-    <span class="o">.</span><span class="n">tensors</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
-</pre></div>
-
-
-<p>Note that you have to use the <code>tensorbuilder.tensorbuilder.BuilderTree.tensors</code> method from the <code>tensorbuilder.tensorbuilder.BuilderTree</code> class to get the tensors back.</p>
-<p>Remember that you can also contain <code>tensorbuilder.tensorbuilder.BuilderTree</code> elements when you branch out, this means that you can keep branching inside branch. Don't worry that the tree keep getting deeper, <code>tensorbuilder.tensorbuilder.BuilderTree</code> has methods that help you flatten or reduce the tree.
-The following example will show you how create a (overly) complex tree and then connect all the leaf nodes to a single <code>sigmoid</code> layer</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-<span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base</span><span class="p">:</span>
-    <span class="p">[</span>
-        <span class="n">base</span>
-        <span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-    <span class="p">,</span>
-        <span class="n">base</span>
-        <span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">base2</span><span class="p">:</span>
-        <span class="p">[</span>
-            <span class="n">base2</span>
-            <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-        <span class="p">,</span>
-            <span class="n">base2</span>
-            <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-        <span class="p">])</span>
-    <span class="p">])</span>
-    <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>BUILDER TREE</h5>
-<h6></h6>
-<h6></h6>
-<h5>builders</h5>
-<h6></h6>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-<span class="p">[</span><span class="n">h_builder</span><span class="p">,</span> <span class="n">trainer_builder</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span>
-    <span class="p">[</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">()</span>
-    <span class="p">,</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
-    <span class="p">])</span>
-    <span class="o">.</span><span class="n">builders</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h_builder</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">trainer_builder</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>tensors</h5>
-<h6></h6>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-<span class="p">[</span><span class="n">h_tensor</span><span class="p">,</span> <span class="n">trainer_tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span>
-    <span class="p">[</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">())</span>
-    <span class="p">,</span>
-        <span class="n">z</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
-    <span class="p">])</span>
-    <span class="o">.</span><span class="n">tensors</span><span class="p">()</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h_tensor</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">trainer_tensor</span><span class="p">)</span>
-</pre></div>
-
-
-<h6></h6>
-<h5>fully_connected</h5>
-<h6></h6>
-<p>The following example shows you how to connect two tensors (rather builders) of different shapes to a single <code>softmax</code> layer of shape [None, 3]</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">branches</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-</pre></div>
-
-
-<p>The next example show you how you can use this to pass the input layer directly through one branch, and "analyze" it with a <code>tanh_layer</code> filter through the other, both of these are connect to a single <code>softmax</code> output layer</p>
-<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
-<span class="kn">import</span> <span class="nn">tensorbuilder.slim_patch</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">branch</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
-    <span class="p">[</span>
-            <span class="n">x</span>
-    <span class="p">,</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-    <span class="p">])</span>
-    <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 </pre></div>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder', this);">Show source &equiv;</a></p>
@@ -1529,8 +1168,7 @@ The following example will show you how create a (overly) complex tree and then 
 <span class="kn">import</span> <span class="nn">extensions</span>
 <span class="kn">import</span> <span class="nn">api</span>
 
-<span class="kn">from</span> <span class="nn">api</span> <span class="kn">import</span> <span class="o">*</span>
-
+<span class="n">tb</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">API</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
 
 <span class="c1">#pdoc</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="s2">&quot;tensordata&quot;</span><span class="p">,</span> <span class="s2">&quot;extensions&quot;</span><span class="p">,</span> <span class="s2">&quot;api&quot;</span><span class="p">]</span>
@@ -1546,7 +1184,7 @@ The following example will show you how create a (overly) complex tree and then 
 
     <h2 class="section-title" id="header-submodules">Sub-modules</h2>
       <div class="item">
-      <p class="name"><a href="api.m.html">tensorbuilder.api</a></p>
+      <p class="name"><a href="api/index.html">tensorbuilder.api</a></p>
       
   
 
