@@ -4,7 +4,7 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 ### Goals
 
 * Be a light-wrapper around Tensor-based libraries
-* Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/tensorbuilder.m.html#tensorbuilder.tensorbuilder.Builder.branch))
+* Enable users to easily create complex branched topologies while maintaining a fluent API (see [Builder.branch](http://cgarciae.github.io/tensorbuilder/api/builder.m.html#tensorbuilder.api.builders.Builder.branch))
 * Let users be expressive and productive through a DSL
 
 ## Installation
