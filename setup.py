@@ -25,9 +25,15 @@ setup(
    	packages = [
         'tensorbuilder',
         'tensorbuilder.core',
+        'tensorbuilder.api',
         'tensorbuilder.extensions',
         'tensorbuilder.extensions.patches',
+        'tensorbuilder.tests'
     ],
+    package_data={
+        '': ['LICENCE'],
+        'tensorbuilder': ['version.txt', 'README-template.md']
+    },
     long_description = read('README.md'),
     install_requires = reqs
 )

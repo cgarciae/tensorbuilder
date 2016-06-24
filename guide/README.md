@@ -58,7 +58,6 @@ Next is an example with all the features of TensorBuilder including the DSL, bra
     from tensorbuilder import tb
 
     x = placeholder(tf.float32, shape=[None, 10])
-    y = placeholder(tf.float32, shape=[None, 5])
 
     [activation, trainer] = tb.pipe(
         x,
@@ -75,15 +74,8 @@ Next is an example with all the features of TensorBuilder including the DSL, bra
                 tb.tanh_layer(20)
             }
         ],
-        tb.linear_layer(5),
-        [
-            tb.softmax() # activation
-        ,
-            tb
-            .softmax_cross_entropy_with_logits(y) # loss
-            .map(tf.train.AdamOptimizer(0.01).minimize) # trainer
-        ],
-        tb.tensors()
+        tb.softmax_layer(5)
+        .tensor()
     )
 
 
