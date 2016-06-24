@@ -1096,6 +1096,22 @@ table {
     <span class="c1">#### TREE</span>
     <span class="c1">###############################</span>
     <span class="k">def</span> <span class="nf">_tree_fully_connected</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces all leaf nodes of a to a single layer. To do this, it first creates a `fully_connected` linear layer of size `size` for each leaf node, then it adds all these together to create a single layer. At this point if `activation_fn` is defined it applies it to this sum.</span>
+
+<span class="sd">        &gt; **Note:** This function behaves slightly different to `tf.contrib.layers.fully_connected` since that function has `tf.nn.relu` as the default for `activation_fn`, that behavior might be unexpected so we initialize it as `None`.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `size`: the size of the resulting layer</span>
+<span class="sd">        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        Builder</span>
+
+<span class="sd">        **Examples**</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">activation_fn</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="k">if</span> <span class="s2">&quot;activation_fn&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -1113,7 +1129,12 @@ table {
 
         <span class="k">return</span> <span class="n">builder</span>
 
-    <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_tree_fully_connected</span><span class="p">,</span> <span class="s2">&quot;tensorbuilder.patches.tensorflow.fully_connected&quot;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;fully_connected&quot;</span><span class="p">)</span>
+    <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span>
+        <span class="n">_tree_fully_connected</span><span class="p">,</span>
+        <span class="s2">&quot;tensorbuilder.patches.tensorflow.fully_connected&quot;</span><span class="p">,</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="s2">&quot;fully_connected&quot;</span><span class="p">,</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">_tree_fully_connected</span><span class="o">.</span><span class="n">__doc__</span>
+    <span class="p">)</span>
 
     <span class="c1">###############################</span>
     <span class="c1">#### BUILDER</span>
@@ -1131,7 +1152,6 @@ table {
 
     <span class="k">def</span> <span class="nf">_get_layer_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">_layer_method</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;activation_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
             <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1152,22 +1172,52 @@ table {
         <span class="n">_layer_method</span> <span class="o">=</span> <span class="n">_get_layer_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">_layer_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_layer_name</span>
-        <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_f_docs</span>
+        <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
+
+<span class="s2">Alias for `.fully_connected(size, activation_fn = {1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* `size`: the size of the resulting layer</span>
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Builder</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
 
         <span class="c1"># Builder</span>
         <span class="n">Builder</span><span class="o">.</span><span class="n">register_map_method</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">)</span> <span class="c1">#This should go first</span>
-        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">)</span>
+        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span> <span class="o">=</span> <span class="n">_layer_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
 
         <span class="c1"># Tree</span>
-        <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">)</span>
+        <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
     <span class="c1">#######################</span>
     <span class="c1">### linear_layer</span>
     <span class="c1">#######################</span>
 
     <span class="k">def</span> <span class="nf">linear_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes a `tf.contrib.layers.fully_connected` with `activation_fn = None`&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alias for `.fully_connected(size, activation_fn = None, ...)`</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `size`: the size of the resulting layer</span>
+<span class="sd">        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        Builder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;activation_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1203,10 +1253,28 @@ table {
         <span class="n">scope_method</span> <span class="o">=</span> <span class="n">get_scope_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">scope_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">method_name</span>
-        <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">f_docs</span>
+        <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
+
+<span class="s2">Alias for `.then_with({1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Function of type `(Builder -&gt; Builder) -&gt; Builder`</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">f_signature</span><span class="p">,</span> <span class="n">f_docs</span><span class="p">)</span>
 
         <span class="c1"># Builder</span>
-        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">scope_method</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">method_name</span><span class="p">)</span>
+        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">scope_method</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">method_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
     <span class="c1">###############################</span>
     <span class="c1"># tflearn</span>
@@ -1223,9 +1291,7 @@ table {
             <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
                 <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
             <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">_method</span>
 
 
@@ -1242,9 +1308,27 @@ table {
         <span class="n">_method</span> <span class="o">=</span> <span class="n">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_name</span>
-        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_f_docs</span>
+        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
 
-        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">)</span>
+<span class="s2">Alias for `.compose({1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `{1}.{0}`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Applicative</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
+
+        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1291,6 +1375,22 @@ table {
     <span class="c1">#### TREE</span>
     <span class="c1">###############################</span>
     <span class="k">def</span> <span class="nf">_tree_fully_connected</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduces all leaf nodes of a to a single layer. To do this, it first creates a `fully_connected` linear layer of size `size` for each leaf node, then it adds all these together to create a single layer. At this point if `activation_fn` is defined it applies it to this sum.</span>
+
+<span class="sd">        &gt; **Note:** This function behaves slightly different to `tf.contrib.layers.fully_connected` since that function has `tf.nn.relu` as the default for `activation_fn`, that behavior might be unexpected so we initialize it as `None`.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `size`: the size of the resulting layer</span>
+<span class="sd">        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        Builder</span>
+
+<span class="sd">        **Examples**</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">activation_fn</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="k">if</span> <span class="s2">&quot;activation_fn&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -1308,7 +1408,12 @@ table {
 
         <span class="k">return</span> <span class="n">builder</span>
 
-    <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_tree_fully_connected</span><span class="p">,</span> <span class="s2">&quot;tensorbuilder.patches.tensorflow.fully_connected&quot;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;fully_connected&quot;</span><span class="p">)</span>
+    <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span>
+        <span class="n">_tree_fully_connected</span><span class="p">,</span>
+        <span class="s2">&quot;tensorbuilder.patches.tensorflow.fully_connected&quot;</span><span class="p">,</span>
+        <span class="n">alias</span> <span class="o">=</span> <span class="s2">&quot;fully_connected&quot;</span><span class="p">,</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">_tree_fully_connected</span><span class="o">.</span><span class="n">__doc__</span>
+    <span class="p">)</span>
 
     <span class="c1">###############################</span>
     <span class="c1">#### BUILDER</span>
@@ -1326,7 +1431,6 @@ table {
 
     <span class="k">def</span> <span class="nf">_get_layer_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">_layer_method</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;activation_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
             <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1347,22 +1451,52 @@ table {
         <span class="n">_layer_method</span> <span class="o">=</span> <span class="n">_get_layer_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">_layer_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_layer_name</span>
-        <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_f_docs</span>
+        <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
+
+<span class="s2">Alias for `.fully_connected(size, activation_fn = {1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* `size`: the size of the resulting layer</span>
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Builder</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
 
         <span class="c1"># Builder</span>
         <span class="n">Builder</span><span class="o">.</span><span class="n">register_map_method</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">)</span> <span class="c1">#This should go first</span>
-        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">)</span>
+        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span> <span class="o">=</span> <span class="n">_layer_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
 
         <span class="c1"># Tree</span>
-        <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">)</span>
+        <span class="n">BuilderTree</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_layer_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">_layer_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_layer_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
     <span class="c1">#######################</span>
     <span class="c1">### linear_layer</span>
     <span class="c1">#######################</span>
 
     <span class="k">def</span> <span class="nf">linear_layer</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Computes a `tf.contrib.layers.fully_connected` with `activation_fn = None`&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Alias for `.fully_connected(size, activation_fn = None, ...)`</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `size`: the size of the resulting layer</span>
+<span class="sd">        * All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        Builder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;activation_fn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1398,10 +1532,28 @@ table {
         <span class="n">scope_method</span> <span class="o">=</span> <span class="n">get_scope_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">scope_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">method_name</span>
-        <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">f_docs</span>
+        <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
+
+<span class="s2">Alias for `.then_with({1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `tf.contrib.layers.fully_connected`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Function of type `(Builder -&gt; Builder) -&gt; Builder`</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">f_signature</span><span class="p">,</span> <span class="n">f_docs</span><span class="p">)</span>
 
         <span class="c1"># Builder</span>
-        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">scope_method</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">method_name</span><span class="p">)</span>
+        <span class="n">Builder</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">scope_method</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">method_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">scope_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 
     <span class="c1">###############################</span>
     <span class="c1"># tflearn</span>
@@ -1418,9 +1570,7 @@ table {
             <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
                 <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
             <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">_method</span>
 
 
@@ -1437,9 +1587,27 @@ table {
         <span class="n">_method</span> <span class="o">=</span> <span class="n">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
         <span class="n">_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_name</span>
-        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">_f_docs</span>
+        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
 
-        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">)</span>
+<span class="s2">Alias for `.compose({1}.{0}, ...)`</span>
+
+<span class="s2">**Arguments**</span>
+
+<span class="s2">* All other \*args and \*\*kwargs are forwarded to `{1}.{0}`</span>
+
+<span class="s2">**Return**</span>
+
+<span class="s2">Applicative</span>
+
+<span class="s2">**Origial documentation for {1}.{0}**</span>
+
+<span class="s2">    def {2}:</span>
+
+<span class="s2">{3}</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
+
+        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
 </pre></div>
 
   </div>
