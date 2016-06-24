@@ -1,4 +1,4 @@
 #! /bin/bash
 cd /tensorbuilder
 PYTHONPATH= pdoc --html-dir=docs --html tensorbuilder --only-pypath --overwrite
-python -c "from tensorbuilder import tb; import os; open('README.md', 'w').write(tb.__doc__); open('guide/README.md', 'w').write(tb.__doc__)"
+python -c "import tensorbuilder; import os; open('README.md', 'w').write(tensorbuilder.__doc__); open('guide/README.md', 'w').write(tensorbuilder.__doc__)"
