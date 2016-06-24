@@ -2,7 +2,7 @@
 
 # Here is an example using the `tflearn` patch
 import tflearn
-import tensorbuilder as tb
+from tensorbuilder import tb
 import tensorbuilder.patches.tflearn.patch
 
 model = (

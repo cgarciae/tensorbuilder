@@ -26,7 +26,6 @@ setup(
         'tensorbuilder',
         'tensorbuilder.core',
         'tensorbuilder.extensions',
-        'tensorbuilder.guide',
         'tensorbuilder.extensions.patches',
     ],
     long_description = read('README.md'),

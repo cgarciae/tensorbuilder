@@ -1,42 +1,65 @@
 # DSL
 
-TensorBuilder includes a dsl to make creating complex neural networks even easier. Use it if you are experimenting with complex architectures with branches, otherwise stick to basic API. The DSL has these rules:
+TensorBuilder's DSL enables you to express the computation do desire to do into a single flexible structure. The DSL preserves all features of given to you by the `Builder` class:
 
-* All elements in the "AST" must be functions of type `Builder -> Builder`
-* A tuple `()` denotes a sequential operation and results in the composition of all functions within it, since its also an element, it compiles to a function that takes a builder and applies the inner composed function.
-* A list `[]` denotes a branching operation and results in creating a function that applies the `.branch` method to its argument, since its also an element, it compiles to a function of type `Builder -> BuilderTree`.
+* Composing operations
+* Branching
+* Scoping
 
-To use the DSL you have to import the `tensorbuilder.dsl` module, in patches the `tensorbuilder.tensorbuilder.Builder` class with a `tensorbuilder.tensorbuilder.Builder.pipe` methods that takes an "AST" of such form, compiles it to a function which represents the desired transformation, and finally applies it to the instance `Builder`. The extra argument of `pipe` (\*args) are treated as tuple, so you don't need to include on the first layer.
-The `dsl` ships with functions with the same names as all the methods in the `Builder` class, so you get the same API, plus its operations are also chainable so you have to do very little to you code if you want to use the DSL.
+The `Applicative` was built to create elements that are accepted/play well will this language. It also two very import methods
 
-Lets see an example, here is the previous example about branching with the the full `patch`, this time using the `dsl` module
+* `compile`: generates a function out a given valid **ast**/structure (compiles it)
+* `pipe`: given `Builder` or `Tensor` and an **ast**, compile it to a function and apply it to the Tensor/Builder.
+
+## Rules
+
+* All final elements in the "AST" must be functions, non final elements are compiled to a function.
+* A Tuple `()` denotes a sequential operation. Results in the composition of all elements within it.
+* A List `[]` denotes a branching operation. Results in the creation of a function that applies the `.branch` method to its argument, and each element in the list results in a branch. It compiles to a function of type `Builder -> BuilderTree`.
+* A Dict `{}` denotes a scoping operation. It only accepts a single key-value pair, its key must me a [Disposable](https://www.python.org/dev/peps/pep-0343/) and its value can be any element of the language. It results in the creation of a function that takes a `Builder` as its argument, applies the `with` statemente to the `key` and applies the function of the `value` to its argument inside the `with` block.
+
+## Example
+
+Its easier to see the actual DSL with an example, especially because you can see a direct mapping of the concepts brought by the `Builder` class into the DSL:
 
     import tensorflow as tf
-    import tensorbuilder as tb
-    import tensorbuilder.patch
-    import tensorbuilder.dsl as dl #<== Notice the alias
+    from tensorbuilder import tb
 
-    x = tf.placeholder(tf.float32, shape=[None, 5])
-    keep_prob = tf.placeholder(tf.float32)
+    x = placeholder(tf.float32, shape=[None, 10])
+    y = placeholder(tf.float32, shape=[None, 5])
 
-    h = x.builder().pipe(
-        dl.fully_connected(10),
+    [h, trainer] = tb.pipe(
+        x,
         [
-            dl.relu_layer(3)
+            { tf.device("/gpu:0"):
+                tb.relu_layer(20)
+            }
         ,
-            (dl.tanh_layer(9),
-            [
-              	dl.sigmoid_layer(6)
-            ,
-                dl
-                .dropout(keep_prob)
-                .softmax_layer(8)
-            ])
+            { tf.device("/gpu:1"):
+                tb.sigmoid_layer(20)
+            }
+        ,
+            { tf.device("/cpu:0"):
+                tb.tanh_layer(20)
+            }
         ],
-        dl.sigmoid_layer(6)
-        .tensor()
+        tb.relu_layer(10)
+        .linear_layer(5),
+        [
+            tb.softmax() # h
+        ,
+            tb.softmax_cross_entropy_with_logits(y)
+            .reduce_mean()
+            .map(tf.trainer.AdamOptimizer(0.01).minimize) # trainer
+        ],
+        tb.tensors()
     )
 
-    print(h)
+Lets go step by step to what is happening here:
 
-As you see a lot of noise is gone, some `dl` terms appeared, and a few `,`s where introduced, but the end result better reveals the structure of you network, plus its very easy to modify.
+1. The Tensor `x` pluged inside a `Builder` and *piped* through the computational structured defined. All the arguments of `pipe` after `x` are grouped as if they were in a tuple `()` and the whole expression is compiled to a single function with is then applied to the `Buider` containing `x`.
+1. **final** elements you see here like `tb.softmax()` are `Applicative`s which as you've been told are functions. As you see, *almost* all methods from the `Builder` class are also methods from the `Applicative` class, the diference is that the methods of the `Builder` class actually perform the computation they intend (construct a new Tensor), but the methods from the `Applicative` class rather *compose/define* the computation to be done later.
+1. There is an implicit Tuple `()` element that is performing a sequential composition of all the other elements. As a result, the visual/spatial ordering of the code corresponds to the intended behavior.
+1. Lists very naturally express branches. Notice how indentation and an intentional positioning of the `,` comma help to diferentiate each branch.
+1. Expresions like `tb.relu_layer(10)` are polymorphic and work for `Builder`s or `BuilderTree`s regardless.
+1. Scoping is very clean with the `{}` notation. In constrast to using `then_with` from the `Builder` class, here you can actually use the original functions from `tensorflow` unchanged in the `key` of the dict.
