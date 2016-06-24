@@ -1857,14 +1857,53 @@ table {
 <span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tensordata</span>
 
 <span class="k">class</span> <span class="nc">API</span><span class="p">(</span><span class="n">applicative</span><span class="o">.</span><span class="n">Applicative</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;docstring for API&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class represents the public API of TensorBuilder that is created as a class and given to the user as the instance object `tb`. This is done because modules cannot define `__call__` and being function is important for the DSL. `tb` is actually an Applicative that contains the identity function, therefore you can use `tb` as an element inside and expression whenever you need to just return the argument. This is useful because in some cases you create branches in which one just contains the argument unmodified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">API</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a Tensor and returns a Builder that contians it.</span>
+
+<span class="sd">        ** Parameters **</span>
+
+<span class="sd">        * `tensor`: a tensorflow Tensor</span>
+
+
+<span class="sd">        #### Example</span>
+<span class="sd">        The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            import tensorbuilder as tb</span>
+
+<span class="sd">            a = tf.placeholder(tf.float32, shape=[None, 8])</span>
+<span class="sd">            a_builder = tb.build(a)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Builder</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder_iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes an iterable with elements of type `Builder` or `BuilderTree` and returns a `BuilderTree`</span>
+
+<span class="sd">        ** Parameters **</span>
+
+<span class="sd">        * `builder_iterable`: list of type `iterable( Builder | BuilderTree)`</span>
+
+<span class="sd">        #### Example</span>
+<span class="sd">        Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            import tensorbuilder as tb</span>
+
+<span class="sd">            a = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))</span>
+<span class="sd">            b = tb.build(tf.placeholder(tf.float32, shape=[None, 12]))</span>
+
+<span class="sd">            tree = tb.branches([a, b])</span>
+
+<span class="sd">        &gt; **Note:** Ideally `BuilderTree`s are constructed using `Builder.branch`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">BuilderTree</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
 
 <span class="n">API</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tensordata</span><span class="o">.</span><span class="n">data</span>
@@ -1887,19 +1926,58 @@ table {
       <p id="tensorbuilder.api.api.API" class="name">class <span class="ident">API</span></p>
       
   
-    <div class="desc"><p>docstring for API</p></div>
+    <div class="desc"><p>This class represents the public API of TensorBuilder that is created as a class and given to the user as the instance object <code>tb</code>. This is done because modules cannot define <code>__call__</code> and being function is important for the DSL. <code>tb</code> is actually an Applicative that contains the identity function, therefore you can use <code>tb</code> as an element inside and expression whenever you need to just return the argument. This is useful because in some cases you create branches in which one just contains the argument unmodified.</p></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.api.api.API', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.api.api.API" class="source">
     <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">API</span><span class="p">(</span><span class="n">applicative</span><span class="o">.</span><span class="n">Applicative</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;docstring for API&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class represents the public API of TensorBuilder that is created as a class and given to the user as the instance object `tb`. This is done because modules cannot define `__call__` and being function is important for the DSL. `tb` is actually an Applicative that contains the identity function, therefore you can use `tb` as an element inside and expression whenever you need to just return the argument. This is useful because in some cases you create branches in which one just contains the argument unmodified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">API</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a Tensor and returns a Builder that contians it.</span>
+
+<span class="sd">        ** Parameters **</span>
+
+<span class="sd">        * `tensor`: a tensorflow Tensor</span>
+
+
+<span class="sd">        #### Example</span>
+<span class="sd">        The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            import tensorbuilder as tb</span>
+
+<span class="sd">            a = tf.placeholder(tf.float32, shape=[None, 8])</span>
+<span class="sd">            a_builder = tb.build(a)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Builder</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder_iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes an iterable with elements of type `Builder` or `BuilderTree` and returns a `BuilderTree`</span>
+
+<span class="sd">        ** Parameters **</span>
+
+<span class="sd">        * `builder_iterable`: list of type `iterable( Builder | BuilderTree)`</span>
+
+<span class="sd">        #### Example</span>
+<span class="sd">        Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
+
+<span class="sd">            import tensorflow as tf</span>
+<span class="sd">            import tensorbuilder as tb</span>
+
+<span class="sd">            a = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))</span>
+<span class="sd">            b = tb.build(tf.placeholder(tf.float32, shape=[None, 12]))</span>
+
+<span class="sd">            tree = tb.branches([a, b])</span>
+
+<span class="sd">        &gt; **Note:** Ideally `BuilderTree`s are constructed using `Builder.branch`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">BuilderTree</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
 </pre></div>
 
@@ -10696,10 +10774,43 @@ boolean_mask(tensor, mask) ==&gt; [[1, 2], [5, 6]]
 
     
   
+    <div class="desc"><p>Takes an iterable with elements of type <code>Builder</code> or <code>BuilderTree</code> and returns a <code>BuilderTree</code></p>
+<p><strong> Parameters </strong></p>
+<ul>
+<li><code>builder_iterable</code>: list of type <code>iterable( Builder | BuilderTree)</code></li>
+</ul>
+<h4>Example</h4>
+<p>Given a list of Builders and/or BuilderTrees you construct a <code>tensorbuilder.tensorbuilder.BuilderTree</code> like this</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">12</span><span class="p">]))</span>
+
+<span class="n">tree</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">branches</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+</pre></div>
+
+
+<blockquote>
+<p><strong>Note:</strong> Ideally <code>BuilderTree</code>s are constructed using <code>Builder.branch</code>.</p>
+</blockquote></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.api.api.API.branches', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.api.api.API.branches" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder_iterable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an iterable with elements of type `Builder` or `BuilderTree` and returns a `BuilderTree`</span>
+<span class="sd">    ** Parameters **</span>
+<span class="sd">    * `builder_iterable`: list of type `iterable( Builder | BuilderTree)`</span>
+<span class="sd">    #### Example</span>
+<span class="sd">    Given a list of Builders and/or BuilderTrees you construct a `tensorbuilder.tensorbuilder.BuilderTree` like this</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        a = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))</span>
+<span class="sd">        b = tb.build(tf.placeholder(tf.float32, shape=[None, 12]))</span>
+<span class="sd">        tree = tb.branches([a, b])</span>
+<span class="sd">    &gt; **Note:** Ideally `BuilderTree`s are constructed using `Builder.branch`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">BuilderTree</span><span class="p">(</span><span class="n">builder_iterable</span><span class="p">)</span>
 </pre></div>
 
@@ -10717,10 +10828,34 @@ boolean_mask(tensor, mask) ==&gt; [[1, 2], [5, 6]]
 
     
   
+    <div class="desc"><p>Takes a Tensor and returns a Builder that contians it.</p>
+<p><strong> Parameters </strong></p>
+<ul>
+<li><code>tensor</code>: a tensorflow Tensor</li>
+</ul>
+<h4>Example</h4>
+<p>The following example shows you how to construct a <code>tensorbuilder.tensorbuilder.Builder</code> from a tensorflow Tensor.</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorbuilder</span> <span class="kn">as</span> <span class="nn">tb</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+<span class="n">a_builder</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div></div>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.api.api.API.build', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.api.api.API.build" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a Tensor and returns a Builder that contians it.</span>
+<span class="sd">    ** Parameters **</span>
+<span class="sd">    * `tensor`: a tensorflow Tensor</span>
+<span class="sd">    #### Example</span>
+<span class="sd">    The following example shows you how to construct a `tensorbuilder.tensorbuilder.Builder` from a tensorflow Tensor.</span>
+<span class="sd">        import tensorflow as tf</span>
+<span class="sd">        import tensorbuilder as tb</span>
+<span class="sd">        a = tf.placeholder(tf.float32, shape=[None, 8])</span>
+<span class="sd">        a_builder = tb.build(a)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Builder</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
 </pre></div>
 
