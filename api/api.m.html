@@ -1373,6 +1373,7 @@ table {
     <li class="mono"><a href="#tensorbuilder.api.api.API.histogram_fixed_width_layer">histogram_fixed_width_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.api.api.API.histogram_summary">histogram_summary</a></li>
     <li class="mono"><a href="#tensorbuilder.api.api.API.histogram_summary_layer">histogram_summary_layer</a></li>
+    <li class="mono"><a href="#tensorbuilder.api.api.API.identity">identity</a></li>
     <li class="mono"><a href="#tensorbuilder.api.api.API.identity_layer">identity_layer</a></li>
     <li class="mono"><a href="#tensorbuilder.api.api.API.ifft">ifft</a></li>
     <li class="mono"><a href="#tensorbuilder.api.api.API.ifft2d">ifft2d</a></li>
@@ -24334,6 +24335,57 @@ has one summary value containing a histogram for <code>values</code>.</p>
   <div class="source_cont">
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.api.api.API.histogram_summary_layer', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.api.api.API.histogram_summary_layer" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.api.api.API.identity">
+    <p>def <span class="ident">identity</span>(</p><p>app, *args, **kwargs)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>THIS METHOD IS AUTOMATICALLY GENERATED</p>
+<p>Alias for <code>.compose(Builder.identity, ...)</code></p>
+<p><strong>Arguments</strong></p>
+<ul>
+<li>All other *args and **kwargs are forwarded to <code>Builder.identity</code></li>
+</ul>
+<p><strong>Return</strong></p>
+<p>Applicative</p>
+<p><strong>Origial documentation for Builder.identity</strong></p>
+<div class="codehilite"><pre><span></span>def identity(builder):
+</pre></div>
+
+
+<p>THIS METHOD IS AUTOMATICALLY GENERATED</p>
+<p><strong>@immutable</strong></p>
+<p>This method is a lifted version the function <code>tf.identity</code> to work with <code>tensorbuilder.core.builders.Builder</code>s. Instead of taking a Tensor as its first argument it takes a builder, the rest of the arguments are exactly the same.</p>
+<p><strong> Original Documentation for <code>tf.identity</code></strong></p>
+<div class="codehilite"><pre><span></span>def identity(input, name=None)
+</pre></div>
+
+
+<p>Return a tensor with the same shape and contents as the input tensor or value.</p>
+<p>Args:
+  input: A <code>Tensor</code>.
+  name: A name for the operation (optional).</p>
+<p>Returns:
+  A <code>Tensor</code>. Has the same type as <code>input</code>.</p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.api.api.API.identity', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.api.api.API.identity" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
         <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
