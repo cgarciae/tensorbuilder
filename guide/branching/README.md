@@ -6,13 +6,12 @@ To create a branch you just have to use the `Builder.branch` method
 
     import tensorflow as tf
     from tensorbuilder import tb
-    import tensorbuilder.slim_patch
 
     x = tf.placeholder(tf.float32, shape=[None, 5])
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-        x.builder()
+        tb.build(x)
         .fully_connected(10)
         .branch(lambda root:
         [
@@ -47,7 +46,7 @@ Thanks to TensorBuilder's immutable API, each branch is independent. The previou
     keep_prob = tf.placeholder(tf.float32)
 
     h = (
-        x.builder()
+        tb.build(x)
         .fully_connected(10)
         .branch(lambda root:
         [

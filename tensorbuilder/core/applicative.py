@@ -302,7 +302,7 @@ if __name__ == "__main__":
 
     x = tf.placeholder(tf.float32, shape=[None, 4])
 
-    h = x.builder().pipe(
+    h = tb.build(x).pipe(
         connect_layer(10, fn=tf.nn.relu),
         [
             connect_layer(10, fn=tf.nn.relu)

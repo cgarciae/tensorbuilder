@@ -13,7 +13,7 @@ x = tf.placeholder(tf.float32, shape=[None, 40])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-	x.builder()
+	tb.build(x)
 	.map(layers.fully_connected, 100, activation_fn=tf.nn.tanh)
 	.map(tf.nn.dropout, keep_prob)
 	.map(layers.fully_connected, 30, activation_fn=tf.nn.softmax)
@@ -32,7 +32,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-	x.builder()
+	tb.build(x)
 	.fully_connected(10, activation_fn=tf.nn.tanh) # tanh(x * w + b)
 	.map(tf.nn.dropout, keep_prob) # dropout(x, keep_prob)
 	.fully_connected(3, activation_fn=tf.nn.softmax) # softmax(x * w + b)
@@ -51,7 +51,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-	x.builder()
+	tb.build(x)
 	.tanh_layer(10) # tanh(x * w + b)
 	.dropout(keep_prob) # dropout(x, keep_prob)
 	.softmax_layer(3) # softmax(x * w + b)
@@ -74,7 +74,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-    x.builder()
+    tb.build(x)
     .fully_connected(10)
     .branch(lambda root:
     [
@@ -109,7 +109,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-    x.builder()
+    tb.build(x)
     .fully_connected(10)
     .branch(lambda root:
     [
@@ -149,7 +149,7 @@ import tensorbuilder.dsl as dl #<== Notice the alias
 x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
-h = x.builder().pipe(
+h = tb.build(x).pipe(
     dl.fully_connected(10),
     [
         dl.relu_layer(3)
@@ -236,7 +236,7 @@ import tensorbuilder.slim_patch
 x = tf.placeholder(tf.float32, shape=[None, 5])
 
 h = (
-	x.builder()
+	tb.build(x)
 	.fully_connected(3, activation_fn=tf.nn.sigmoid)
 	.tensor()
 )
@@ -252,7 +252,7 @@ import tensorbuilder.patch
 x = tf.placeholder(tf.float32, shape=[None, 5])
 
 h = (
-	x.builder()
+	tb.build(x)
 	.sigmoid_layer(3)
 	.tensor()
 )
@@ -269,7 +269,7 @@ import tensorbuilder.slim_patch
 x = tf.placeholder(tf.float32, shape=[None, 40])
 
 h = (
-	x.builder()
+	tb.build(x)
 	.fully_connected(100, activation_fn=tf.nn.tanh)
 	.fully_connected(30, activation_fn=tf.nn.softmax)
 	.tensor()
@@ -286,7 +286,7 @@ import tensorbuilder.patch
 x = tf.placeholder(tf.float32, shape=[None, 5])
 
 h = (
-	x.builder()
+	tb.build(x)
 	.tanh_layer(100)
 	.softmax_layer(30)
 	.tensor()
@@ -308,7 +308,7 @@ x = tf.placeholder(tf.float32, shape=[None, 40])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-	x.builder()
+	tb.build(x)
 	.fully_connected(100, activation_fn=tf.nn.tanh)
 	.map(tf.nn.dropout, keep_prob)
 	.fully_connected(30, activation_fn=tf.nn.softmax)
@@ -344,7 +344,7 @@ def sigmoid_layer(builder, size):
 	return y.builder()
 
 h = (
-	x.builder()
+	tb.build(x)
 	.then(sigmoid_layer, 3)
 	.tensor()
 )
@@ -354,7 +354,7 @@ import tensorflow as tf
 from tensorbuilder import tb
 import tensorbuilder.slim_patch
 h = (
-	x.builder()
+	tb.build(x)
 	.fully_connected(3, activation_fn=tf.nn.sigmoid)
 	.tensor()
 )
@@ -375,7 +375,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 y = tf.placeholder(tf.float32, shape=[None, 1])
 
 [h, trainer] = (
-    x.builder()
+    tb.build(x)
     .fully_connected(1)
     .branch(lambda z:
     [
@@ -403,7 +403,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 keep_prob = tf.placeholder(tf.float32)
 
 h = (
-    x.builder()
+    tb.build(x)
     .fully_connected(10)
     .branch(lambda base:
     [
@@ -443,7 +443,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 y = tf.placeholder(tf.float32, shape=[None, 1])
 
 [h_builder, trainer_builder] = (
-    x.builder()
+    tb.build(x)
     .fully_connected(1)
     .branch(lambda z:
     [
@@ -470,7 +470,7 @@ x = tf.placeholder(tf.float32, shape=[None, 5])
 y = tf.placeholder(tf.float32, shape=[None, 1])
 
 [h_tensor, trainer_tensor] = (
-    x.builder()
+    tb.build(x)
     .fully_connected(1)
     .branch(lambda z:
     [
@@ -514,7 +514,7 @@ import tensorbuilder.slim_patch
 x = tf.placeholder(tf.float32, shape=[None, 5])
 
 h = (
-	x.builder()
+	tb.build(x)
 	.branch(lambda x:
 	[
 		x
