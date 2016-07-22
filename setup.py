@@ -26,8 +26,8 @@ setup(
         'tensorbuilder',
         'tensorbuilder.core',
         'tensorbuilder.api',
-        'tensorbuilder.extensions',
-        'tensorbuilder.extensions.patches',
+        'tensorbuilder.patches',
+        'tensorbuilder.patches.tensorbuilder_patch',
         'tensorbuilder.tests'
     ],
     package_data={

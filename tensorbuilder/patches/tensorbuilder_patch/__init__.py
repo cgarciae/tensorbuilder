@@ -6,6 +6,7 @@ import numpy as np
 import tflearn as tl
 import inspect
 
+import builder_custom_ops
 
 def patch_classes(Builder, BuilderTree, Applicative):
 
@@ -230,7 +231,15 @@ Function of type `(Builder -> Builder) -> Builder`
             return app.compose(_lambda)
         return _method
 
+    #######################
+    ### Custom
+    #######################
+    builder_custom_ops.patch_classes(Builder, BuilderTree, Applicative)
 
+
+    #######################
+    ### Applicative
+    #######################
 
     _dsl_funs = (
         [ ("BuilderTree", _name, f) for  _name, f in inspect.getmembers(BuilderTree, inspect.ismethod) if _name[0] != '_' and _name not in applicative_tree_blacklist ] +

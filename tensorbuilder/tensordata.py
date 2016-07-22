@@ -20,6 +20,8 @@ class Data(object):
         self.__dict__.update(sources)
 
         self._iterator = _iterator if _iterator else lambda: self._raw_data()
+        self.batch = None
+        self.patch = None
 
 
     def copy(self):
@@ -64,7 +66,7 @@ class Data(object):
 
 
     @immutable
-    def batch(self, batch_size):
+    def batches(self, batch_size):
         """
         docstring for Batcher
         """
@@ -111,6 +113,12 @@ class Data(object):
 
 
     def run(self, sess, tensor, tensors={}, **feed):
+
+        try:
+            tensor = tensor.tensor()
+        except:
+            pass
+
         feed = { feed[k]: self.sources[k] for k in feed }
         feed.update(tensors)
 
@@ -141,5 +149,5 @@ if __name__ == '__main__':
     [training, validation, test] = d.split(0.6, 0.2, 0.2)
     print([training, validation, test])
 
-    for dat in training.batch(4).epochs(10):
+    for dat in training.batches(4).epochs(10):
         print(dat.x, dat.batch, dat.epoch)
