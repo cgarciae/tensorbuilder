@@ -5,6 +5,7 @@ from tensorbuilder.core import utils
 import numpy as np
 import tflearn as tl
 import inspect
+import summaries
 
 import builder_custom_ops
 
@@ -14,6 +15,7 @@ def patch_classes(Builder, BuilderTree, Applicative):
     builders_blacklist = (
         ["relu_layer"] +
         scope_functions +
+        summaries.builders_blacklist +
         BuilderBase.__core__ + BuilderTreeBase.__core__
     )
     applicative_builder_blacklist = (
@@ -87,9 +89,13 @@ def patch_classes(Builder, BuilderTree, Applicative):
     # tf + tf.nn
     ###############################
 
-    def _get_layer_method(f):
+    def _get_layer_method(f, name):
         def _layer_method(builder, size, *args, **kwargs):
             kwargs['activation_fn'] = f
+
+            if 'scope' not in kwargs:
+                kwargs['scope'] = name
+
             return builder.fully_connected(size, *args, **kwargs)
 
         return _layer_method
@@ -106,7 +112,7 @@ def patch_classes(Builder, BuilderTree, Applicative):
         _f_signature = utils.get_method_sig(f)
         _f_docs = inspect.getdoc(f)
 
-        _layer_method = _get_layer_method(f)
+        _layer_method = _get_layer_method(f, _layer_name)
 
         _layer_method.__name__ = _layer_name
         _layer_method.__doc__ = """
@@ -156,6 +162,8 @@ Builder
         Builder
         """
         kwargs['activation_fn'] = None
+        if 'scope' not in kwargs:
+            kwargs['scope'] = 'linear_layer'
         return builder.fully_connected(size, *args, **kwargs)
 
     Builder.register_method(linear_layer, "tensorbuilder")
@@ -212,6 +220,11 @@ Function of type `(Builder -> Builder) -> Builder`
 
         # Builder
         Builder.register_method(scope_method, module_name, alias=method_name, doc = scope_method.__doc__)
+
+    #######################
+    ### scopes
+    #######################
+    summaries.patch_classes(Builder, BuilderTree, Applicative)
 
     ###############################
     # tflearn

@@ -214,19 +214,49 @@ class ApplicativeBase(object):
         ** Documentation from `{3}.{0}`**
 
             def {1}
-
         """.format(name, fn_signature, fn.__doc__, library_path)
 
 
         setattr(cls, name, fn)
 
+    @classmethod
+    def register_tensor_method(cls, fn, library_path, alias=None, doc=None):
+        """
+        This method enables you to register any function `fn` that takes an tensor as its first argument as a method of the Builder and Applicative class.
 
+        **Arguments**
+
+        * `fn`: a function that atleast takes an Tensor as its first argument.
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        """
+        original_name = fn.__name__
+        name = alias if alias else original_name
+        method = get_app_method(name)
+
+        cls.register_method(method, library_path, alias=name, doc=doc)
 
 ApplicativeBase.__core__ = [ _name for _name, f in inspect.getmembers(ApplicativeBase, predicate=inspect.ismethod) ]
 
 #######################
 ### FUNCTIONS
 #######################
+
+def get_app_method(name):
+    def _method(app, *args, **kwargs):
+        def _lambda(builder):
+            g = getattr(builder, name)
+            return g(*args, **kwargs)
+        return app.compose(_lambda)
+    return _method
 
 def _compile(ast):
     #if type(ast) is tuple:

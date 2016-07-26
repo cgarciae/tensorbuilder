@@ -66,7 +66,7 @@ class Data(object):
 
 
     @immutable
-    def batches(self, batch_size):
+    def batches_of(self, batch_size):
         """
         docstring for Batcher
         """
@@ -76,17 +76,11 @@ class Data(object):
 
     def _batch(self, batch_size, _iterator):
         for data in _iterator():
-            i = 0
             length = len(data.x)
-            while i * batch_size < length:
-                start = i * batch_size
-                end = min(start + batch_size, length)
+            sample = np.random.choice(length, batch_size)
+            new_data = Data(**{k: source[sample] for (k, source) in data.sources.iteritems()})
 
-                new_data = Data(**{k: source[start:end,:] for (k, source) in data.sources.iteritems()})
-                new_data.batch = i
-
-                yield new_data
-                i += 1
+            yield new_data
 
     @immutable
     def epochs(self, epochs):
