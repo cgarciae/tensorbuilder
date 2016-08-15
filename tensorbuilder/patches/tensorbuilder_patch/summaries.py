@@ -9,8 +9,6 @@ def _get_summery_method(f):
         f(tag, builder.tensor(), *args, **kwargs)
         return builder
 
-
-
     return summary_method
 
 def patch_classes(Builder, BuilderTree, Applicative):
