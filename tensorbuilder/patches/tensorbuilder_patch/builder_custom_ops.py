@@ -1,7 +1,9 @@
 import tensorflow as tf
 from tensorflow.python.framework import tensor_shape
 
-builders_blacklist = ["sampled_softmax_loss"]
+builders_blacklist = [
+    "sampled_softmax_loss"
+]
 
 def _polynomial(tensor):
     size = int(tensor.get_shape()[1])
@@ -288,8 +290,8 @@ def patch_classes(Builder, BuilderTree, Applicative):
     Builder.register_map_method(maximize, "tensorbuilder.Builder")
     Builder.register_map_method(drop_layer, "tensorbuilder.Builder")
     Builder.register_map_method(add_regularization_loss, "tensorbuilder")
-    Builder.register_map_method(fully_connected_from_indexes, "tensorbuilder")
     Builder.register_map_method(fully_connected_from_product, "tensorbuilder")
+    Builder.register_map_method(sampled_softmax_loss, "tensorbuilder")
     Builder.register_map_method(sampled_softmax_loss, "tensorbuilder")
 
 

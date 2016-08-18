@@ -10,6 +10,7 @@ import tensorflow_ops
 import tflearn_ops
 import scope_ops
 import applicative_ops
+import custom_layer_ops
 
 import builder_custom_ops
 

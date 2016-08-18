@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorbuilder.core.builders import BuilderBase, BuilderTreeBase
 import inspect
+from tensorbuilder.core import utils
 
 builders_blacklist = (
     ["relu_layer"] +

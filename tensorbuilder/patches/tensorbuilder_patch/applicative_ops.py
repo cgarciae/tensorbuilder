@@ -1,5 +1,6 @@
 import tensorflow as tf
 import inspect
+from tensorbuilder.core import utils
 
 builders_blacklist = []
 

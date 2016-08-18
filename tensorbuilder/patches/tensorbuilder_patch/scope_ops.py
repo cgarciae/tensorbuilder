@@ -1,4 +1,6 @@
 import tensorflow as tf
+import inspect
+from tensorbuilder.core import utils
 
 builders_blacklist = ["variable_scope", "device"]
 
@@ -10,7 +12,7 @@ def patch_classes(Builder, BuilderTree, Applicative):
 
 
     scope_funs = (
-        [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name in scope_functions ]
+        [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name in builders_blacklist ]
     )
 
 
