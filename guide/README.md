@@ -11,7 +11,7 @@ TensorBuilder is light-weight extensible library that enables you to easily crea
 Tensor Builder assumes you have a working `tensorflow` installation. We don't include it in the `requirements.txt` since the installation of tensorflow varies depending on your setup.
 
 #### From github
-1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.9`
+1. `pip install git+https://github.com/cgarciae/tensorbuilder.git@0.0.10`
 
 #### From pip
 Coming soon!
