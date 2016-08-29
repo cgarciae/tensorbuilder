@@ -11,8 +11,8 @@ import tflearn_ops
 import scope_ops
 import applicative_ops
 import custom_layer_ops
-
 import builder_custom_ops
+import api_functions_patch
 
 def patch_classes(Builder, BuilderTree, Applicative):
 
@@ -20,7 +20,8 @@ def patch_classes(Builder, BuilderTree, Applicative):
         summaries.builders_blacklist +
         builder_custom_ops.builders_blacklist +
         custom_layer_ops.builders_blacklist +
-        scope_ops.builders_blacklist
+        scope_ops.builders_blacklist +
+        api_functions_patch.builders_blacklist
     )
     applicative_builder_blacklist = (
         ["copy", "compose"] +
@@ -45,6 +46,7 @@ def patch_classes(Builder, BuilderTree, Applicative):
     summaries.patch_classes(Builder, BuilderTree, Applicative)
     tensorflow_ops.patch_classes(Builder, BuilderTree, Applicative)
     tflearn_ops.patch_classes(Builder, BuilderTree, Applicative)
+    api_functions_patch.patch_classes(Builder, BuilderTree, Applicative)
 
 
     #Applicative should go last

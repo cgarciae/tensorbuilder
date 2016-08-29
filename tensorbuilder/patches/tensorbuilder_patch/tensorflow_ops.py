@@ -5,11 +5,31 @@ builders_blacklist = [
 ]
 
 def dynamic_rnn(inputs, cell, *args, **kwargs):
+    state_builder = None
+
+    if 'state_builder' in kwargs:
+        state_builder = kwargs['state_builder']
+        del kwargs['state_builder']
+
     outputs, state = tf.nn.dynamic_rnn(cell, inputs, *args, **kwargs)
+
+    if state_builder is not None:
+        state_builder._tensor = state
+
     return outputs
 
 def rnn(inputs, cell, *args, **kwargs):
+    state_builder = None
+
+    if 'state_builder' in kwargs:
+        state_builder = kwargs['state_builder']
+        del kwargs['state_builder']
+
     outputs, state = tf.nn.rnn(cell, inputs, *args, **kwargs)
+
+    if state_builder is not None:
+        state_builder._tensor = state
+
     return outputs
 
 def patch_classes(Builder, BuilderTree, Applicative):
