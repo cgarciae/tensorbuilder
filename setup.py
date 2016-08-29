@@ -31,7 +31,7 @@ setup(
         'tensorbuilder.tests'
     ],
     package_data={
-        '': ['LICENCE'],
+        '': ['LICENCE', 'requirements.txt', 'README.md', 'CHANGELOG.md'],
         'tensorbuilder': ['version.txt', 'README-template.md']
     },
     long_description = read('README.md'),
