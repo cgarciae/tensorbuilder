@@ -34,6 +34,7 @@ setup(
         '': ['LICENCE', 'requirements.txt', 'README.md', 'CHANGELOG.md'],
         'tensorbuilder': ['version.txt', 'README-template.md']
     },
+    include_package_data = True,
     long_description = read('README.md'),
     install_requires = reqs
 )
