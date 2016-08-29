@@ -15,14 +15,11 @@ Tensor Builder assumes you have a working `tensorflow` installation. We don't in
 pip install tensorbuilder==0.0.15
 ```
 
-#### From pypi
+#### From github
 For the latest development version
 ```
 pip install git+https://github.com/cgarciae/tensorbuilder.git@develop
 ```
-
-#### From pip
-Coming soon!
 
 ## Getting Started
 

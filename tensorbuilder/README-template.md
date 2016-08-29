@@ -21,9 +21,6 @@ For the latest development version
 pip install git+https://github.com/cgarciae/tensorbuilder.git@develop
 ```
 
-#### From pip
-Coming soon!
-
 ## Getting Started
 
 Create neural network with a [5, 10, 3] architecture with a `softmax` output layer and a `tanh` hidden layer through a Builder and then get back its tensor:
