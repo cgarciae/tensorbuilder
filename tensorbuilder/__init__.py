@@ -14,10 +14,10 @@ module.__doc__ = raw_docs.format(__version__)
 # Init code
 import core
 import tensordata
-import extensions
+import patches
 import api
 
 tb = api.API(lambda x: x)
 
 #pdoc
-__all__ = ["core", "tensordata", "extensions", "api"]
+__all__ = ["core", "tensordata", "patches", "api"]

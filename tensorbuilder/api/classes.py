@@ -1,3 +1,3 @@
-from tensorbuilder import extensions
+from tensorbuilder import patches
 
-Builder, BuilderTree, Applicative = extensions.patched_tensorbuilder_classes()
+Builder, BuilderTree, Applicative = patches.patched_tensorbuilder_classes()

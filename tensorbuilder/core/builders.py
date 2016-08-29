@@ -45,6 +45,10 @@ class BuilderBase(object):
     def _unit(self, tensor):
         return self.__class__(tensor)
 
+    def store_on(builder, other):
+        other._tensor = builder.tensor()
+        return builder
+
     @classmethod
     def register_method(cls, fn, library_path, alias=None, doc=None):
         """

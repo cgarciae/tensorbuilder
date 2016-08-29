@@ -1052,6 +1052,7 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.copy">copy</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.pipe">pipe</a></li>
     <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.register_method">register_method</a></li>
+    <li class="mono"><a href="#tensorbuilder.core.ApplicativeBase.register_tensor_method">register_tensor_method</a></li>
   </ul>
 
         </li>
@@ -1067,6 +1068,7 @@ table {
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.map">map</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.register_map_method">register_map_method</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.register_method">register_method</a></li>
+    <li class="mono"><a href="#tensorbuilder.core.BuilderBase.store_on">store_on</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.tensor">tensor</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.then">then</a></li>
     <li class="mono"><a href="#tensorbuilder.core.BuilderBase.then_with">then_with</a></li>
@@ -1278,7 +1280,7 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
         <span class="n">f</span> <span class="o">=</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
 
         <span class="c1">#if the input is a Tensor, create a Builder</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
             <span class="n">builder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Builder</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span>
@@ -1359,11 +1361,35 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
 <span class="s2">        ** Documentation from `{3}.{0}`**</span>
 
 <span class="s2">            def {1}</span>
-
 <span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">fn_signature</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">__doc__</span><span class="p">,</span> <span class="n">library_path</span><span class="p">)</span>
 
 
         <span class="nb">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register_tensor_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method enables you to register any function `fn` that takes an tensor as its first argument as a method of the Builder and Applicative class.</span>
+
+<span class="sd">        **Arguments**</span>
+
+<span class="sd">        * `fn`: a function that atleast takes an Tensor as its first argument.</span>
+<span class="sd">        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.</span>
+<span class="sd">        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.</span>
+<span class="sd">        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.</span>
+
+<span class="sd">        **Return**</span>
+
+<span class="sd">        `None`</span>
+
+<span class="sd">        **Examples**</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">original_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">alias</span> <span class="k">if</span> <span class="n">alias</span> <span class="k">else</span> <span class="n">original_name</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">get_app_method</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">cls</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">doc</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1665,7 +1691,7 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_compile</span><span class="p">(</span><span class="n">ast</span><span class="p">)</span>
     <span class="c1">#if the input is a Tensor, create a Builder</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">Tensor</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
         <span class="n">builder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Builder</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">builder</span><span class="p">)</span>
 </pre></div>
@@ -1730,6 +1756,53 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
 
   </div>
   
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.core.ApplicativeBase.register_tensor_method">
+    <p>def <span class="ident">register_tensor_method</span>(</p><p>cls, fn, library_path, alias=None, doc=None)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>This method enables you to register any function <code>fn</code> that takes an tensor as its first argument as a method of the Builder and Applicative class.</p>
+<p><strong>Arguments</strong></p>
+<ul>
+<li><code>fn</code>: a function that atleast takes an Tensor as its first argument.</li>
+<li><code>library_path</code>: the route of the librar from which this function was taken, used for documentation purposes.</li>
+<li><code>alias</code>: allows you to specify the name of the method, it will take the name of the function if its <code>None</code>.</li>
+<li><code>doc</code>: the documentation for the method, if <code>None</code> a predefied documentation will be generated based on the documentation of <code>fn</code>.</li>
+</ul>
+<p><strong>Return</strong></p>
+<p><code>None</code></p>
+<p><strong>Examples</strong></p></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.ApplicativeBase.register_tensor_method', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.core.ApplicativeBase.register_tensor_method" class="source">
+    <div class="codehilite"><pre><span></span><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">register_tensor_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method enables you to register any function `fn` that takes an tensor as its first argument as a method of the Builder and Applicative class.</span>
+<span class="sd">    **Arguments**</span>
+<span class="sd">    * `fn`: a function that atleast takes an Tensor as its first argument.</span>
+<span class="sd">    * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.</span>
+<span class="sd">    * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.</span>
+<span class="sd">    * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.</span>
+<span class="sd">    **Return**</span>
+<span class="sd">    `None`</span>
+<span class="sd">    **Examples**</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">original_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">alias</span> <span class="k">if</span> <span class="n">alias</span> <span class="k">else</span> <span class="n">original_name</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">get_app_method</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">cls</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">doc</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
       </div>
       </div>
       
@@ -1772,6 +1845,10 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
 
     <span class="k">def</span> <span class="nf">_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">store_on</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">_tensor</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">builder</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_method</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">library_path</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -2532,6 +2609,28 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
   
             
   <div class="item">
+    <div class="name def" id="tensorbuilder.core.BuilderBase.store_on">
+    <p>def <span class="ident">store_on</span>(</p><p>builder, other)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.BuilderBase.store_on', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.core.BuilderBase.store_on" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">store_on</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="n">other</span><span class="o">.</span><span class="n">_tensor</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">builder</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
     <div class="name def" id="tensorbuilder.core.BuilderBase.tensor">
     <p>def <span class="ident">tensor</span>(</p><p>self)</p>
     </div>
@@ -2606,7 +2705,7 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
   
     <div class="desc"><p><code>@immutable</code></p>
 <p>Expects a function <strong>fn</strong> with that returns a "Disposable" (implement <code>__enter__</code> and <code>__exit__</code>) plus some *args and **kwargs, and return a function <code>g</code> that expects a function <code>h</code> of type <code>Builder -&gt; Builder</code> such that</p>
-<div class="codehilite"><pre><span></span><span class="na">.then_with</span><span class="p">(</span><span class="no">fn</span><span class="p">,</span> <span class="p">*</span><span class="no">args</span><span class="p">,</span> <span class="p">**</span><span class="no">kwargs</span><span class="p">)(</span><span class="no">h</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span>.then_with(fn, *args, **kwargs)(h)
 </pre></div>
 
 
@@ -3621,14 +3720,14 @@ tb.relu_layer(10)) # Notice the begging and ending &#39;()&#39; tuple parenthesi
 
 
 <p>Remember that this</p>
-<div class="codehilite"><pre><span></span><span class="na">.map_each</span><span class="p">(</span><span class="no">tf.contrib.layers.fully_connected</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="no">activation_fn</span><span class="err">=</span><span class="no">None</span><span class="p">)</span>
-<span class="na">.reduce</span><span class="p">(</span><span class="no">tf.add</span><span class="p">)</span>
-<span class="na">.softmax</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span>.map_each(tf.contrib.layers.fully_connected, 5, activation_fn=None)
+.reduce(tf.add)
+.softmax()
 </pre></div>
 
 
 <p>is equivalent to just</p>
-<div class="codehilite"><pre><span></span><span class="na">.softmax_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span>.softmax_layer(5)
 </pre></div>
 
 

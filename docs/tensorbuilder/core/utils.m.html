@@ -1040,6 +1040,7 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
+    <li class="mono"><a href="#tensorbuilder.core.utils.flatten">flatten</a></li>
     <li class="mono"><a href="#tensorbuilder.core.utils.get_instance_methods">get_instance_methods</a></li>
     <li class="mono"><a href="#tensorbuilder.core.utils.get_method_sig">get_method_sig</a></li>
     <li class="mono"><a href="#tensorbuilder.core.utils.immutable">immutable</a></li>
@@ -1148,6 +1149,18 @@ table {
         <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">method</span>
+
+
+<span class="k">def</span> <span class="nf">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">j</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">i</span>
+
+<span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -1157,6 +1170,27 @@ table {
   <section id="section-items">
 
     <h2 class="section-title" id="header-functions">Functions</h2>
+      
+  <div class="item">
+    <div class="name def" id="tensorbuilder.core.utils.flatten">
+    <p>def <span class="ident">flatten</span>(</p><p>container)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils.flatten', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.core.utils.flatten" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
       
   <div class="item">
     <div class="name def" id="tensorbuilder.core.utils.get_instance_methods">

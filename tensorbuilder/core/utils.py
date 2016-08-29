@@ -74,3 +74,15 @@ def get_instance_methods(instance):
         method = getattr(instance, method_name)
         if hasattr(method, '__call__'):
             yield method_name, method
+
+
+def _flatten(container):
+    for i in container:
+        if isinstance(i, (list,tuple)):
+            for j in flatten(i):
+                yield j
+        else:
+            yield i
+
+def flatten(container):
+    return list(_flatten(container))

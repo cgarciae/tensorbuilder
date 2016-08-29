@@ -53,7 +53,7 @@ class API(applicative.Applicative):
         """
         return self.BuilderTree(builder_iterable)
 
-API.data = tensordata.data
+API.data = tensordata.Data
 
 API.Builder = builder.Builder
 API.BuilderTree = builder_tree.BuilderTree
