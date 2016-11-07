@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:0.10.0rc0
+FROM tensorflow/tensorflow:0.11.0rc2
 
 RUN apt-get update
 RUN apt-get -y install git
