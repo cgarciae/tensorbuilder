@@ -2,3 +2,5 @@ include LICENCE
 include requirements.txt
 include README.md
 include CHANGELOG.md
+
+include tensorbuilder/version.txt
