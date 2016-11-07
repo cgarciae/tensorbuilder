@@ -133,7 +133,7 @@ class ApplicativeBase(object):
         f = _compile(ast)
 
         #if the input is a Tensor, create a Builder
-        if type(builder) is tf.python.framework.ops.Tensor or type(builder) is tf.Variable:
+        if type(builder) is tf.Tensor or type(builder) is tf.Variable:
             builder = self.Builder(builder)
 
         return f(builder)
