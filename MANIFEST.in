@@ -4,3 +4,4 @@ include README.md
 include CHANGELOG.md
 
 include tensorbuilder/version.txt
+include tensorbuilder/README-template.md

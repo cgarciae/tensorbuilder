@@ -12,7 +12,7 @@ Tensor Builder assumes you have a working `tensorflow` installation. We don't in
 
 #### From pypi
 ```
-pip install tensorbuilder==0.0.17
+pip install tensorbuilder==0.0.18
 
 ```
 
