@@ -15,7 +15,7 @@ def _identity(x):
 #######################
 ### Applicative
 #######################
-class ApplicativeBase(object):
+class Builder(object):
     """
     An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.
 
@@ -46,15 +46,12 @@ class ApplicativeBase(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, f):
-        super(ApplicativeBase, self).__init__()
+    def __init__(self, f=_identity):
+        super(Builder, self).__init__()
         self.f = f
         """
         A function of type `a -> b`.
         """
-
-    def Builder(self, tensor):
-        pass
 
 
     def _unit(self, f):
@@ -68,7 +65,7 @@ class ApplicativeBase(object):
     def __call__(self, *args, **kwargs):
         return self.f(*args, **kwargs)
 
-    def compose(app, g, *args, **kwargs):
+    def _(builder, g, *args, **kwargs):
         """
         Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
 
@@ -88,20 +85,21 @@ class ApplicativeBase(object):
 
 
         """
-        return app._unit(lambda x: g(app.f(x), *args, **kwargs))
+        g = _compile(g)
+        return builder._unit(lambda x: g(builder.f(x), *args, **kwargs))
 
-    def pipe(self, builder, *ast):
+    def pipe(self, x, *ast):
         """
-        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Tensor` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
+        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Object` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
 
         **Arguments**
 
-        * `builder`: a `Builder`, `BuilderTree` or `Tensor` preferably.
+        * `builder`: a `Builder`, `BuilderTree` or `Object` preferably.
         * `*ast`: a sequence of elements of the DSL.
 
         **Return**
 
-        An object with the result of the computation, probable types: `Tensor | Builder | BuilderTree | list(Tensor) |  `
+        An object with the result of the computation, probable types: `Object | Builder | BuilderTree | list(Object) |  `
 
         **Examples**
 
@@ -126,21 +124,16 @@ class ApplicativeBase(object):
                     }
                 ],
                 tb.relu_layer(10)
-                .tensor()
+                .object()
             )
         """
 
         f = _compile(ast)
-
-        #if the input is a Tensor, create a Builder
-        if type(builder) is tf.Tensor or type(builder) is tf.Variable:
-            builder = self.Builder(builder)
-
-        return f(builder)
+        return f(x)
 
     def compile(self, *ast):
         """
-        `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Tensor/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
+        `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Object/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
 
         **Arguments**
 
@@ -158,7 +151,7 @@ class ApplicativeBase(object):
             x = placeholder(tf.float32, shape=[None, 10])
 
             f = tb.compile(
-                tb.build, #accept a Tensor as a parameter and create a builder so you can use the rest of the methods
+                tb.build, #accept a Object as a parameter and create a builder so you can use the rest of the methods
                 [
                     { tf.device("/gpu:0"):
                         tb.relu_layer(20)
@@ -173,7 +166,7 @@ class ApplicativeBase(object):
                     }
                 ],
                 tb.relu_layer(10)
-                .tensor()
+                .object()
             )
 
             h = f(x)
@@ -202,8 +195,7 @@ class ApplicativeBase(object):
         """
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
-        original_name = fn.__name__
-        name = alias if alias else original_name
+        name = alias if alias else fn.__name__
 
         fn.__name__ = name
         fn.__doc__ = doc if doc else """
@@ -220,13 +212,13 @@ class ApplicativeBase(object):
         setattr(cls, name, fn)
 
     @classmethod
-    def register_tensor_method(cls, fn, library_path, alias=None, doc=None):
+    def register_function_as_method(cls, fn, library_path, alias=None, doc=None):
         """
-        This method enables you to register any function `fn` that takes an tensor as its first argument as a method of the Builder and Applicative class.
+        This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
 
         **Arguments**
 
-        * `fn`: a function that atleast takes an Tensor as its first argument.
+        * `fn`: a function that atleast takes an Object as its first argument.
         * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
         * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
         * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
@@ -238,25 +230,23 @@ class ApplicativeBase(object):
         **Examples**
 
         """
-        original_name = fn.__name__
-        name = alias if alias else original_name
-        method = get_app_method(name)
+        name = alias if alias else fn.__name__
+        method = get_method_from_function(fn)
 
         cls.register_method(method, library_path, alias=name, doc=doc)
 
-ApplicativeBase.__core__ = [ _name for _name, f in inspect.getmembers(ApplicativeBase, predicate=inspect.ismethod) ]
+Builder.__core__ = [ _name for _name, f in inspect.getmembers(Builder, predicate=inspect.ismethod) ]
 
 #######################
 ### FUNCTIONS
 #######################
 
-def get_app_method(name):
-    def _method(app, *args, **kwargs):
-        def _lambda(builder):
-            g = getattr(builder, name)
-            return g(*args, **kwargs)
-        return app.compose(_lambda)
-    return _method
+def get_method_from_function(fn):
+    def method(builder, *args, **kwargs):
+        return builder._(fn, *args, **kwargs)
+
+    method.__doc__ = inspect.getdoc(fn)
+    return method
 
 def _compile(ast):
     #if type(ast) is tuple:
@@ -287,38 +277,17 @@ def _sequence_function(tuple_ast):
     return _compose_reversed(fs)
 
 def _branch_function(list_ast):
+    list_ast = utils.flatten(list_ast)
     fs = [ _compile(ast) for ast in list_ast ]
-    return lambda builder: builder.branch(lambda builder: [ f(builder) for f in fs ])
+    return lambda x: [ f(x) for f in fs ]
 
 def _with_function(dict_ast):
     scope, body_ast = list(dict_ast.items())[0]
     body = _compile(body_ast)
-    return lambda builder: builder.then_with(lambda: scope)(body)
-
-
-
-
-def _get_fun(_name, _f_signature, _f_docs, _module_name):
-    def _fun(app, *args, **kwargs):
-        def _lambda(builder):
-            f = getattr(builder, _name)
-            return f(*args, **kwargs)
-
-    	return app._unit(_lambda)
-
-    _fun.__name__ = _name
-    _fun.__doc__ = """
-    THIS FUNCTION IS AUTOMATICALLY GENERATED
-
-    This function accepts the same arguments as `{3}.{0}` but instead of getting the class instance as its first arguments, it returns a function that expects a builder and applies the builder plus all \*args and \*\*kwargs to `{3}.{0}`. The returned function is an `tensorbuilder.dsl.Applicative`, so you can use all the methods defined by this class.
-
-    ** Documentation for `{3}.{0}`**
-
-        def {1}
-
-    """.format(_name, _f_signature, _f_docs, _module_name)
-
-    return _fun
+    def _lambda(x):
+        with scope:
+            return body(x)
+    return _lambda
 
 
 

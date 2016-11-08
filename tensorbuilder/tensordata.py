@@ -4,7 +4,7 @@ import asq.queryables
 import random
 from itertools import islice, izip_longest
 import numpy as np
-from core.utils import immutable
+from utils import immutable
 import tensorflow as tf
 
 """

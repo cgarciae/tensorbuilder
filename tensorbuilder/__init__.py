@@ -12,12 +12,18 @@ module.__doc__ = raw_docs.format(__version__)
 
 
 # Init code
-import core
+#import core
 import tensordata
-import patches
-import api
 
-tb = api.API(lambda x: x)
+from builder import Builder
+
+builder = Builder()
+#import patches
+#import api
+
+
+
+#tb = api.API(lambda x: x)
 
 #pdoc
 __all__ = ["core", "tensordata", "patches", "api"]
