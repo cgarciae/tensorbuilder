@@ -12,18 +12,16 @@ module.__doc__ = raw_docs.format(__version__)
 
 
 # Init code
-#import core
-import tensordata
-
-from builder import Builder
-
-builder = Builder()
-#import patches
-#import api
 
 
+print("aca")
 
-#tb = api.API(lambda x: x)
+from builder_class import Builder
+from tensorbuilder_class import TensorBuilder
+
+tensorbuilder = TensorBuilder()
+
+import patches #do this at the end
 
 #pdoc
-__all__ = ["core", "tensordata", "patches", "api"]
+__all__ = ["tensordata", "patches"]

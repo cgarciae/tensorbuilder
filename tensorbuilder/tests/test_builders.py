@@ -1,6 +1,8 @@
 import tensorflow as tf
-from tensorbuilder import builder, Builder
+from tensorbuilder import Builder
 from fn import _
+
+builder = Builder()
 # from tensorbuilder import tb
 
 add2 = _ + 2
