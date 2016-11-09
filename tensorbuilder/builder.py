@@ -15,6 +15,16 @@ def _identity(x):
 #######################
 ### Applicative
 #######################
+class Ref(object):
+    """docstring for Ref."""
+    def __init__(self, ref=None):
+        super(Ref, self).__init__()
+        self.ref = ref
+
+    def __call__(self):
+        return self.ref
+
+
 class Builder(object):
     """
     An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.
@@ -87,6 +97,24 @@ class Builder(object):
         """
         g = _compile(g)
         return builder._unit(lambda x: g(builder.f(x), *args, **kwargs))
+
+
+    def using(builder, x):
+        """
+        """
+        return builder._(lambda _: x)
+
+    def run(builder):
+        return builder(None)
+
+    def store_on(builder, reference):
+        def store_ref(x):
+            reference.ref = x
+            return x
+        return builder._(store_ref)
+
+    def ref(self):
+        return Ref()
 
     def pipe(self, x, *ast):
         """
@@ -205,8 +233,8 @@ class Builder(object):
 
         ** Documentation from `{3}.{0}`**
 
-            def {1}
-        """.format(name, fn_signature, fn.__doc__, library_path)
+            {2}
+        """.format(name, fn_signature, fn_docs, library_path)
 
 
         setattr(cls, name, fn)
@@ -230,10 +258,20 @@ class Builder(object):
         **Examples**
 
         """
-        name = alias if alias else fn.__name__
-        method = get_method_from_function(fn)
+        alias = alias if alias else fn.__name__
+        method = get_method(fn)
+        method.__doc__ = inspect.getdoc(fn)
+        method.__name__ = alias
 
-        cls.register_method(method, library_path, alias=name, doc=doc)
+        cls.register_method(method, library_path, alias=alias, doc=doc)
+
+    def register(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_function_as_method(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
 
 Builder.__core__ = [ _name for _name, f in inspect.getmembers(Builder, predicate=inspect.ismethod) ]
 
@@ -241,11 +279,9 @@ Builder.__core__ = [ _name for _name, f in inspect.getmembers(Builder, predicate
 ### FUNCTIONS
 #######################
 
-def get_method_from_function(fn):
+def get_method(fn):
     def method(builder, *args, **kwargs):
         return builder._(fn, *args, **kwargs)
-
-    method.__doc__ = inspect.getdoc(fn)
     return method
 
 def _compile(ast):
@@ -297,25 +333,4 @@ def _with_function(dict_ast):
 
 
 if __name__ == "__main__":
-    import tensorflow as tf
-
-    x = tf.placeholder(tf.float32, shape=[None, 4])
-
-    h = tb.build(x).pipe(
-        connect_layer(10, fn=tf.nn.relu),
-        [
-            connect_layer(10, fn=tf.nn.relu)
-            .connect_layer(5, fn=tf.nn.relu)
-        ,
-            connect_layer(10, fn=tf.nn.sigmoid)
-        ],
-        connect_layer(10, fn=tf.nn.relu),
-        [
-            connect_layer(1)
-        ,
-            connect_layer(1)
-        ],
-        tensors
-    )
-
-    print(h)
+    pass

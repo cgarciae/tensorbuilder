@@ -8,6 +8,13 @@ mul3 = _ * 3
 get_list = lambda x: [1,2,3]
 
 
+@builder.register("test.lib")
+def add(a, b):
+    """Some docs"""
+    return a + b
+
+
+
 class TestBuilder(object):
     """docstring for TestBuilder"""
 
@@ -18,6 +25,7 @@ class TestBuilder(object):
 
         assert builder._(add2)._(mul3)(4) == 18
 
+    def test_pipe(self):
         assert builder.pipe(4, add2, mul3) == 18
 
         assert builder.pipe(
@@ -104,6 +112,23 @@ class TestBuilder(object):
         )
 
         assert a == 18 and b == 18 and c == 14
+
+    def test_register(self):
+
+        assert 5 == builder.pipe(
+            3,
+            builder.add(2)
+        )
+
+    def test_using_run(self):
+        assert 8 == builder.using(3).add(2).add(3).run()
+
+    def test_reference(self):
+        ref = builder.ref()
+
+        assert 8 == builder.using(3).add(2).store_on(ref).add(3).run()
+        assert 5 == ref()
+
 
 
 #
