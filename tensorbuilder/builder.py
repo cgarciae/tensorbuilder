@@ -21,8 +21,12 @@ class Ref(object):
         super(Ref, self).__init__()
         self.ref = ref
 
-    def __call__(self):
+    def __call__(self, *optional):
         return self.ref
+
+    def set(self, x):
+        self.ref = x
+        return x
 
 
 class Builder(object):
@@ -98,6 +102,54 @@ class Builder(object):
         g = _compile(g)
         return builder._unit(lambda x: g(builder.f(x), *args, **kwargs))
 
+    def _2(builder, g, arg1, *args, **kwargs):
+        """
+        """
+        g = _compile(g)
+
+        def _lambda(x):
+            arg2 = builder.f(x)
+            new_args = tuple([arg1, arg2] + list(args))
+            return g(*new_args, **kwargs)
+
+        return builder._unit(_lambda)
+
+    def _3(builder, g, arg1, arg2, *args, **kwargs):
+        """
+        """
+        g = _compile(g)
+
+        def _lambda(x):
+            arg3 = builder.f(x)
+            new_args = tuple([arg1, arg2, arg3] + list(args))
+            return g(*new_args, **kwargs)
+
+        return builder._unit(_lambda)
+
+    def _4(builder, g, arg1, arg2, arg3, *args, **kwargs):
+        """
+        """
+        g = _compile(g)
+
+        def _lambda(x):
+            arg4 = builder.f(x)
+            new_args = tuple([arg1, arg2, arg3, arg4] + list(args))
+            return g(*new_args, **kwargs)
+
+        return builder._unit(_lambda)
+
+    def _5(builder, g, arg1, arg2, arg3, arg4, *args, **kwargs):
+        """
+        """
+        g = _compile(g)
+
+        def _lambda(x):
+            arg5 = builder.f(x)
+            new_args = tuple([arg1, arg2, arg3, arg4, arg5] + list(args))
+            return g(*new_args, **kwargs)
+
+        return builder._unit(_lambda)
+
 
     def using(builder, x):
         """
@@ -107,14 +159,14 @@ class Builder(object):
     def run(builder):
         return builder(None)
 
-    def store_on(builder, reference):
-        def store_ref(x):
-            reference.ref = x
-            return x
-        return builder._(store_ref)
+    def store(builder, ref):
+        return builder._(ref.set)
 
     def ref(self):
         return Ref()
+
+    def identity(self, x):
+        return x
 
     def pipe(self, x, *ast):
         """
@@ -203,7 +255,7 @@ class Builder(object):
         return _compile(ast)
 
     @classmethod
-    def register_method(cls, fn, library_path, alias=None, doc=None):
+    def register_as_method(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register any function `fn` that takes an Applicative as its first argument as a method of the Builder class.
 
@@ -239,8 +291,16 @@ class Builder(object):
 
         setattr(cls, name, fn)
 
+    def register_method(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_as_method(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
+
     @classmethod
-    def register_function_as_method(cls, fn, library_path, alias=None, doc=None):
+    def register_function(cls, fn, library_path, alias=None, doc=None):
         """
         This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
 
@@ -259,16 +319,107 @@ class Builder(object):
 
         """
         alias = alias if alias else fn.__name__
-        method = get_method(fn)
+
+        def method(builder, *args, **kwargs):
+            return builder._(fn, *args, **kwargs)
+
         method.__doc__ = inspect.getdoc(fn)
         method.__name__ = alias
 
-        cls.register_method(method, library_path, alias=alias, doc=doc)
+        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+
+    @classmethod
+    def register_function2(cls, fn, library_path, alias=None, doc=None):
+        """
+        """
+        alias = alias if alias else fn.__name__
+
+        def method(builder, *args, **kwargs):
+            return builder._2(fn, *args, **kwargs)
+
+        method.__doc__ = inspect.getdoc(fn)
+        method.__name__ = alias
+
+        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+
+    @classmethod
+    def register_function3(cls, fn, library_path, alias=None, doc=None):
+        """
+        """
+        alias = alias if alias else fn.__name__
+
+        def method(builder, *args, **kwargs):
+            return builder._3(fn, *args, **kwargs)
+
+        method.__doc__ = inspect.getdoc(fn)
+        method.__name__ = alias
+
+        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+
+    @classmethod
+    def register_function4(cls, fn, library_path, alias=None, doc=None):
+        """
+        """
+        alias = alias if alias else fn.__name__
+
+        def method(builder, *args, **kwargs):
+            return builder._4(fn, *args, **kwargs)
+
+        method.__doc__ = inspect.getdoc(fn)
+        method.__name__ = alias
+
+        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+
+    @classmethod
+    def register_function5(cls, fn, library_path, alias=None, doc=None):
+        """
+        """
+        alias = alias if alias else fn.__name__
+
+        def method(builder, *args, **kwargs):
+            return builder._5(fn, *args, **kwargs)
+
+        method.__doc__ = inspect.getdoc(fn)
+        method.__name__ = alias
+
+        cls.register_as_method(method, library_path, alias=alias, doc=doc)
 
     def register(self, library_path, alias=None, doc=None):
         def register_decorator(fn):
 
-            self.register_function_as_method(fn, library_path, alias=alias, doc=doc)
+            self.register_function(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
+
+    def register2(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_function2(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
+
+    def register3(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_function3(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
+
+    def register4(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_function4(fn, library_path, alias=alias, doc=doc)
+
+            return fn
+        return register_decorator
+
+    def register5(self, library_path, alias=None, doc=None):
+        def register_decorator(fn):
+
+            self.register_function5(fn, library_path, alias=alias, doc=doc)
 
             return fn
         return register_decorator
@@ -278,11 +429,6 @@ Builder.__core__ = [ _name for _name, f in inspect.getmembers(Builder, predicate
 #######################
 ### FUNCTIONS
 #######################
-
-def get_method(fn):
-    def method(builder, *args, **kwargs):
-        return builder._(fn, *args, **kwargs)
-    return method
 
 def _compile(ast):
     #if type(ast) is tuple:
