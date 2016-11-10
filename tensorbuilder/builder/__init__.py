@@ -278,7 +278,7 @@ class Builder(object):
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         name = alias if alias else fn.__name__
-        original_name = original_name if original_name else name
+        original_name = fn.__name__ if wrapped else original_name if original_name else name
 
         fn.__name__ = name
         fn.__doc__ = doc if doc else ("""

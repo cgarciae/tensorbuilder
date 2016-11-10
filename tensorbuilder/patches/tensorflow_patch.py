@@ -10,6 +10,7 @@ def patch(TensorBuilder):
     )]
 
     f2_names = (
+        ["concat"] +
         [ name for name in all_fs if "_summary" in name ]
     )
 
