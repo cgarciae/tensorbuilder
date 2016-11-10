@@ -6,7 +6,6 @@ import tensorflow as tf
 import sys
 from copy import deepcopy, copy
 from types import MethodType
-from utils import immutable
 from abc import ABCMeta, abstractmethod
 
 def _identity(x):

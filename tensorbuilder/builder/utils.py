@@ -2,8 +2,6 @@ from collections import namedtuple
 import functools, inspect
 from decorator import decorator
 
-
-
 # Decorators
 @decorator
 def immutable(method, self, *args, **kwargs):

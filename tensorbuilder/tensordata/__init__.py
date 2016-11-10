@@ -4,13 +4,19 @@ import asq.queryables
 import random
 from itertools import islice, izip_longest
 import numpy as np
-from utils import immutable
 import tensorflow as tf
+from decorator import decorator
 
 """
 """
-def data(*args, **kwargs):
-    return Data(*args, **kwargs)
+
+@decorator
+def immutable(method, self, *args, **kwargs):
+    """
+    Decorator. Passes a copy of the entity to the method so that the original object remains un touched.
+    Used in methods to get a fluent immatable API.
+    """
+    return method(self.copy(), *args, **kwargs)
 
 class Data(object):
     """docstring for Data"""
