@@ -4,16 +4,16 @@ import sys
 from builder import Builder
 from tensordata import Data
 import patches
+import inspect
 
 
 class TensorBuilder(Builder):
     """docstring for TensorBuilder."""
-    def __init__(self):
-        super(TensorBuilder, self).__init__()
 
     def data(self, *args, **kwargs):
         return Data(*args, **kwargs)
 
+TensorBuilder.__core__ = [ name for name, f in inspect.getmembers(TensorBuilder, predicate=inspect.ismethod) ]
 
 tensorbuilder = TensorBuilder()
 patches.patch(TensorBuilder)

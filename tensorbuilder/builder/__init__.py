@@ -423,7 +423,7 @@ class Builder(object):
             return fn
         return register_decorator
 
-Builder.__core__ = [ _name for _name, f in inspect.getmembers(Builder, predicate=inspect.ismethod) ]
+
 
 #######################
 ### FUNCTIONS
