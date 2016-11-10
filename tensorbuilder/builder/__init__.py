@@ -78,6 +78,9 @@ class Builder(object):
     def __call__(self, *args, **kwargs):
         return self.f(*args, **kwargs)
 
+    def __iter__(self):
+        return [self.f]
+
     def _(builder, g, *args, **kwargs):
         """
         Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
@@ -431,6 +434,27 @@ class Builder(object):
         return register_decorator
 
 
+class BuilderTree(Builder):
+    """docstring for BuilderTree."""
+    def __init__(self, f=[]):
+        f = list(f) #copy
+        super(BuilderTree, self).__init__(f)
+
+    def __iter__(self):
+        for f in self.f:
+            print(type(f))
+            if type(f) is BuilderTree:
+                for g in f:
+                    yield g
+            else:
+                yield f
+
+    def __call__(self, x):
+        return [ f(x) for f in self ]
+
+
+
+
 
 #######################
 ### FUNCTIONS
@@ -439,15 +463,16 @@ class Builder(object):
 def _compile(ast):
     #if type(ast) is tuple:
 
-    if type(ast) is list:
-        return _branch_function(ast)
+    if type(ast) is tuple:
+        return _sequence_function(ast)
     elif hasattr(ast, '__call__'):
         return ast
     elif type(ast) is dict:
         return _with_function(ast)
+    elif hasattr(ast, '__iter__'):
+        return _branch_function(ast)
     else:
-        return _sequence_function(ast)
-        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
+        raise Exception("Element has to be either a tuple for sequential operations, a list for branching, a dictionary for scoping or a function. Got {0}".format(type(ast)))
 
 
 def _compose2(f, g):
@@ -464,10 +489,9 @@ def _sequence_function(tuple_ast):
     fs = [ _compile(ast) for ast in tuple_ast ]
     return _compose_reversed(fs)
 
-def _branch_function(list_ast):
-    list_ast = utils.flatten(list_ast)
-    fs = [ _compile(ast) for ast in list_ast ]
-    return lambda x: [ f(x) for f in fs ]
+def _branch_function(iterable_ast):
+    fs = [ _compile(ast) for ast in iterable_ast ]
+    return BuilderTree(fs)
 
 def _with_function(dict_ast):
     scope, body_ast = list(dict_ast.items())[0]
