@@ -19,7 +19,7 @@ def patch(TensorBuilder):
     )
 
     f1_blacklist = (
-        ["relu_layer"] +
+        ["relu_layer", "device"] +
         TensorBuilder.__core__ +
         f2_names
     )

@@ -254,7 +254,7 @@ class Builder(object):
         return _compile(ast)
 
     @classmethod
-    def register_as_method(cls, fn, library_path, alias=None, doc=None):
+    def register_as_method(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         This method enables you to register any function `fn` that takes an Applicative as its first argument as a method of the Builder class.
 
@@ -272,34 +272,40 @@ class Builder(object):
         **Examples**
 
         """
+        if wrapped:
+            fn = functools.wraps(wrapped)(fn)
+
         fn_signature = utils.get_method_sig(fn)
      	fn_docs = inspect.getdoc(fn)
         name = alias if alias else fn.__name__
+        original_name = original_name if original_name else name
 
         fn.__name__ = name
-        fn.__doc__ = doc if doc else """
+        fn.__doc__ = doc if doc else ("""
         THIS METHOD IS AUTOMATICALLY GENERATED
 
-        This method accepts the same arguments as `{3}.{0}`
+            tb.{1}(*args, **kwargs)
+
+        This method accepts the same arguments as `{3}.{0}`. """ + explanation + """
 
         ** Documentation from `{3}.{0}`**
 
             {2}
-        """.format(name, fn_signature, fn_docs, library_path)
+        """).format(original_name, name, fn_docs, library_path)
 
 
         setattr(cls, name, fn)
 
-    def register_method(self, library_path, alias=None, doc=None):
+    def register_method(self, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
 
-            self.register_as_method(fn, library_path, alias=alias, doc=doc)
+            self.register_as_method(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
             return fn
         return register_decorator
 
     @classmethod
-    def register_function(cls, fn, library_path, alias=None, doc=None):
+    def register_function(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
 
@@ -317,109 +323,110 @@ class Builder(object):
         **Examples**
 
         """
-        alias = alias if alias else fn.__name__
-
+        @functools.wraps(fn)
         def method(builder, *args, **kwargs):
             return builder._(fn, *args, **kwargs)
 
-        method.__doc__ = inspect.getdoc(fn)
-        method.__name__ = alias
+        explanation = """However, the 1st argument is omitted, a partial with the rest of the arguments is returned which expects the 1st argument such that
 
-        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+            {3}.{0}(x1, *args, **kwargs) <==> tb.{1}(*args, **kwargs)(x1)
+
+        """ + explanation
+
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function2(cls, fn, library_path, alias=None, doc=None):
+    def register_function2(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         """
-        alias = alias if alias else fn.__name__
-
+        @functools.wraps(fn)
         def method(builder, *args, **kwargs):
             return builder._2(fn, *args, **kwargs)
 
-        method.__doc__ = inspect.getdoc(fn)
-        method.__name__ = alias
+        explanation = """However, the 2nd argument is omitted, a partial with the rest of the arguments is returned which expects the 2nd argument such that
 
-        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+            {3}.{0}(x1, x2, *args, **kwargs) <==> tb.{1}(x1, *args, **kwargs)(x2)
+        """ + explanation
+
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function3(cls, fn, library_path, alias=None, doc=None):
+    def register_function3(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         """
-        alias = alias if alias else fn.__name__
-
+        @functools.wraps(fn)
         def method(builder, *args, **kwargs):
             return builder._3(fn, *args, **kwargs)
 
-        method.__doc__ = inspect.getdoc(fn)
-        method.__name__ = alias
+        explanation = """However, the 3rd argument is omitted, a partial with the rest of the arguments is returned which expects the 3rd argument such that
 
-        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+            {3}.{0}(x1, x2, x3, *args, **kwargs) <==> tb.{1}(x1, x2, *args, **kwargs)(x3)
+        """ + explanation
+
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function4(cls, fn, library_path, alias=None, doc=None):
+    def register_function4(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         """
-        alias = alias if alias else fn.__name__
-
+        @functools.wraps(fn)
         def method(builder, *args, **kwargs):
             return builder._4(fn, *args, **kwargs)
 
-        method.__doc__ = inspect.getdoc(fn)
-        method.__name__ = alias
+        explanation = """However, the 4th argument is omitted, a partial with the rest of the arguments is returned which expects the 4th argument such that
 
-        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+            {3}.{0}(x1, x2, x3, x4, *args, **kwargs) <==> tb.{1}(x1, x2, x3, *args, **kwargs)(x4)
+        """ + explanation
+
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function5(cls, fn, library_path, alias=None, doc=None):
+    def register_function5(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         """
         """
-        alias = alias if alias else fn.__name__
-
+        @functools.wraps(fn)
         def method(builder, *args, **kwargs):
             return builder._5(fn, *args, **kwargs)
 
-        method.__doc__ = inspect.getdoc(fn)
-        method.__name__ = alias
+        explanation = """However, the 5th argument is omitted, a partial with the rest of the arguments is returned which expects the 5th argument such that
 
-        cls.register_as_method(method, library_path, alias=alias, doc=doc)
+            {3}.{0}(x1, x2, x3, x4, x5, *args, **kwargs) <==> tb.{1}(x1, x2, x3, x4, *args, **kwargs)(x5)
+        """ + explanation
 
-    def register(self, library_path, alias=None, doc=None):
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+
+    @classmethod
+    def register(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
-
-            self.register_function(fn, library_path, alias=alias, doc=doc)
-
+            cls.register_function(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
             return fn
         return register_decorator
 
-    def register2(self, library_path, alias=None, doc=None):
+    @classmethod
+    def register2(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
-
-            self.register_function2(fn, library_path, alias=alias, doc=doc)
-
+            cls.register_function2(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
             return fn
         return register_decorator
 
-    def register3(self, library_path, alias=None, doc=None):
+    @classmethod
+    def register3(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
-
-            self.register_function3(fn, library_path, alias=alias, doc=doc)
-
+            cls.register_function3(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
             return fn
         return register_decorator
 
-    def register4(self, library_path, alias=None, doc=None):
+    @classmethod
+    def register4(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
-
-            self.register_function4(fn, library_path, alias=alias, doc=doc)
-
+            cls.register_function4(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
             return fn
         return register_decorator
 
-    def register5(self, library_path, alias=None, doc=None):
+    @classmethod
+    def register5(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
-
-            self.register_function5(fn, library_path, alias=alias, doc=doc)
-
+            cls.register_function5(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
             return fn
         return register_decorator
 
