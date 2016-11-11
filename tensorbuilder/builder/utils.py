@@ -2,8 +2,6 @@ from collections import namedtuple
 import functools, inspect
 from decorator import decorator
 
-
-
 # Decorators
 @decorator
 def immutable(method, self, *args, **kwargs):
@@ -78,7 +76,7 @@ def get_instance_methods(instance):
 
 def _flatten(container):
     for i in container:
-        if isinstance(i, (list,tuple)):
+        if isinstance(i, list):
             for j in flatten(i):
                 yield j
         else:
