@@ -78,9 +78,6 @@ class Builder(object):
     def __call__(self, *args, **kwargs):
         return self.f(*args, **kwargs)
 
-    def __iter__(self):
-        return [self.f]
-
     def _(builder, g, *args, **kwargs):
         """
         Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
@@ -210,7 +207,8 @@ class Builder(object):
             )
         """
 
-        f = _compile(ast)
+        f = self.compile(*ast)
+
         return f(x)
 
     def compile(self, *ast):
@@ -254,7 +252,17 @@ class Builder(object):
             h = f(x)
 
         """
-        return _compile(ast)
+
+        if len(ast) == 1:
+            ast = ast[0]
+
+        f = _compile(ast)
+
+        while _is_iterable_ast(f):
+            f = _compile(f)
+
+        return f
+
 
     @classmethod
     def register_as_method(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
@@ -434,27 +442,6 @@ class Builder(object):
         return register_decorator
 
 
-class BuilderTree(Builder):
-    """docstring for BuilderTree."""
-    def __init__(self, f=[]):
-        f = list(f) #copy
-        super(BuilderTree, self).__init__(f)
-
-    def __iter__(self):
-        for f in self.f:
-            print(type(f))
-            if type(f) is BuilderTree:
-                for g in f:
-                    yield g
-            else:
-                yield f
-
-    def __call__(self, x):
-        return [ f(x) for f in self ]
-
-
-
-
 
 #######################
 ### FUNCTIONS
@@ -463,35 +450,44 @@ class BuilderTree(Builder):
 def _compile(ast):
     #if type(ast) is tuple:
 
-    if type(ast) is tuple:
-        return _sequence_function(ast)
-    elif hasattr(ast, '__call__'):
+    if hasattr(ast, '__call__'):
         return ast
+    elif type(ast) is tuple:
+        return _sequence_function(ast)
     elif type(ast) is dict:
         return _with_function(ast)
-    elif hasattr(ast, '__iter__'):
-        return _branch_function(ast)
     else:
-        raise Exception("Element has to be either a tuple for sequential operations, a list for branching, a dictionary for scoping or a function. Got {0}".format(type(ast)))
+        return _branch_function(ast) #its iterable
+        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
 
 
-def _compose2(f, g):
-    return lambda x: f(g(x))
+def _compose2(ast_f, ast_g):
+    g = _compile(ast_g)
+    if _is_iterable_ast(ast_f):
+        return [ _compose2(_compile(f), g) for f in ast_f ]
+    else:
+        f = _compile(ast_f)
+        return lambda x: f(g(x))
 
 
-def _compose_reversed(functions):
-    functions = functions[:]
-    functions.reverse()
-    return functools.reduce(_compose2, functions, _identity)
+# def _compose_reversed(functions):
+#     functions = functions[:] #copy
+#     functions.reverse()
+#     return functools.reduce(_compose2, functions, _identity)
 
+def _is_iterable_ast(ast):
+    return hasattr(ast, '__iter__') and not(type(ast) is tuple and type(ast) is dict) and not hasattr(ast, '__call__')
 
 def _sequence_function(tuple_ast):
-    fs = [ _compile(ast) for ast in tuple_ast ]
-    return _compose_reversed(fs)
+    tuple_ast = list(tuple_ast)
+    tuple_ast.reverse()
+    tuple_ast = tuple_ast + [ _identity ]
+    return functools.reduce(_compose2, tuple_ast)
 
-def _branch_function(iterable_ast):
-    fs = [ _compile(ast) for ast in iterable_ast ]
-    return BuilderTree(fs)
+def _branch_function(list_ast):
+    list_ast = utils.flatten(list_ast)
+    fs = utils.flatten([ _compile(ast) for ast in list_ast ])
+    return lambda x: [ f(x) for f in fs ]
 
 def _with_function(dict_ast):
     scope, body_ast = list(dict_ast.items())[0]

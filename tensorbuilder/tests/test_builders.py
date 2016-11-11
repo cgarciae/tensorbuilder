@@ -64,23 +64,27 @@ class TestBuilder(object):
             4,
             [
                 (
-                add2,
-                mul3
+                    add2,
+                    mul3
                 )
             ,
                 [
                     (
-                    add2,
-                    mul3
+                        add2,
+                        mul3
                     )
                 ,
                     (
-                    mul3,
-                    add2
+                        mul3,
+                        add2,
+                        [
+                            _ + 1,
+                            _ + 2
+                        ]
                     )
                 ]
             ]
-        ) == [18, 18, 14]
+        ) == [18, 18, 15, 16]
 
         assert builder.pipe(
             4,
