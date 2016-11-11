@@ -46,7 +46,8 @@ class TestTensorBuilder(object):
     def test_layers_patch(self):
         softmax_layer = tb.pipe(
             self.x,
-            tb.softmax_layer(10)
+            tb.layers.sigmoid(10)
+            .layers.softmax(20)
         )
         assert "Softmax" in softmax_layer.name
 
@@ -54,13 +55,19 @@ class TestTensorBuilder(object):
         concatenated = tb.pipe(
             self.x,
             [
-                tb.softmax_layer(3)
+            (
+                tb.layers.softmax(3),
+            )
             ,
-                tb.tanh_layer(2)
+                tb.layers.tanh(2)
             ,
-                tb.sigmoid_layer(5)
+                tb.layers.sigmoid(5)
             ],
             tb.concat(1)
         )
 
         assert int(concatenated.get_shape()[1]) == 10
+
+    def test_rnn_utilities(self):
+        assert tb.rnn_placeholders_from_state
+        assert tb.rnn_state_feed_dict

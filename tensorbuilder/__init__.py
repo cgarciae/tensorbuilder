@@ -2,21 +2,14 @@
 import os
 import sys
 from builder import Builder
+from tensorbuilder_class import TensorBuilder
 from tensordata import Data
 import patches
 import inspect
 
-
-class TensorBuilder(Builder):
-    """docstring for TensorBuilder."""
-
-    def data(self, *args, **kwargs):
-        return Data(*args, **kwargs)
-
-TensorBuilder.__core__ = [ name for name, f in inspect.getmembers(TensorBuilder, predicate=inspect.ismethod) ]
+import patches #import last
 
 tensorbuilder = TensorBuilder()
-patches.patch(TensorBuilder)
 
 
 #pdoc

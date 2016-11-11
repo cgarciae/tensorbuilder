@@ -4,7 +4,6 @@ import functools
 import itertools
 import tensorflow as tf
 import sys
-from copy import deepcopy, copy
 from types import MethodType
 from abc import ABCMeta, abstractmethod
 
@@ -67,18 +66,17 @@ class Builder(object):
         """
 
 
-    def _unit(self, f):
+    def _unit(self, f, _return_type=None):
         "Monadic unit, also known as `return`"
-        return self.__class__(f)
-
-    def copy(self):
-        """Returns a compy of the applicative"""
-        return self._unit(self.f)
+        if _return_type:
+            return _return_type(f)
+        else:
+            return self.__class__(f)
 
     def __call__(self, *args, **kwargs):
         return self.f(*args, **kwargs)
 
-    def _(builder, g, *args, **kwargs):
+    def _(self, g, *args, **kwargs):
         """
         Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
 
@@ -98,68 +96,98 @@ class Builder(object):
 
 
         """
-        g = _compile(g)
-        return builder._unit(lambda x: g(builder.f(x), *args, **kwargs))
+        _return_type = None
 
-    def _2(builder, g, arg1, *args, **kwargs):
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
+        return self._unit(lambda x: g(self.f(x), *args, **kwargs), _return_type=_return_type)
+
+    def _2(self, g, arg1, *args, **kwargs):
         """
         """
-        g = _compile(g)
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
 
         def _lambda(x):
-            arg2 = builder.f(x)
+            arg2 = self.f(x)
             new_args = tuple([arg1, arg2] + list(args))
             return g(*new_args, **kwargs)
 
-        return builder._unit(_lambda)
+        return self._unit(_lambda, _return_type=_return_type)
 
-    def _3(builder, g, arg1, arg2, *args, **kwargs):
+    def _3(self, g, arg1, arg2, *args, **kwargs):
         """
         """
-        g = _compile(g)
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
 
         def _lambda(x):
-            arg3 = builder.f(x)
+            arg3 = self.f(x)
             new_args = tuple([arg1, arg2, arg3] + list(args))
             return g(*new_args, **kwargs)
 
-        return builder._unit(_lambda)
+        return self._unit(_lambda, _return_type=_return_type)
 
-    def _4(builder, g, arg1, arg2, arg3, *args, **kwargs):
+    def _4(self, g, arg1, arg2, arg3, *args, **kwargs):
         """
         """
-        g = _compile(g)
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
 
         def _lambda(x):
-            arg4 = builder.f(x)
+            arg4 = self.f(x)
             new_args = tuple([arg1, arg2, arg3, arg4] + list(args))
             return g(*new_args, **kwargs)
 
-        return builder._unit(_lambda)
+        return self._unit(_lambda, _return_type=_return_type)
 
-    def _5(builder, g, arg1, arg2, arg3, arg4, *args, **kwargs):
+    def _5(self, g, arg1, arg2, arg3, arg4, *args, **kwargs):
         """
         """
-        g = _compile(g)
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
 
         def _lambda(x):
-            arg5 = builder.f(x)
+            arg5 = self.f(x)
             new_args = tuple([arg1, arg2, arg3, arg4, arg5] + list(args))
             return g(*new_args, **kwargs)
 
-        return builder._unit(_lambda)
+        return self._unit(_lambda, _return_type=_return_type)
 
 
-    def using(builder, x):
+    def using(self, x):
         """
         """
-        return builder._(lambda _: x)
+        return self._(lambda _: x)
 
-    def run(builder):
-        return builder(None)
+    def run(self):
+        return self(None)
 
-    def store(builder, ref):
-        return builder._(ref.set)
+    def store(self, ref):
+        return self._(ref.set)
 
     def ref(self):
         return Ref()
@@ -167,6 +195,7 @@ class Builder(object):
     def identity(self, x):
         return x
 
+    @classmethod
     def pipe(self, x, *ast):
         """
         `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Object` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
@@ -211,6 +240,7 @@ class Builder(object):
 
         return f(x)
 
+    @classmethod
     def compile(self, *ast):
         """
         `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Object/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
@@ -255,6 +285,7 @@ class Builder(object):
 
         if len(ast) == 1:
             ast = ast[0]
+
 
         f = _compile(ast)
 
@@ -307,6 +338,7 @@ class Builder(object):
 
         setattr(cls, name, fn)
 
+    @classmethod
     def register_method(self, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
         def register_decorator(fn):
 
@@ -316,7 +348,7 @@ class Builder(object):
         return register_decorator
 
     @classmethod
-    def register_function(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register_function(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
 
@@ -335,8 +367,9 @@ class Builder(object):
 
         """
         @functools.wraps(fn)
-        def method(builder, *args, **kwargs):
-            return builder._(fn, *args, **kwargs)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._(fn, *args, **kwargs)
 
         explanation = """However, the 1st argument is omitted, a partial with the rest of the arguments is returned which expects the 1st argument such that
 
@@ -347,12 +380,13 @@ class Builder(object):
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function2(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register_function2(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         """
         @functools.wraps(fn)
-        def method(builder, *args, **kwargs):
-            return builder._2(fn, *args, **kwargs)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._2(fn, *args, **kwargs)
 
         explanation = """However, the 2nd argument is omitted, a partial with the rest of the arguments is returned which expects the 2nd argument such that
 
@@ -362,12 +396,13 @@ class Builder(object):
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function3(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register_function3(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         """
         @functools.wraps(fn)
-        def method(builder, *args, **kwargs):
-            return builder._3(fn, *args, **kwargs)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._3(fn, *args, **kwargs)
 
         explanation = """However, the 3rd argument is omitted, a partial with the rest of the arguments is returned which expects the 3rd argument such that
 
@@ -377,12 +412,13 @@ class Builder(object):
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function4(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register_function4(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         """
         @functools.wraps(fn)
-        def method(builder, *args, **kwargs):
-            return builder._4(fn, *args, **kwargs)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._4(fn, *args, **kwargs)
 
         explanation = """However, the 4th argument is omitted, a partial with the rest of the arguments is returned which expects the 4th argument such that
 
@@ -392,52 +428,53 @@ class Builder(object):
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
 
     @classmethod
-    def register_function5(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register_function5(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         """
         @functools.wraps(fn)
-        def method(builder, *args, **kwargs):
-            return builder._5(fn, *args, **kwargs)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._5(fn, *args, **kwargs)
 
         explanation = """However, the 5th argument is omitted, a partial with the rest of the arguments is returned which expects the 5th argument such that
 
             {3}.{0}(x1, x2, x3, x4, x5, *args, **kwargs) <==> tb.{1}(x1, x2, x3, x4, *args, **kwargs)(x5)
         """ + explanation
 
-        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
 
     @classmethod
-    def register(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+            cls.register_function(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
     @classmethod
-    def register2(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register2(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function2(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+            cls.register_function2(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
     @classmethod
-    def register3(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register3(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function3(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+            cls.register_function3(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
     @classmethod
-    def register4(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register4(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function4(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+            cls.register_function4(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
     @classmethod
-    def register5(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation=""):
+    def register5(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function5(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+            cls.register_function5(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
@@ -469,12 +506,6 @@ def _compose2(ast_f, ast_g):
         f = _compile(ast_f)
         return lambda x: f(g(x))
 
-
-# def _compose_reversed(functions):
-#     functions = functions[:] #copy
-#     functions.reverse()
-#     return functools.reduce(_compose2, functions, _identity)
-
 def _is_iterable_ast(ast):
     return hasattr(ast, '__iter__') and not(type(ast) is tuple and type(ast) is dict) and not hasattr(ast, '__call__')
 
@@ -482,11 +513,17 @@ def _sequence_function(tuple_ast):
     tuple_ast = list(tuple_ast)
     tuple_ast.reverse()
     tuple_ast = tuple_ast + [ _identity ]
-    return functools.reduce(_compose2, tuple_ast)
+
+    f = functools.reduce(_compose2, tuple_ast)
+
+    if _is_iterable_ast(f):
+        f = utils.flatten_list(f)
+
+    return f
 
 def _branch_function(list_ast):
-    list_ast = utils.flatten(list_ast)
-    fs = utils.flatten([ _compile(ast) for ast in list_ast ])
+    list_ast = utils.flatten_list(list_ast)
+    fs = utils.flatten_list([ _compile(ast) for ast in list_ast ])
     return lambda x: [ f(x) for f in fs ]
 
 def _with_function(dict_ast):
