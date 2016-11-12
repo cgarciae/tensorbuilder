@@ -140,14 +140,3 @@ def _then(q, fn, *args, **kwargs):
     return query(fn(q, *args, **kwargs))
 
 asq.queryables.Queryable.then = _then
-
-if __name__ == '__main__':
-    x = np.array(range(1200)).reshape(400, 3)
-    y = np.array(range(400)).reshape(400, 1)
-
-    d = data(x=x, y=y)
-    [training, validation, test] = d.split(0.6, 0.2, 0.2)
-    print([training, validation, test])
-
-    for dat in training.batches(4).epochs(10):
-        print(dat.x, dat.batch, dat.epoch)
