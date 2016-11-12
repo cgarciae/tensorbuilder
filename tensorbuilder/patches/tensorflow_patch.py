@@ -31,14 +31,14 @@ f1s = (
 )
 
 #tf
-utils.patch_with_module_members(TensorBuilder, tf, blacklist=f1_blacklist)
-utils.patch_with_module_members2(TensorBuilder, tf, whitelist=f2_names)
+utils.patch_with_module_members_1(TensorBuilder, tf, blacklist=f1_blacklist)
+utils.patch_with_module_members_2(TensorBuilder, tf, whitelist=f2_names)
 
 #tf.nn
-utils.patch_with_module_members(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
+utils.patch_with_module_members_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
 
 # for name, f, module in f1s:
-#     TensorBuilder.register_function(f, module)
+#     TensorBuilder.register_function1(f, module)
 #
 # for name, f, module in f2s:
 #     TensorBuilder.register_function2(f, module)

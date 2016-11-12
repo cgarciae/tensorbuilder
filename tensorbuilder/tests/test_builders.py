@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorbuilder.builder import Builder, __, C, _0, _1
+from tensorbuilder.builder import Builder, P, C, _0, _1, _2, _3, _4, _5
 from fn import _
 import math
 
@@ -75,16 +75,29 @@ class TestBuilder(object):
             _1(math.pow, 2)
         )
 
+    def test_2(self):
+        assert [2, 4] == [1, 2, 3] >> C(
+            _2(map, _ + 1),
+            _2(filter, _ % 2 == 0)
+        )
+
+        assert [2, 4] == P(
+            [1, 2, 3],
+            _2(map, _ + 1),
+            _2(filter, _ % 2 == 0)
+        )
+
 
     def test_underscores(self):
         assert bl._(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
+        assert bl._1(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
         assert bl._2(a2_plus_b_minus_2c, 2, 4)(3) == -1 # (2)^2 + 3 - 2*4
         assert bl._3(a2_plus_b_minus_2c, 2, 4)(3) == 2 # (2)^2 + 4 - 2*3
 
     def test_pipe(self):
         assert bl.pipe(4, add2, mul3) == 18
 
-        assert [18, 14] == __(
+        assert [18, 14] == P(
             4,
             [
             (
@@ -320,7 +333,3 @@ class TestBuilder(object):
 #         assert a.tensor() == a2.tensor() and b.tensor() == b2.tensor()
 #
 #
-#
-# if __name__ == '__main__':
-#     TestBuilder().test_then_with_1()
-#     print "pass"

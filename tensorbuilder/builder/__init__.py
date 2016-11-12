@@ -121,7 +121,10 @@ class Builder(object):
         g = self.compile(g)
         return self._unit(lambda x: g(*args, **kwargs), _return_type=_return_type)
 
-    def _(self, g, *args, **kwargs):
+    def _(self, *args, **kwargs):
+        return self._1(*args, **kwargs)
+
+    def _1(self, g, *args, **kwargs):
         """
         Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
 
@@ -226,13 +229,13 @@ class Builder(object):
     def using(self, x):
         """
         """
-        return self._(lambda _: x)
+        return self._1(lambda _: x)
 
     def run(self):
         return self(None)
 
     def store(self, ref):
-        return self._(ref.set)
+        return self._1(ref.set)
 
     @property
     def ref(self):
@@ -243,7 +246,7 @@ class Builder(object):
 
     def __rrshift__(self, x):
         if isinstance(x, Builder):
-            return x._(self.f)
+            return x._1(self.f)
         else:
             return self.f(x)
 
@@ -378,7 +381,7 @@ class Builder(object):
         fn.__doc__ = doc if doc else ("""
         THIS METHOD IS AUTOMATICALLY GENERATED
 
-            tb.{1}(*args, **kwargs)
+            builder.{1}(*args, **kwargs)
 
         This method accepts the same arguments as `{3}.{0}`. """ + explanation + """
 
@@ -399,8 +402,9 @@ class Builder(object):
             return fn
         return register_decorator
 
+
     @classmethod
-    def register_function(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
+    def register_function0(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         """
         This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
 
@@ -421,15 +425,48 @@ class Builder(object):
         @functools.wraps(fn)
         def method(self, *args, **kwargs):
             kwargs['_return_type'] = _return_type
-            return self._(fn, *args, **kwargs)
+            return self._0(fn, *args, **kwargs)
 
-        explanation = """However, the 1st argument is omitted, a partial with the rest of the arguments is returned which expects the 1st argument such that
+        explanation = """However, a partial with the arguments is returned which expects any argument `x` such that
 
-            {3}.{0}(x1, *args, **kwargs) <==> tb.{1}(*args, **kwargs)(x1)
+            {3}.{0}(*args, **kwargs) <==> builder.{1}(*args, **kwargs)(x)
 
         """ + explanation
 
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+
+    @classmethod
+    def register_function1(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
+        """
+        This method enables you to register any function `fn` that takes an object as its first argument as a method of the Builder and Applicative class.
+
+        **Arguments**
+
+        * `fn`: a function that atleast takes an Object as its first argument.
+        * `library_path`: the route of the librar from which this function was taken, used for documentation purposes.
+        * `alias`: allows you to specify the name of the method, it will take the name of the function if its `None`.
+        * `doc`: the documentation for the method, if `None` a predefied documentation will be generated based on the documentation of `fn`.
+
+        **Return**
+
+        `None`
+
+        **Examples**
+
+        """
+        @functools.wraps(fn)
+        def method(self, *args, **kwargs):
+            kwargs['_return_type'] = _return_type
+            return self._1(fn, *args, **kwargs)
+
+        explanation = """However, the 1st argument is omitted, a partial with the rest of the arguments is returned which expects the 1st argument such that
+
+            {3}.{0}(x1, *args, **kwargs) <==> builder.{1}(*args, **kwargs)(x1)
+
+        """ + explanation
+
+        cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
+
 
     @classmethod
     def register_function2(cls, fn, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
@@ -442,7 +479,7 @@ class Builder(object):
 
         explanation = """However, the 2nd argument is omitted, a partial with the rest of the arguments is returned which expects the 2nd argument such that
 
-            {3}.{0}(x1, x2, *args, **kwargs) <==> tb.{1}(x1, *args, **kwargs)(x2)
+            {3}.{0}(x1, x2, *args, **kwargs) <==> builder.{1}(x1, *args, **kwargs)(x2)
         """ + explanation
 
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
@@ -458,7 +495,7 @@ class Builder(object):
 
         explanation = """However, the 3rd argument is omitted, a partial with the rest of the arguments is returned which expects the 3rd argument such that
 
-            {3}.{0}(x1, x2, x3, *args, **kwargs) <==> tb.{1}(x1, x2, *args, **kwargs)(x3)
+            {3}.{0}(x1, x2, x3, *args, **kwargs) <==> builder.{1}(x1, x2, *args, **kwargs)(x3)
         """ + explanation
 
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
@@ -474,7 +511,7 @@ class Builder(object):
 
         explanation = """However, the 4th argument is omitted, a partial with the rest of the arguments is returned which expects the 4th argument such that
 
-            {3}.{0}(x1, x2, x3, x4, *args, **kwargs) <==> tb.{1}(x1, x2, x3, *args, **kwargs)(x4)
+            {3}.{0}(x1, x2, x3, x4, *args, **kwargs) <==> builder.{1}(x1, x2, x3, *args, **kwargs)(x4)
         """ + explanation
 
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation)
@@ -490,7 +527,7 @@ class Builder(object):
 
         explanation = """However, the 5th argument is omitted, a partial with the rest of the arguments is returned which expects the 5th argument such that
 
-            {3}.{0}(x1, x2, x3, x4, x5, *args, **kwargs) <==> tb.{1}(x1, x2, x3, x4, *args, **kwargs)(x5)
+            {3}.{0}(x1, x2, x3, x4, x5, *args, **kwargs) <==> builder.{1}(x1, x2, x3, x4, *args, **kwargs)(x5)
         """ + explanation
 
         cls.register_as_method(method, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
@@ -498,7 +535,7 @@ class Builder(object):
     @classmethod
     def register(cls, library_path, alias=None, original_name=None, doc=None, wrapped=None, explanation="", _return_type=None):
         def register_decorator(fn):
-            cls.register_function(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
+            cls.register_function1(fn, library_path, alias=alias, original_name=original_name, doc=doc, wrapped=wrapped, explanation=explanation, _return_type=_return_type)
             return fn
         return register_decorator
 
@@ -531,14 +568,14 @@ class Builder(object):
         return register_decorator
 
 
-def __(*args, **kwargs):
+def P(*args, **kwargs):
     return Builder.pipe(*args, **kwargs)
 
 def _0(*args, **kwargs):
     return Builder()._0(*args, **kwargs)
 
 def _1(*args, **kwargs):
-    return Builder()._(*args, **kwargs)
+    return Builder()._1(*args, **kwargs)
 
 def _2(*args, **kwargs):
     return Builder()._2(*args, **kwargs)
