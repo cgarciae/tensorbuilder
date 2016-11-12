@@ -18,17 +18,20 @@ class TestTensorBuilder(object):
 
 
     def test_patch(self):
-        assert tb.matmul
+
+        matmul, add = tb.ref, tb.ref
 
         y = tb.pipe(
             self.x,
             tb
-            .matmul(self.w)
-            .add(self.b)
+            .matmul(self.w).store(matmul)
+            .add(self.b).store(add)
             .relu()
         )
 
         assert "Relu" in y.name
+        assert "MatMul" in matmul().name
+        assert "Add" in add().name
 
     def test_summaries_patch(self):
         mean = tb.pipe(

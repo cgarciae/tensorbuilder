@@ -1,8 +1,9 @@
 import tensorflow as tf
-from tensorbuilder import Builder
+from tensorbuilder.builder import Builder, __, C
 from fn import _
 
-builder = Builder()
+
+bl = Builder()
 # from tensorbuilder import tb
 
 add2 = _ + 2
@@ -11,19 +12,27 @@ get_list = lambda x: [1,2,3]
 a2_plus_b_minus_2c = lambda a, b, c: a ** 2 + b - 2*c
 
 
-@builder.register("test.lib")
+@bl.register("test.lib")
 def add(a, b):
     """Some docs"""
     return a + b
 
-@builder.register2("test.lib")
+@bl.register2("test.lib")
 def pow(a, b):
     return a ** b
 
-@builder.register_method("test.lib")
-def get_function_name(builder):
-    return builder.f.__name__
+@bl.register_method("test.lib")
+def get_function_name(bl):
+    return bl.f.__name__
 
+class DummyContext:
+    def __init__(self, val):
+        self.val = val
+
+    def __enter__(self):
+        return self.val
+    def __exit__(self, type, value, traceback):
+        pass
 
 
 class TestBuilder(object):
@@ -34,18 +43,26 @@ class TestBuilder(object):
         self.x = tf.placeholder(tf.float32, shape=[None, 5])
 
     def test_underscore(self):
-        assert builder._(add2)(4) == 6
-        assert builder._(add2)._(mul3)(4) == 18
+        assert bl._(add2)(4) == 6
+        assert bl._(add2)._(mul3)(4) == 18
+
+    def test_rrshift(self):
+        assert 10 == 2 >> C(
+            _ + 1,
+            _ * 2,
+            _ + 4
+        )
+
 
     def test_underscores(self):
-        assert builder._(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
-        assert builder._2(a2_plus_b_minus_2c, 2, 4)(3) == -1 # (2)^2 + 3 - 2*4
-        assert builder._3(a2_plus_b_minus_2c, 2, 4)(3) == 2 # (2)^2 + 4 - 2*3
+        assert bl._(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
+        assert bl._2(a2_plus_b_minus_2c, 2, 4)(3) == -1 # (2)^2 + 3 - 2*4
+        assert bl._3(a2_plus_b_minus_2c, 2, 4)(3) == 2 # (2)^2 + 4 - 2*3
 
     def test_pipe(self):
-        assert builder.pipe(4, add2, mul3) == 18
+        assert bl.pipe(4, add2, mul3) == 18
 
-        assert builder.pipe(
+        assert [18, 14] == __(
             4,
             [
             (
@@ -58,9 +75,9 @@ class TestBuilder(object):
                 add2
             )
             ]
-        ) == [18, 14]
+        )
 
-        assert builder.pipe(
+        assert bl.pipe(
             4,
             [
                 (
@@ -86,7 +103,7 @@ class TestBuilder(object):
             ]
         ) == [18, 18, 15, 16]
 
-        assert builder.pipe(
+        assert bl.pipe(
             4,
             [
                 (
@@ -110,7 +127,7 @@ class TestBuilder(object):
             ]
         ) == [18, 18, 14, get_list(None)]
 
-        [a, b, c] = builder.pipe(
+        [a, b, c] = bl.pipe(
             4,
             [
                 (
@@ -135,15 +152,15 @@ class TestBuilder(object):
         assert a == 18 and b == 18 and c == 14
 
     def test_scope(self):
-        y = builder.ref()
+        y = bl.ref
 
-        z = builder.pipe(
+        z = bl.pipe(
             self.x,
             { tf.name_scope('TEST'):
                 (
                 _ * 2,
                 _ + 4,
-                builder.store(y)
+                bl.store(y)
                 )
             },
             _ ** 3
@@ -155,47 +172,61 @@ class TestBuilder(object):
     def test_register(self):
 
         #register
-        assert 5 == builder.pipe(
+        assert 5 == bl.pipe(
             3,
-            builder.add(2)
+            bl.add(2)
         )
 
         #register2
-        assert 8 == builder.pipe(
+        assert 8 == bl.pipe(
             3,
-            builder.pow(2)
+            bl.pow(2)
         )
 
         #register_method
-        assert "_identity" == builder.get_function_name()
+        assert "_identity" == bl.get_function_name()
 
     def test_using_run(self):
-        assert 8 == builder.using(3).add(2).add(3).run()
+        assert 8 == bl.using(3).add(2).add(3).run()
 
     def test_reference(self):
-        ref = builder.ref()
+        add_ref = bl.ref
 
-        assert 8 == builder.using(3).add(2).store(ref).add(3).run()
-        assert 5 == ref()
+        assert 8 == bl.using(3).add(2).store(add_ref).add(3).run()
+        assert 5 == add_ref()
 
     def test_ref_props(self):
 
-        a = builder.ref()
-        b = builder.ref()
+        a = bl.ref
+        b = bl.ref
 
-        assert [7, 3, 5] == builder.pipe(
+        assert [7, 3, 5] == bl.pipe(
             1,
             add2, a.set,
             add2, b.set,
             add2,
             [
-                builder.identity,
+                bl.identity,
                 a,
                 b
             ]
         )
 
+    def test_scope_property(self):
 
+        assert "some random text" == bl.pipe(
+            "some ",
+            { DummyContext("random "):
+            (
+                lambda s: s + bl.S,
+                { DummyContext("text"):
+                    lambda s: s + bl.S
+                }
+            )
+            }
+        )
+
+        assert bl._S == None
 
 
 
@@ -206,8 +237,8 @@ class TestBuilder(object):
 #     x = tf.placeholder(tf.float32, shape=[None, 5])
 #
 #     def test_build(self):
-#         builder = tb.build(self.x)
-#         assert type(builder) == tb.Builder
+#         bl = tb.build(self.x)
+#         assert type(bl) == tb.Builder
 #
 #     def test_unit(self):
 #         h = tf.nn.softmax(self.x)

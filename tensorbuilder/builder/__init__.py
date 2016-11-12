@@ -26,6 +26,19 @@ class Ref(object):
         self.ref = x
         return x
 
+class Scope(object):
+    """docstring for Scope."""
+    def __init__(self, new_scope):
+        super(Scope, self).__init__()
+        self.new_scope = new_scope
+        self.old_scope = Builder._S
+
+    def __enter__(self):
+        Builder._S = self.new_scope
+
+    def __exit__(self, *args):
+        Builder._S = self.old_scope
+
 
 class Builder(object):
     """
@@ -60,10 +73,8 @@ class Builder(object):
 
     def __init__(self, f=_identity):
         super(Builder, self).__init__()
-        self.f = f
-        """
-        A function of type `a -> b`.
-        """
+        ast = (f,)
+        self.f = self.compile(*ast)
 
 
     def _unit(self, f, _return_type=None):
@@ -75,6 +86,12 @@ class Builder(object):
 
     def __call__(self, *args, **kwargs):
         return self.f(*args, **kwargs)
+
+    _S = None
+
+    @property
+    def S(self):
+        return Builder._S
 
     def _(self, g, *args, **kwargs):
         """
@@ -189,14 +206,21 @@ class Builder(object):
     def store(self, ref):
         return self._(ref.set)
 
+    @property
     def ref(self):
         return Ref()
 
     def identity(self, x):
         return x
 
+    def __rrshift__(self, x):
+        if isinstance(x, Builder):
+            return x._(self.f)
+        else:
+            return self.f(x)
+
     @classmethod
-    def pipe(self, x, *ast):
+    def pipe(cls, x, *ast):
         """
         `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Object` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
 
@@ -236,12 +260,12 @@ class Builder(object):
             )
         """
 
-        f = self.compile(*ast)
+        f = cls.compile(*ast)
 
         return f(x)
 
     @classmethod
-    def compile(self, *ast):
+    def compile(cls, *ast):
         """
         `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Object/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
 
@@ -283,14 +307,10 @@ class Builder(object):
 
         """
 
-        if len(ast) == 1:
-            ast = ast[0]
-
-
         f = _compile(ast)
 
-        while _is_iterable_ast(f):
-            f = _compile(f)
+        if _is_iterable_ast(f):
+            f = _compile_iterable(f)
 
         return f
 
@@ -479,6 +499,11 @@ class Builder(object):
         return register_decorator
 
 
+def __(*args, **kwargs):
+    return Builder.pipe(*args, **kwargs)
+
+def C(*args, **kwargs):
+    return Builder(args)
 
 #######################
 ### FUNCTIONS
@@ -486,17 +511,20 @@ class Builder(object):
 
 def _compile(ast):
     #if type(ast) is tuple:
+    try:
+        if hasattr(ast, '__call__'):
+            return ast
+        elif type(ast) is tuple:
+            return _compile_tuple(ast)
+        elif type(ast) is dict:
+            return _compile_dictionary(ast)
+        else:
+            return _compile_iterable(ast) #its iterable
+            #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
 
-    if hasattr(ast, '__call__'):
-        return ast
-    elif type(ast) is tuple:
-        return _sequence_function(ast)
-    elif type(ast) is dict:
-        return _with_function(ast)
-    else:
-        return _branch_function(ast) #its iterable
-        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
-
+    except:
+        print(ast)
+        raise
 
 def _compose2(ast_f, ast_g):
     g = _compile(ast_g)
@@ -507,9 +535,12 @@ def _compose2(ast_f, ast_g):
         return lambda x: f(g(x))
 
 def _is_iterable_ast(ast):
-    return hasattr(ast, '__iter__') and not(type(ast) is tuple and type(ast) is dict) and not hasattr(ast, '__call__')
+    return hasattr(ast, '__iter__') and not( type(ast) is tuple or type(ast) is dict or hasattr(ast, '__call__') )
 
-def _sequence_function(tuple_ast):
+def _compile_tuple(tuple_ast):
+    if len(tuple_ast) == 1:
+        return _compile(tuple_ast[0])
+
     tuple_ast = list(tuple_ast)
     tuple_ast.reverse()
     tuple_ast = tuple_ast + [ _identity ]
@@ -521,17 +552,26 @@ def _sequence_function(tuple_ast):
 
     return f
 
-def _branch_function(list_ast):
+def _compile_iterable(list_ast):
+    # try:
+    #     list_ast = list(list_ast)
+    # except:
+    #     import traceback
+    #     print(list_ast)
+    #     traceback.print_stack()
+    #     raise
+    list_ast = list(list_ast)
     list_ast = utils.flatten_list(list_ast)
     fs = utils.flatten_list([ _compile(ast) for ast in list_ast ])
     return lambda x: [ f(x) for f in fs ]
 
-def _with_function(dict_ast):
+def _compile_dictionary(dict_ast):
     scope, body_ast = list(dict_ast.items())[0]
     body = _compile(body_ast)
     def _lambda(x):
-        with scope:
-            return body(x)
+        with scope as new_scope:
+            with Scope(new_scope):
+                return body(x)
     return _lambda
 
 

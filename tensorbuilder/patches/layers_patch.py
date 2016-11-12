@@ -26,7 +26,7 @@ funs = ( (name, f) for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction
 def register_layer_functions(name, f):
     explanation = """and the keyword argument `activation_fn` is set to `tf.nn.{0}`.""".format(name)
 
-    @LayerBuilder.register("tf.contrib.layers", alias="{0}".format(name), wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
+    @LayerBuilder.register("tf.contrib.layers", name, wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
     def layer_function(*args, **kwargs):
         kwargs['activation_fn'] = f
         return tf.contrib.layers.fully_connected(*args, **kwargs)
@@ -42,6 +42,3 @@ explanation = """and the keyword argument `activation_fn` is set to `None`."""
 def linear(*args, **kwargs):
     kwargs['activation_fn'] = None
     return tf.contrib.layers.fully_connected(*args, **kwargs)
-
-
-print [ name for name, f in inspect.getmembers(layers, inspect.isfunction) ]

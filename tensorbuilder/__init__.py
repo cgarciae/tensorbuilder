@@ -1,7 +1,8 @@
 # Patch docs
 import os
 import sys
-from builder import Builder
+from builder import Builder, utils
+import builder
 from tensorbuilder_class import TensorBuilder
 from tensordata import Data
 import patches
