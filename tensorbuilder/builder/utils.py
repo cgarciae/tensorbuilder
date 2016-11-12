@@ -110,32 +110,32 @@ def patch_with_module_members_1(builder_class, module, module_alias=None, blackl
     patch_members = _get_patch_members(builder_class, module, blacklist=blacklist, whitelist=whitelist, getmembers_predicate=getmembers_predicate)
 
     for name, f in patch_members:
-        builder_class.register_function1(f, module_name, _return_type=_return_type)
+        builder_class.register_function_1(f, module_name, _return_type=_return_type)
 
 def patch_with_module_members_2(builder_class, module, module_alias=None, blacklist=[], whitelist=None, _return_type=None, getmembers_predicate=inspect.isfunction):
     module_name = module_alias if module_alias else module.__name__
     patch_members = _get_patch_members(builder_class, module, blacklist=blacklist, whitelist=whitelist, getmembers_predicate=getmembers_predicate)
 
     for name, f in patch_members:
-        builder_class.register_function2(f, module_name, _return_type=_return_type)
+        builder_class.register_function_2(f, module_name, _return_type=_return_type)
 
 def patch_with_module_members_3(builder_class, module, module_alias=None, blacklist=[], whitelist=None, _return_type=None, getmembers_predicate=inspect.isfunction):
     module_name = module_alias if module_alias else module.__name__
     patch_members = _get_patch_members(builder_class, module, blacklist=blacklist, whitelist=whitelist, getmembers_predicate=getmembers_predicate)
 
     for name, f in patch_members:
-        builder_class.register_function3(f, module_name, _return_type=_return_type)
+        builder_class.register_function_3(f, module_name, _return_type=_return_type)
 
 def patch_with_module_members_4(builder_class, module, module_alias=None, blacklist=[], whitelist=None, _return_type=None, getmembers_predicate=inspect.isfunction):
     module_name = module_alias if module_alias else module.__name__
     patch_members = _get_patch_members(builder_class, module, blacklist=blacklist, whitelist=whitelist, getmembers_predicate=getmembers_predicate)
 
     for name, f in patch_members:
-        builder_class.register_function4(f, module_name, _return_type=_return_type)
+        builder_class.register_function_4(f, module_name, _return_type=_return_type)
 
 def patch_with_module_members_5(builder_class, module, module_alias=None, blacklist=[], whitelist=None, _return_type=None, getmembers_predicate=inspect.isfunction):
     module_name = module_alias if module_alias else module.__name__
     patch_members = _get_patch_members(builder_class, module, blacklist=blacklist, whitelist=whitelist, getmembers_predicate=getmembers_predicate)
 
     for name, f in patch_members:
-        builder_class.register_function5(f, module_name, _return_type=_return_type)
+        builder_class.register_function_5(f, module_name, _return_type=_return_type)

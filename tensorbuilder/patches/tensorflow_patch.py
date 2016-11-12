@@ -38,7 +38,7 @@ utils.patch_with_module_members_2(TensorBuilder, tf, whitelist=f2_names)
 utils.patch_with_module_members_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
 
 # for name, f, module in f1s:
-#     TensorBuilder.register_function1(f, module)
+#     TensorBuilder.register_function_1(f, module)
 #
 # for name, f, module in f2s:
-#     TensorBuilder.register_function2(f, module)
+#     TensorBuilder.register_function_2(f, module)

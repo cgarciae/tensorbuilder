@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorbuilder.builder import Builder, P, C, _0, _1, _2, _3, _4, _5
+from tensorbuilder.builder import Builder, P, C, M, _0, _1, _2, _3, _4, _5
 from fn import _
 import math
 
@@ -13,12 +13,12 @@ get_list = lambda x: [1,2,3]
 a2_plus_b_minus_2c = lambda a, b, c: a ** 2 + b - 2*c
 
 
-@bl.register("test.lib")
+@bl.register_1("test.lib")
 def add(a, b):
     """Some docs"""
     return a + b
 
-@bl.register2("test.lib")
+@bl.register_2("test.lib")
 def pow(a, b):
     return a ** b
 
@@ -43,9 +43,42 @@ class TestBuilder(object):
     def setup_method(self):
         self.x = tf.placeholder(tf.float32, shape=[None, 5])
 
-    def test_underscore(self):
+    def test_underscore_1(self):
+        assert bl._1(add2)(4) == 6
+        assert bl._1(add2)._1(mul3)(4) == 18
+
         assert bl._(add2)(4) == 6
         assert bl._(add2)._(mul3)(4) == 18
+
+    def test_methods(self):
+        assert 9 == P(
+            "hello world !!!",
+            M.split(" ")
+            .filter(M.contains("wor").Not())
+            .map(len),
+            sum,
+            _ + 0.5,
+            round
+        )
+
+        assert not P(
+            [1,2,3],
+            M.contains(5)
+        )
+
+        class A(object):
+            def something(self, x):
+                return "y" * x
+
+        assert "yyyy" == P(
+            A(),
+            M.proxy('something', 4) #registered something
+        )
+
+        assert "yy" == P(
+            A(),
+            M.something(2) #used something
+        )
 
     def test_rrshift(self):
         assert 10 == 2 >> C(
@@ -204,7 +237,7 @@ class TestBuilder(object):
         assert "TEST/" in y().name
         assert "TEST/" not in z.name
 
-    def test_register(self):
+    def test_register_1(self):
 
         #register
         assert 5 == bl.pipe(
@@ -212,7 +245,7 @@ class TestBuilder(object):
             bl.add(2)
         )
 
-        #register2
+        #register_2
         assert 8 == bl.pipe(
             3,
             bl.pow(2)

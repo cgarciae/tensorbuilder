@@ -10,8 +10,6 @@ from tensorbuilder import Builder
 class LayerBuilder(Builder):
     """docstring for LayerBuilder."""
 
-LayerBuilder.__core__ = [ name for name, f in inspect.getmembers(LayerBuilder, predicate=inspect.ismethod) ]
-
 #Add property to TensorBuilder
 TensorBuilder.layers = property(lambda self: LayerBuilder(self.f))
 
@@ -26,7 +24,7 @@ funs = ( (name, f) for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction
 def register_layer_functions(name, f):
     explanation = """and the keyword argument `activation_fn` is set to `tf.nn.{0}`.""".format(name)
 
-    @LayerBuilder.register("tf.contrib.layers", name, wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
+    @LayerBuilder.register_1("tf.contrib.layers", name, wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
     def layer_function(*args, **kwargs):
         kwargs['activation_fn'] = f
         return tf.contrib.layers.fully_connected(*args, **kwargs)
@@ -38,7 +36,7 @@ for name, f in funs:
 #linear_layer
 explanation = """and the keyword argument `activation_fn` is set to `None`."""
 
-@LayerBuilder.register("tf.contrib.layers", alias="linear", wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
+@LayerBuilder.register_1("tf.contrib.layers", alias="linear", wrapped=fully_connected, explanation=explanation, _return_type=TensorBuilder)
 def linear(*args, **kwargs):
     kwargs['activation_fn'] = None
     return tf.contrib.layers.fully_connected(*args, **kwargs)
