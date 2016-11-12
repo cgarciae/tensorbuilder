@@ -40,6 +40,7 @@ class Scope(object):
         Builder._S = self.old_scope
 
 
+
 class Builder(object):
     """
     An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.
@@ -83,8 +84,8 @@ class Builder(object):
         else:
             return self.__class__(f)
 
-    def __call__(self, *args, **kwargs):
-        return self.f(*args, **kwargs)
+    def __call__(self, x):
+        return self.f(x)
 
     _S = None
 
@@ -151,7 +152,7 @@ class Builder(object):
             del kwargs['_return_type']
 
         g = self.compile(g)
-        return self._unit(lambda x: g(self.f(x), *args, **kwargs), _return_type=_return_type)
+        return self._unit(lambda x: g(self(x), *args, **kwargs), _return_type=_return_type)
 
     def _2(self, g, arg1, *args, **kwargs):
         """
@@ -165,7 +166,7 @@ class Builder(object):
         g = self.compile(g)
 
         def _lambda(x):
-            arg2 = self.f(x)
+            arg2 = self(x)
             new_args = tuple([arg1, arg2] + list(args))
             return g(*new_args, **kwargs)
 
@@ -183,7 +184,7 @@ class Builder(object):
         g = self.compile(g)
 
         def _lambda(x):
-            arg3 = self.f(x)
+            arg3 = self(x)
             new_args = tuple([arg1, arg2, arg3] + list(args))
             return g(*new_args, **kwargs)
 
@@ -201,7 +202,7 @@ class Builder(object):
         g = self.compile(g)
 
         def _lambda(x):
-            arg4 = self.f(x)
+            arg4 = self(x)
             new_args = tuple([arg1, arg2, arg3, arg4] + list(args))
             return g(*new_args, **kwargs)
 
@@ -219,7 +220,7 @@ class Builder(object):
         g = self.compile(g)
 
         def _lambda(x):
-            arg5 = self.f(x)
+            arg5 = self(x)
             new_args = tuple([arg1, arg2, arg3, arg4, arg5] + list(args))
             return g(*new_args, **kwargs)
 
@@ -246,9 +247,9 @@ class Builder(object):
 
     def __rrshift__(self, x):
         if isinstance(x, Builder):
-            return x._1(self.f)
+            return x._1(self)
         else:
-            return self.f(x)
+            return self(x)
 
     def set(self, *ast):
         f = self.compile(*ast)
@@ -569,10 +570,34 @@ class Builder(object):
             return fn
         return register_decorator
 
+    def after(self, g):
+        return
+
+
 
 Builder.__core__ = [ name for name, f in inspect.getmembers(Builder, inspect.ismethod) ]
 
+class Tree(object):
+    """docstring for Tree."""
 
+    def __init__(self, _branches=[], _refs={}):
+        self._branches = list(_branches)
+        self._refs = _refs
+
+    def __iter__(self):
+        for branch in self._branches:
+            if type(branch) is Tree:
+                for builder in branch:
+                    yield builder
+            else:
+                yield branch #branch is Builder
+
+    def __call__(self, x):
+        return [ builder(x) for builder in self ]
+
+#############################
+## Shortcuts
+#############################
 def P(*args, **kwargs):
     return Builder.pipe(*args, **kwargs)
 
@@ -603,8 +628,10 @@ def C(*args, **kwargs):
 
 def _compile(ast):
     #if type(ast) is tuple:
-    if hasattr(ast, '__call__'):
+    if isinstance(ast, (Builder, Tree)):
         return ast
+    if hasattr(ast, '__call__'):
+        return Builder(ast)
     elif type(ast) is tuple:
         return _compile_tuple(ast)
     elif type(ast) is dict:
@@ -613,37 +640,18 @@ def _compile(ast):
         return _compile_iterable(ast) #its iterable
         #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
 
-def _compose2(ast_f, ast_g):
-    g = _compile(ast_g)
-    if _is_iterable_ast(ast_f):
-        return [ _compose2(_compile(f), g) for f in ast_f ]
-    else:
-        f = _compile(ast_f)
-        return lambda x: f(g(x))
+def _fuse2(f, g):
+    return g._after(f)
 
 def _is_iterable_ast(ast):
     return hasattr(ast, '__iter__') and not( type(ast) is tuple or type(ast) is dict or hasattr(ast, '__call__') )
 
 def _compile_tuple(tuple_ast):
-    if len(tuple_ast) == 1:
-        return _compile(tuple_ast[0])
+    builders = [ _compile(ast) for ast in tuple_ast ]
+    return functools.reduce(_fuse2, builders)
 
-    tuple_ast = list(tuple_ast)
-    tuple_ast.reverse()
-    tuple_ast = tuple_ast + [ _identity ]
-
-    f = functools.reduce(_compose2, tuple_ast)
-
-    if _is_iterable_ast(f):
-        f = utils.flatten_list(f)
-
-    return f
-
-def _compile_iterable(list_ast):
-    list_ast = list(list_ast)
-    list_ast = utils.flatten_list(list_ast)
-    fs = utils.flatten_list([ _compile(ast) for ast in list_ast ])
-    return lambda x: [ f(x) for f in fs ]
+def _compile_iterable(iterable_ast):
+    return Tree([ _compile(ast) for ast in iterable_ast ])
 
 def _compile_dictionary(dict_ast):
     scope, body_ast = list(dict_ast.items())[0]
@@ -652,7 +660,7 @@ def _compile_dictionary(dict_ast):
         with scope as new_scope:
             with Scope(new_scope):
                 return body(x)
-    return _lambda
+    return Builder(_lambda)
 
 #######################
 ### CUSTOM FUNCTIONS
