@@ -73,8 +73,7 @@ class Builder(object):
 
     def __init__(self, f=_identity):
         super(Builder, self).__init__()
-        ast = (f,)
-        self.f = self.compile(*ast)
+        self.f = f
 
 
     def _unit(self, f, _return_type=None):
@@ -92,6 +91,35 @@ class Builder(object):
     @property
     def S(self):
         return Builder._S
+
+    def _0(self, g, *args, **kwargs):
+        """
+        Takes in a function `g` and composes it with `tensorbuilder.core.Applicative.f` as `g o f`. All \*args and \*\* are forwarded to g. This is an essential method since most registered methods use this.
+
+        **Arguments**
+
+        * `g`: A function
+        * All \*args and \*\* are forwarded to `g`
+
+        **Return**
+
+        Applicative
+
+        **Examples**
+
+            import tensorflow as tf
+            from tensorbuilder import tb
+
+
+        """
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g = self.compile(g)
+        return self._unit(lambda x: g(*args, **kwargs), _return_type=_return_type)
 
     def _(self, g, *args, **kwargs):
         """
@@ -218,6 +246,10 @@ class Builder(object):
             return x._(self.f)
         else:
             return self.f(x)
+
+    def set(self, *ast):
+        f = self.compile(*ast)
+        return self._unit(f)
 
     @classmethod
     def pipe(cls, x, *ast):
@@ -502,8 +534,26 @@ class Builder(object):
 def __(*args, **kwargs):
     return Builder.pipe(*args, **kwargs)
 
+def _0(*args, **kwargs):
+    return Builder()._0(*args, **kwargs)
+
+def _1(*args, **kwargs):
+    return Builder()._(*args, **kwargs)
+
+def _2(*args, **kwargs):
+    return Builder()._2(*args, **kwargs)
+
+def _3(*args, **kwargs):
+    return Builder()._3(*args, **kwargs)
+
+def _4(*args, **kwargs):
+    return Builder()._4(*args, **kwargs)
+
+def _5(*args, **kwargs):
+    return Builder()._5(*args, **kwargs)
+
 def C(*args, **kwargs):
-    return Builder(args)
+    return Builder().set(*args, **kwargs)
 
 #######################
 ### FUNCTIONS

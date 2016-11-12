@@ -1,6 +1,7 @@
 import tensorflow as tf
-from tensorbuilder.builder import Builder, __, C
+from tensorbuilder.builder import Builder, __, C, _0, _1
 from fn import _
+import math
 
 
 bl = Builder()
@@ -51,6 +52,27 @@ class TestBuilder(object):
             _ + 1,
             _ * 2,
             _ + 4
+        )
+
+    def test_0(self):
+        from datetime import datetime
+        import time
+
+        t0 = datetime.now()
+
+        time.sleep(0.01)
+
+        t1 = 2 >> C(
+            _ + 1,
+            _0(datetime.now)
+        )
+
+        assert t1 > t0
+
+    def test_1(self):
+        assert 9 == 2 >> C(
+            _ + 1,
+            _1(math.pow, 2)
         )
 
 
