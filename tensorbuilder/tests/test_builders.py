@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorbuilder.builder import Builder, P, C, M, _0, _1, _2, _3, _4, _5
+from tensorbuilder.builder import Builder, M, _0, _1, _2, C, P, val, on
 from fn import _
 import math
 
@@ -86,8 +86,7 @@ class TestBuilder(object):
             _ * 2,
             _ + 4
         )
-        print(builder)
-        print(builder(2))
+
         assert 10 == 2 >> builder
 
     def test_0(self):
@@ -222,7 +221,7 @@ class TestBuilder(object):
         assert a == 18 and b == 18 and c == 14
 
     def test_scope(self):
-        y = bl.ref
+        y = bl.ref('y')
 
         z = bl.pipe(
             self.x,
@@ -230,7 +229,7 @@ class TestBuilder(object):
                 (
                 _ * 2,
                 _ + 4,
-                bl.store(y)
+                bl.on(y)
                 )
             },
             _ ** 3
@@ -257,18 +256,18 @@ class TestBuilder(object):
         assert "identity" == bl.get_function_name()
 
     def test_using_run(self):
-        assert 8 == bl.using(3).add(2).add(3).run()
+        assert 8 == bl.val(3).add(2).add(3).run()
 
     def test_reference(self):
-        add_ref = bl.ref
+        add_ref = bl.ref('add_ref')
 
-        assert 8 == bl.using(3).add(2).store(add_ref).add(3).run()
+        assert 8 == bl.val(3).add(2).on(add_ref).add(3).run()
         assert 5 == add_ref()
 
     def test_ref_props(self):
 
-        a = bl.ref
-        b = bl.ref
+        a = bl.ref('a')
+        b = bl.ref('b')
 
         assert [7, 3, 5] == bl.pipe(
             1,
@@ -298,73 +297,15 @@ class TestBuilder(object):
 
         assert bl.Scope() == None
 
+    def test_ref_integraton_with_dsl(self):
+
+        y = bl.ref('y')
 
 
-#
-# class TestBuilder(object):
-#     """docstring for TestBuilder"""
-#
-#     x = tf.placeholder(tf.float32, shape=[None, 5])
-#
-#     def test_build(self):
-#         bl = tb.build(self.x)
-#         assert type(bl) == tb.Builder
-#
-#     def test_unit(self):
-#         h = tf.nn.softmax(self.x)
-#         h2 = tb.build(self.x)._unit(h).tensor()
-#
-#         assert h2 == h
-#
-#     def test_branch(self):
-#         pass
-#
-#     def test_then_with_1(self):
-#         h1 = (
-#             tb.build(self.x)
-#             .then_with(tf.device, "/cpu:0")(lambda x:
-#                 x.softmax()
-#             )
-#             .tensor()
-#         )
-#
-#         h2 = (
-#             tb.build(self.x)
-#             .with_device("/cpu:0")(lambda x:
-#                 x.softmax()
-#             )
-#             .tensor()
-#         )
-#
-#         assert "CPU:0" in h1.device
-#         assert "CPU:0" in h2.device
-#
-#     def test_then_with_2(self):
-#         h1 = tb.pipe(
-#             self.x
-#             ,
-#             { tf.device("/cpu:0"):
-#
-#                 tb.softmax()
-#             }
-#             ,
-#             tb.tensor()
-#         )
-#
-#         assert "CPU:0" in h1.device
-#
-# class TestBuilderTree(object):
-#
-#     def test_branches(self):
-#         a = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))
-#         b = tb.build(tf.placeholder(tf.float32, shape=[None, 8]))
-#
-#         tree = tb.branches([a, b])
-#
-#         assert type(tree) == tb.BuilderTree
-#
-#         [a2, b2] = tree.builders()
-#
-#         assert a.tensor() == a2.tensor() and b.tensor() == b2.tensor()
-#
-#
+        assert 5 == P(
+            1,
+            _ + 4,
+            on(y),
+            _ * 10,
+            'y'
+        )

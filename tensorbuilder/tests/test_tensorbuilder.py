@@ -19,13 +19,13 @@ class TestTensorBuilder(object):
 
     def test_patch(self):
 
-        matmul, add = tb.ref, tb.ref
+        matmul, add = tb.ref('matmul'), tb.ref('add')
 
         y = tb.pipe(
             self.x,
             tb
-            .matmul(self.w).store(matmul)
-            .add(self.b).store(add)
+            .matmul(self.w).on(matmul)
+            .add(self.b).on(add)
             .relu()
         )
 

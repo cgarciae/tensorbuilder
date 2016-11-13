@@ -1,6 +1,6 @@
 from tensorbuilder.builder import dsl
 from fn import _
-from tensorbuilder.builder import utils
+from tensorbuilder.builder import *
 
 class TestDSL(object):
     """docstring for TestDSL."""
@@ -12,7 +12,7 @@ class TestDSL(object):
 
     def test_read(self):
         refs = dict(
-            x=dsl.Ref(10)
+            x=dsl.Ref('x', 10)
         )
         code = ('x',)
         f, refs = dsl.Compile(code, refs)
@@ -21,10 +21,11 @@ class TestDSL(object):
         assert f(None) == 10
 
     def test_write(self):
+        r = dsl.Ref('r')
         code = (
             _ + 1, {'a'},
             _ * 2, {'b'},
-            _ * 100, {'c'},
+            _ * 100, {'c', r },
             ['c', 'a', 'b']
         )
 
@@ -34,11 +35,11 @@ class TestDSL(object):
 
     def test_input(self):
         code = (
-             {'a'},
+            {'a'},
             _ + 1,
             [
             (
-                {(10,)},
+                val(10),
                 _ * 2
             )
             ,

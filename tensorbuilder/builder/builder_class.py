@@ -8,7 +8,7 @@ import dsl
 ### Applicative
 #######################
 
-class Builder(object):
+class Builder(dsl.Function):
     """
     An [Applicative](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) is an object who wraps around a function and posses the means to apply it.
 
@@ -38,7 +38,7 @@ class Builder(object):
     """
 
     def __init__(self, f=identity, refs={}):
-        super(Builder, self).__init__()
+        super(Builder, self).__init__(f)
         self.f = f
         self.refs = refs
 
@@ -192,7 +192,7 @@ class Builder(object):
         return self._unit(_lambda, self.refs, _return_type=_return_type)
 
 
-    def using(self, x):
+    def val(self, x):
         """
         """
         return self._1(lambda _: x)
@@ -200,12 +200,20 @@ class Builder(object):
     def run(self):
         return self(None)
 
-    def store(self, ref):
-        return self._1(ref.set)
+    def on(self, ref):
 
-    @property
-    def ref(self):
-        return dsl.Ref()
+        if type(ref) is str:
+            ref = dsl.Ref(ref)
+
+        if ref.name not in self.refs:
+            refs = dict(self.refs, **{ref.name: ref})
+        else:
+            refs = self.refs
+
+        return self._unit(utils.compose2(ref.set, self), refs)
+
+    def ref(self, name):
+        return dsl.Ref(name)
 
     def identity(self, x):
         return x
@@ -300,14 +308,7 @@ class Builder(object):
             h = f(x)
 
         """
-        _return_type = None
-
-        if '_return_type' in kwargs:
-            cls = kwargs['_return_type']
-
-        f, refs = dsl.Compile(code, {})
-
-        return cls(f, refs)
+        return cls()._(*code, **kwargs)
 
 
     @classmethod
@@ -533,32 +534,3 @@ class Builder(object):
 
 
 Builder.__core__ = [ name for name, f in inspect.getmembers(Builder, inspect.ismethod) ]
-
-
-
-#############################
-## Shortcuts
-#############################
-def P(*args, **kwargs):
-    return Builder.pipe(*args, **kwargs)
-
-def _0(*args, **kwargs):
-    return Builder()._0(*args, **kwargs)
-
-def _1(*args, **kwargs):
-    return Builder()._1(*args, **kwargs)
-
-def _2(*args, **kwargs):
-    return Builder()._2(*args, **kwargs)
-
-def _3(*args, **kwargs):
-    return Builder()._3(*args, **kwargs)
-
-def _4(*args, **kwargs):
-    return Builder()._4(*args, **kwargs)
-
-def _5(*args, **kwargs):
-    return Builder()._5(*args, **kwargs)
-
-def C(*args, **kwargs):
-    return Builder().compile(*args, **kwargs)

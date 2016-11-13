@@ -7,17 +7,29 @@ from abc import ABCMeta, abstractmethod
 ###############################
 # Ref
 ###############################
+
+NO_VALUE = object()
+
 class Ref(object):
     """docstring for Ref."""
-    def __init__(self, value=None):
+    def __init__(self, name, value=NO_VALUE):
         super(Ref, self).__init__()
-        self.value = value
+        self.name = name
+        self.value = None if value is NO_VALUE else value
+        self.assigned = value is not NO_VALUE
 
     def __call__(self, *optional):
+        if not self.assigned:
+            raise Exception("Trying to read Ref('{0}') before assignment".format(self.name))
+
         return self.value
 
     def set(self, x):
         self.value = x
+
+        if not self.assigned:
+            self.assigned = True
+
         return x
 
 ###############################
@@ -30,7 +42,7 @@ class Node(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def compile(self, refs):
+    def __compile__(self, refs):
         pass
 
 class Function(Node):
@@ -38,11 +50,13 @@ class Function(Node):
     def __init__(self, f):
         super(Function, self).__init__()
         self.f = f
+        self.refs = {}
 
     def __iter__(self):
         yield self
 
-    def compile(self, refs):
+    def __compile__(self, refs):
+        refs = dict(refs, **self.refs)
         return self.f, refs
 
     def __str__(self):
@@ -58,11 +72,11 @@ class Tree(Node):
     def __init__(self, branches):
         self.branches = list(branches)
 
-    def compile(self, refs):
+    def __compile__(self, refs):
         fs = []
 
         for node in self.branches:
-            node_fs, refs = node.compile(refs)
+            node_fs, refs = node.__compile__(refs)
 
             if type(node_fs) is list:
                 fs += node_fs
@@ -82,13 +96,13 @@ class Sequence(Node):
         self.left = left
         self.right = right
 
-    def compile(self, refs):
-        f_left, refs = self.left.compile(refs)
+    def __compile__(self, refs):
+        f_left, refs = self.left.__compile__(refs)
 
         if type(f_left) is list:
             f_left = list_to_fn(f_left)
 
-        f_right, refs = self.right.compile(refs)
+        f_right, refs = self.right.__compile__(refs)
 
         if type(f_right) is list:
             f_right = compose_list(f_right, f_left)
@@ -111,8 +125,8 @@ class Scope(Node):
         self.scope_obj = scope_obj
         self.body = body
 
-    def compile(self, refs):
-        body_fs, refs = self.body.compile(refs)
+    def __compile__(self, refs):
+        body_fs, refs = self.body.__compile__(refs)
 
         def scope_fun(x):
             with self.scope_obj as scope:
@@ -122,7 +136,7 @@ class Scope(Node):
         left = Identity
         right = Function(scope_fun)
 
-        return Sequence(left, right).compile(refs)
+        return Sequence(left, right).__compile__(refs)
 
     def set_scope(self, new_scope):
         self.new_scope = new_scope
@@ -145,7 +159,7 @@ class Read(Node):
         super(Read, self).__init__()
         self.name = name
 
-    def compile(self, refs):
+    def __compile__(self, refs):
         ref = refs[self.name]
         f = ref #ref is callable with an argument
         return f, refs
@@ -153,17 +167,26 @@ class Read(Node):
 
 class Write(Node):
     """docstring for Read."""
-    def __init__(self, name):
+    def __init__(self, ref):
         super(Write, self).__init__()
-        self.name = name
+        self.ref = ref
 
-    def compile(self, refs):
-        if self.name not in refs:
-            refs[self.name] = ref = Ref()
-        else:
-            ref = refs[self.name]
+    def __compile__(self, refs):
 
-        return ref.set, refs
+        if type(self.ref) is str:
+            name = self.ref
+
+            if name in refs:
+                self.ref = refs[name]
+            else:
+                refs = refs.copy()
+                refs[name] = self.ref = Ref(self.ref)
+
+        elif self.ref.name not in refs:
+            refs = refs.copy()
+            refs[self.ref.name] = self.ref
+
+        return self.ref.set, refs
 
 
 class Input(Node):
@@ -172,7 +195,7 @@ class Input(Node):
         super(Input, self).__init__()
         self.value = value
 
-    def compile(self, refs):
+    def __compile__(self, refs):
         f = lambda x: self.value
         return f, refs
 
@@ -190,7 +213,7 @@ class Apply(Node):
 
 def Compile(code, refs):
     ast = parse(code)
-    fs, refs = ast.compile(refs)
+    fs, refs = ast.__compile__(refs)
 
     if type(fs) is list:
         fs = list_to_fn(fs)
@@ -208,7 +231,9 @@ def list_to_fn(fs):
 
 def parse(code):
     #if type(code) is tuple:
-    if type(code) is str:
+    if isinstance(code, Node):
+        return code
+    elif type(code) is str:
         return Read(code)
     elif type(code) is set:
         return parse_set(code)
@@ -226,16 +251,21 @@ def parse_set(code):
     if len(code) == 0:
         return Identity
 
+    for ref in code:
+        if not isinstance(ref, (str, Ref)):
+            raise Exception("Sets can only contain strings or Refs, get {0}".format(code))
+
+    writes = tuple([ Write(ref) for ref in code ])
+    return parse(writes)
+
+
     fst = iter(code).next()
 
     if len(code) == 1:
-        if type(fst) is str:
+        if type(fst) is str or type(fst) is Ref:
             return Write(fst)
-        elif type(fst) is tuple:
-            value = fst[0]
-            return Input(value)
         else:
-            raise Exception("Not part of the language: {0}".format(code))
+            raise
     else:
         raise Exception("Not part of the language: {0}".format(code))
 

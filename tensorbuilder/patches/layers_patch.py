@@ -5,13 +5,18 @@ from tensorflow.contrib import layers
 from tensorflow.contrib.layers import fully_connected
 from tensorbuilder import TensorBuilder
 from tensorbuilder import Builder
+from tensorbuilder.builder import utils
 
 
 class LayerBuilder(Builder):
     """docstring for LayerBuilder."""
 
+
 #Add property to TensorBuilder
 TensorBuilder.layers = property(lambda self: LayerBuilder(self.f))
+
+# patch all layer functions
+utils.patch_with_members_from_1(LayerBuilder, layers, module_alias="tf.contrib.layers")
 
 # fully conneted layers
 blacklist = (

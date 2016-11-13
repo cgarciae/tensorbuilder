@@ -1,2 +1,31 @@
-from builder_class import Builder, _0, _1, _2, _3, _4, _5, C, P
-from method_builder import M, MethodBuilder
+from builder_class import Builder
+from method_builder import MethodBuilder
+
+#############################
+## Shortcuts
+#############################
+def val(x):
+    return Builder().val(x)
+
+def on(ref):
+    return Builder().on(ref)
+
+def C(*args, **kwargs):
+    return Builder().compile(*args, **kwargs)
+
+def P(*args, **kwargs):
+    return Builder.pipe(*args, **kwargs)
+
+M = MethodBuilder()
+
+def _0(*args, **kwargs):
+    return Builder()._0(*args, **kwargs)
+
+def _1(*args, **kwargs):
+    return Builder()._1(*args, **kwargs)
+
+def _2(*args, **kwargs):
+    return Builder()._2(*args, **kwargs)
+
+def _3(*args, **kwargs):
+    return Builder()._3(*args, **kwargs)

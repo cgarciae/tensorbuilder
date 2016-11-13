@@ -1,4 +1,4 @@
-from builder_class import Builder, utils, C, P, _1, _2
+from builder_class import Builder, utils
 import inspect
 
 Builder.M = property(lambda self: MethodBuilder(self.f))
@@ -11,8 +11,6 @@ class MethodBuilder(Builder):
             register_proxy_method(name)
         return self._unit(lambda x: getattr(x, name)(*args, **kwargs), self.refs)
 
-M = MethodBuilder()
-
 def register_proxy_method(method_name, alias=None):
     def proxy_method(self, *args, **kwargs):
         return getattr(self, method_name)(*args, **kwargs)
@@ -21,7 +19,7 @@ def register_proxy_method(method_name, alias=None):
     MethodBuilder.register_function_1(proxy_method, "any", alias=alias)
 
 _is_viable_method = lambda m: inspect.isroutine(m) and m.__name__[0] is not '_'
-_get_members = _1(inspect.getmembers, _is_viable_method)
+_get_members = lambda x: inspect.getmembers(x, _is_viable_method)
 
 classes = [str, int, list, tuple, dict, float, bool]
 method_info_list = map(_get_members, classes)
