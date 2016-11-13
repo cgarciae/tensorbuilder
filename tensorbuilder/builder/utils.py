@@ -2,6 +2,12 @@ from collections import namedtuple
 import functools, inspect
 from decorator import decorator
 
+def identity(x):
+    return x
+
+def compose2(f, g):
+    return lambda x: f(g(x))
+
 # Decorators
 @decorator
 def immutable(method, self, *args, **kwargs):

@@ -9,7 +9,7 @@ class MethodBuilder(Builder):
     def proxy(self, name, *args, **kwargs):
         if not hasattr(self, name):
             register_proxy_method(name)
-        return self._unit(lambda x: getattr(x, name)(*args, **kwargs))
+        return self._unit(lambda x: getattr(x, name)(*args, **kwargs), self.refs)
 
 M = MethodBuilder()
 
@@ -23,11 +23,9 @@ def register_proxy_method(method_name, alias=None):
 _is_viable_method = lambda m: inspect.isroutine(m) and m.__name__[0] is not '_'
 _get_members = _1(inspect.getmembers, _is_viable_method)
 
-method_info_list = P(
-    [str, int, list, tuple, dict, float, bool],
-    _2(map, _get_members),
-    utils.flatten_list
-)
+classes = [str, int, list, tuple, dict, float, bool]
+method_info_list = map(_get_members, classes)
+method_info_list = utils.flatten_list(method_info_list)
 
 for name, f in method_info_list:
     register_proxy_method(name)

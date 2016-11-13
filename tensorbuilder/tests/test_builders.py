@@ -81,11 +81,14 @@ class TestBuilder(object):
         )
 
     def test_rrshift(self):
-        assert 10 == 2 >> C(
+        builder = C(
             _ + 1,
             _ * 2,
             _ + 4
         )
+        print(builder)
+        print(builder(2))
+        assert 10 == 2 >> builder
 
     def test_0(self):
         from datetime import datetime
@@ -122,7 +125,6 @@ class TestBuilder(object):
 
 
     def test_underscores(self):
-        assert bl._(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
         assert bl._1(a2_plus_b_minus_2c, 2, 4)(3) == 3 # (3)^2 + 2 - 2*4
         assert bl._2(a2_plus_b_minus_2c, 2, 4)(3) == -1 # (2)^2 + 3 - 2*4
         assert bl._3(a2_plus_b_minus_2c, 2, 4)(3) == 2 # (2)^2 + 4 - 2*3
@@ -252,7 +254,7 @@ class TestBuilder(object):
         )
 
         #register_method
-        assert "_identity" == bl.get_function_name()
+        assert "identity" == bl.get_function_name()
 
     def test_using_run(self):
         assert 8 == bl.using(3).add(2).add(3).run()
@@ -286,15 +288,15 @@ class TestBuilder(object):
             "some ",
             { DummyContext("random "):
             (
-                lambda s: s + bl.S,
+                lambda s: s + bl.Scope(),
                 { DummyContext("text"):
-                    lambda s: s + bl.S
+                    lambda s: s + bl.Scope()
                 }
             )
             }
         )
 
-        assert bl._S == None
+        assert bl.Scope() == None
 
 
 

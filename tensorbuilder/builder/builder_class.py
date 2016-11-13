@@ -1,45 +1,12 @@
 import inspect
 import utils
+from utils import identity
 import functools
-import itertools
-import tensorflow as tf
-import sys
-from types import MethodType
-from abc import ABCMeta, abstractmethod
-
-def _identity(x):
-    return x
+import dsl
 
 #######################
 ### Applicative
 #######################
-class Ref(object):
-    """docstring for Ref."""
-    def __init__(self, ref=None):
-        super(Ref, self).__init__()
-        self.ref = ref
-
-    def __call__(self, *optional):
-        return self.ref
-
-    def set(self, x):
-        self.ref = x
-        return x
-
-class Scope(object):
-    """docstring for Scope."""
-    def __init__(self, new_scope):
-        super(Scope, self).__init__()
-        self.new_scope = new_scope
-        self.old_scope = Builder._S
-
-    def __enter__(self):
-        Builder._S = self.new_scope
-
-    def __exit__(self, *args):
-        Builder._S = self.old_scope
-
-
 
 class Builder(object):
     """
@@ -70,28 +37,25 @@ class Builder(object):
 
     """
 
-    __metaclass__ = ABCMeta
-
-    def __init__(self, f=_identity):
+    def __init__(self, f=identity, refs={}):
         super(Builder, self).__init__()
         self.f = f
+        self.refs = refs
 
 
-    def _unit(self, f, _return_type=None):
+    def _unit(self, f, refs, _return_type=None):
         "Monadic unit, also known as `return`"
         if _return_type:
-            return _return_type(f)
+            return _return_type(f, refs)
         else:
-            return self.__class__(f)
+            return self.__class__(f, refs)
 
     def __call__(self, x):
         return self.f(x)
 
-    _S = None
-
-    @property
-    def S(self):
-        return Builder._S
+    @classmethod
+    def Scope(cls):
+        return dsl.Scope.GLOBAL_SCOPE
 
     def _0(self, g, *args, **kwargs):
         """
@@ -119,11 +83,19 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
-        return self._unit(lambda x: g(*args, **kwargs), _return_type=_return_type)
+        return self._unit(lambda x: g(*args, **kwargs), self.refs, _return_type=_return_type)
 
-    def _(self, *args, **kwargs):
-        return self._1(*args, **kwargs)
+    def _(self, *code, **kwargs):
+        _return_type = None
+
+        if '_return_type' in kwargs:
+            _return_type = kwargs['_return_type']
+            del kwargs['_return_type']
+
+        g, refs = dsl.Compile(code, self.refs)
+        h = utils.compose2(g, self)
+
+        return self._unit(h, refs, _return_type=_return_type)
 
     def _1(self, g, *args, **kwargs):
         """
@@ -151,8 +123,7 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
-        return self._unit(lambda x: g(self(x), *args, **kwargs), _return_type=_return_type)
+        return self._unit(lambda x: g(self(x), *args, **kwargs), self.refs, _return_type=_return_type)
 
     def _2(self, g, arg1, *args, **kwargs):
         """
@@ -163,14 +134,13 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
 
         def _lambda(x):
             arg2 = self(x)
             new_args = tuple([arg1, arg2] + list(args))
             return g(*new_args, **kwargs)
 
-        return self._unit(_lambda, _return_type=_return_type)
+        return self._unit(_lambda, self.refs, _return_type=_return_type)
 
     def _3(self, g, arg1, arg2, *args, **kwargs):
         """
@@ -181,14 +151,13 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
 
         def _lambda(x):
             arg3 = self(x)
             new_args = tuple([arg1, arg2, arg3] + list(args))
             return g(*new_args, **kwargs)
 
-        return self._unit(_lambda, _return_type=_return_type)
+        return self._unit(_lambda, self.refs, _return_type=_return_type)
 
     def _4(self, g, arg1, arg2, arg3, *args, **kwargs):
         """
@@ -199,14 +168,12 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
-
         def _lambda(x):
             arg4 = self(x)
             new_args = tuple([arg1, arg2, arg3, arg4] + list(args))
             return g(*new_args, **kwargs)
 
-        return self._unit(_lambda, _return_type=_return_type)
+        return self._unit(_lambda, self.refs, _return_type=_return_type)
 
     def _5(self, g, arg1, arg2, arg3, arg4, *args, **kwargs):
         """
@@ -217,14 +184,12 @@ class Builder(object):
             _return_type = kwargs['_return_type']
             del kwargs['_return_type']
 
-        g = self.compile(g)
-
         def _lambda(x):
             arg5 = self(x)
             new_args = tuple([arg1, arg2, arg3, arg4, arg5] + list(args))
             return g(*new_args, **kwargs)
 
-        return self._unit(_lambda, _return_type=_return_type)
+        return self._unit(_lambda, self.refs, _return_type=_return_type)
 
 
     def using(self, x):
@@ -240,30 +205,23 @@ class Builder(object):
 
     @property
     def ref(self):
-        return Ref()
+        return dsl.Ref()
 
     def identity(self, x):
         return x
 
     def __rrshift__(self, x):
-        if isinstance(x, Builder):
-            return x._1(self)
-        else:
-            return self(x)
-
-    def set(self, *ast):
-        f = self.compile(*ast)
-        return self._unit(f)
+        return self(x)
 
     @classmethod
-    def pipe(cls, x, *ast):
+    def pipe(cls, x, *code, **kwargs):
         """
-        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Object` preferably and an object `ast` which must be part of the domain of the DSL, and compiles `ast` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
+        `pipe` takes in a `builder` of type `Builder`, `BuilderTree` or `Object` preferably and an object `code` which must be part of the domain of the DSL, and compiles `code` to a function of type `Builder -> Builder` and applies it to the input `builder`. All \*args after `builder` are taken as a tuple, therefore, it makes it easier to define an initial tuple `()` element to define a sequential operation.
 
         **Arguments**
 
         * `builder`: a `Builder`, `BuilderTree` or `Object` preferably.
-        * `*ast`: a sequence of elements of the DSL.
+        * `*code`: a sequence of elements of the DSL.
 
         **Return**
 
@@ -296,18 +254,18 @@ class Builder(object):
             )
         """
 
-        f = cls.compile(*ast)
+        builder = cls.compile(*code, **kwargs)
 
-        return f(x)
+        return builder(x)
 
     @classmethod
-    def compile(cls, *ast):
+    def compile(cls, *code, **kwargs):
         """
-        `compile` an object `ast` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Object/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
+        `compile` an object `code` which must be part of the domain of the DSL and returns function. It applies the rules of the DSL to create an actual Python function that does what you intend. Normally you will just use pipe, which not only compiles the DSL it actually performs the computation to a given Object/Builder, however, it you are building and API this might be useful since you can create a function from an AST which can itself be used as an element of another AST since final elements of the DSL are functions.
 
         **Arguments**
 
-        * `*ast`: a sequence of elements of the DSL.
+        * `*code`: a sequence of elements of the DSL.
 
         **Return**
 
@@ -342,12 +300,14 @@ class Builder(object):
             h = f(x)
 
         """
-        f = _compile(ast)
+        _return_type = None
 
-        if _is_iterable_ast(f):
-            f = _compile_iterable(f)
+        if '_return_type' in kwargs:
+            cls = kwargs['_return_type']
 
-        return f
+        f, refs = dsl.Compile(code, {})
+
+        return cls(f, refs)
 
 
     @classmethod
@@ -570,30 +530,11 @@ class Builder(object):
             return fn
         return register_decorator
 
-    def after(self, g):
-        return
-
 
 
 Builder.__core__ = [ name for name, f in inspect.getmembers(Builder, inspect.ismethod) ]
 
-class Tree(object):
-    """docstring for Tree."""
 
-    def __init__(self, _branches=[], _refs={}):
-        self._branches = list(_branches)
-        self._refs = _refs
-
-    def __iter__(self):
-        for branch in self._branches:
-            if type(branch) is Tree:
-                for builder in branch:
-                    yield builder
-            else:
-                yield branch #branch is Builder
-
-    def __call__(self, x):
-        return [ builder(x) for builder in self ]
 
 #############################
 ## Shortcuts
@@ -620,52 +561,4 @@ def _5(*args, **kwargs):
     return Builder()._5(*args, **kwargs)
 
 def C(*args, **kwargs):
-    return Builder().set(*args, **kwargs)
-
-#######################
-### FUNCTIONS
-#######################
-
-def _compile(ast):
-    #if type(ast) is tuple:
-    if isinstance(ast, (Builder, Tree)):
-        return ast
-    if hasattr(ast, '__call__'):
-        return Builder(ast)
-    elif type(ast) is tuple:
-        return _compile_tuple(ast)
-    elif type(ast) is dict:
-        return _compile_dictionary(ast)
-    else:
-        return _compile_iterable(ast) #its iterable
-        #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(ast), type(ast) is tuple))
-
-def _fuse2(f, g):
-    return g._after(f)
-
-def _is_iterable_ast(ast):
-    return hasattr(ast, '__iter__') and not( type(ast) is tuple or type(ast) is dict or hasattr(ast, '__call__') )
-
-def _compile_tuple(tuple_ast):
-    builders = [ _compile(ast) for ast in tuple_ast ]
-    return functools.reduce(_fuse2, builders)
-
-def _compile_iterable(iterable_ast):
-    return Tree([ _compile(ast) for ast in iterable_ast ])
-
-def _compile_dictionary(dict_ast):
-    scope, body_ast = list(dict_ast.items())[0]
-    body = _compile(body_ast)
-    def _lambda(x):
-        with scope as new_scope:
-            with Scope(new_scope):
-                return body(x)
-    return Builder(_lambda)
-
-#######################
-### CUSTOM FUNCTIONS
-#######################
-
-
-if __name__ == "__main__":
-    pass
+    return Builder().compile(*args, **kwargs)
