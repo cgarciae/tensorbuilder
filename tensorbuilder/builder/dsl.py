@@ -1,28 +1,39 @@
 from utils import identity
 import utils
 import pprint
+from abc import ABCMeta, abstractmethod
+
 
 ###############################
 # Ref
 ###############################
 class Ref(object):
     """docstring for Ref."""
-    def __init__(self, ref=None):
+    def __init__(self, value=None):
         super(Ref, self).__init__()
-        self.ref = ref
+        self.value = value
 
     def __call__(self, *optional):
-        return self.ref
+        return self.value
 
     def set(self, x):
-        self.ref = x
+        self.value = x
         return x
 
 ###############################
 # DSL Elements
 ###############################
 
-class Function(object):
+class Node(object):
+    """docstring for Node."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def compile(self, refs):
+        pass
+
+class Function(Node):
     """docstring for Function."""
     def __init__(self, f):
         super(Function, self).__init__()
@@ -41,7 +52,7 @@ class Function(object):
 Identity = Function(identity)
 
 
-class Tree(object):
+class Tree(Node):
     """docstring for Tree."""
 
     def __init__(self, branches):
@@ -64,7 +75,7 @@ class Tree(object):
         return pprint.pformat(self.branches)
 
 
-class Sequence(object):
+class Sequence(Node):
     """docstring for Sequence."""
     def __init__(self, left, right):
         super(Sequence, self).__init__()
@@ -90,7 +101,7 @@ class Sequence(object):
         return "Seq({0}, {1})".format(self.left, self.right)
 
 
-class Scope(object):
+class Scope(Node):
     """docstring for Dict."""
 
     GLOBAL_SCOPE = None
@@ -128,19 +139,45 @@ class Scope(object):
     def __str__(self):
         return "\{ {0}: {1}\}".format(pprint.pformat(self.scope_obj), pprint.pformat(self.body))
 
-class Read(object):
+class Read(Node):
     """docstring for Read."""
-    def __init__(self):
+    def __init__(self, name):
         super(Read, self).__init__()
+        self.name = name
+
+    def compile(self, refs):
+        ref = refs[self.name]
+        f = ref #ref is callable with an argument
+        return f, refs
 
 
-class Write(object):
+class Write(Node):
     """docstring for Read."""
-    def __init__(self):
+    def __init__(self, name):
         super(Write, self).__init__()
+        self.name = name
+
+    def compile(self, refs):
+        if self.name not in refs:
+            refs[self.name] = ref = Ref()
+        else:
+            ref = refs[self.name]
+
+        return ref.set, refs
 
 
-class Apply(object):
+class Input(Node):
+    """docstring for Input."""
+    def __init__(self, value):
+        super(Input, self).__init__()
+        self.value = value
+
+    def compile(self, refs):
+        f = lambda x: self.value
+        return f, refs
+
+
+class Apply(Node):
     """docstring for Read."""
     def __init__(self):
         super(Write, self).__init__()
@@ -171,7 +208,11 @@ def list_to_fn(fs):
 
 def parse(code):
     #if type(code) is tuple:
-    if hasattr(code, '__call__'):
+    if type(code) is str:
+        return Read(code)
+    elif type(code) is set:
+        return parse_set(code)
+    elif hasattr(code, '__call__'):
         return Function(code)
     elif type(code) is tuple:
         return parse_tuple(code)
@@ -181,6 +222,22 @@ def parse(code):
         return parse_iterable(code) #its iterable
         #raise Exception("Element has to be either a tuple for sequential operations, a list for branching, or a function from a builder to a builder, got %s, %s" % (type(code), type(code) is tuple))
 
+def parse_set(code):
+    if len(code) == 0:
+        return Identity
+
+    fst = iter(code).next()
+
+    if len(code) == 1:
+        if type(fst) is str:
+            return Write(fst)
+        elif type(fst) is tuple:
+            value = fst[0]
+            return Input(value)
+        else:
+            raise Exception("Not part of the language: {0}".format(code))
+    else:
+        raise Exception("Not part of the language: {0}".format(code))
 
 def build_sequence(right, *prevs):
     left = prevs[0] if len(prevs) == 1 else build_sequence(*prevs)
