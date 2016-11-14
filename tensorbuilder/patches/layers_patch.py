@@ -4,8 +4,7 @@ import functools
 from tensorflow.contrib import layers
 from tensorflow.contrib.layers import fully_connected
 from tensorbuilder import TensorBuilder
-from tensorbuilder import Builder
-from tensorbuilder.builder import utils
+from phi import Builder, utils
 
 
 class LayerBuilder(Builder):

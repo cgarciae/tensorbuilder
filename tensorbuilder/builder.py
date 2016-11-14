@@ -1,4 +1,4 @@
-from builder import Builder
+from phi import Builder
 import inspect
 from tensordata import Data
 

@@ -1,20 +1,18 @@
-# Patch docs
-import os
-import sys
-from builder import Builder, utils
-import builder
-from tensorbuilder_class import TensorBuilder
+from builder import TensorBuilder
 from tensordata import Data
-import patches
-import inspect
 
 import patches #import last
 
 tensorbuilder = TensorBuilder()
 
+########################
+# Documentation
+########################
+import os
+import sys
 
 #pdoc
-__all__ = ["tensordata", "patches", "builder"]
+__all__ = ["tensordata", "patches"]
 
 #set documentation
 def _read(fname):

@@ -1,7 +1,7 @@
 import tensorflow as tf
 import inspect
 from tensorbuilder import TensorBuilder
-from tensorbuilder import utils
+from phi import utils
 
 # register functions
 all_fs = [ name for name, f in (

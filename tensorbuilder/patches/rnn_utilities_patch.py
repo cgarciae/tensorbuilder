@@ -1,4 +1,4 @@
-from tensorbuilder.builder import utils
+from phi import utils
 from tensorbuilder import TensorBuilder
 
 
