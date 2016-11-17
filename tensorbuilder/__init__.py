@@ -20,5 +20,5 @@ def _read(fname):
 
 module = sys.modules[__name__]
 raw_docs = _read("README-template.md")
-__version__ = _read("version.txt")
+__version__ = _read("version.txt").split("\n")[0]
 module.__doc__ = raw_docs.format(__version__)

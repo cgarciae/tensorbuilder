@@ -88,5 +88,3 @@ Next is an example with all the features of TensorBuilder including the DSL, bra
         ],
         tb.tensors()
     )
-
-

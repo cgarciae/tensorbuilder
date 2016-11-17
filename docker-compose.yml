@@ -12,7 +12,7 @@ services:
       - "8885:8888"
     command: bash -c "python setup.py install && cd /notebooks && /run_jupyter.sh"
 
-  pdoc:
+  docs:
     # update gh-pages => git subtree push --prefix docs/tensorbuilder origin gh-pages
     build: .
     volumes:

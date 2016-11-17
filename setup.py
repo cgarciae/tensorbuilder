@@ -13,27 +13,28 @@ reqs = [str(r.req) for r in parse_requirements("requirements.txt", session=False
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+version = read('tensorbuilder/version.txt').split("\n")[0]
+
 setup(
     name = "tensorbuilder",
-    version = read('tensorbuilder/version.txt'),
+    version = version,
     author = "Cristian Garcia",
     author_email = "cgarcia.e88@gmail.com",
     description = ("A light wrapper over TensorFlow that enables you to easily create complex deep neural networks using the Builder Pattern through a functional fluent immutable API"),
     license = "MIT",
-    keywords = "tensorflow deep learning neural networks",
+    keywords = ["tensorflow", "deep learning", "neural networks"],
     url = "https://github.com/cgarciae/tensorbuilder",
    	packages = [
         'tensorbuilder',
-        'tensorbuilder.core',
-        'tensorbuilder.api',
+        'tensorbuilder.tensordata',
         'tensorbuilder.patches',
-        'tensorbuilder.patches.tensorbuilder_patch',
         'tensorbuilder.tests'
     ],
     package_data={
         '': ['LICENCE', 'requirements.txt', 'README.md', 'CHANGELOG.md'],
         'tensorbuilder': ['version.txt', 'README-template.md']
     },
+    download_url = 'https://github.com/cgarciae/tensorbuilder/tarball/{0}'.format(version),
     include_package_data = True,
     long_description = read('README.md'),
     install_requires = reqs
