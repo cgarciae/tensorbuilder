@@ -1,6 +1,67 @@
 import tensorflow as tf
 from tensorbuilder import TensorBuilder
+from phi import ph
 
+tb = TensorBuilder()
+
+@TensorBuilder.register_1("tb")
+def inception_layer(tensor, num_outputs, **kwargs):
+    stride = 1
+    pool_operation = tb.max_pool2d
+    pool_kernel = [3, 3]
+    scope = None
+    reuse = None
+
+    if 'stride' in kwargs:
+        stride = kwargs['stride']
+    else:
+        kwargs['stride'] = stride
+
+
+    if 'pool_kernel' in kwargs:
+        pool_kernel = kwargs['pool_kernel']
+        del kwargs['pool_kernel']
+
+    if 'scope' in kwargs:
+        scope = kwargs['scope']
+        del kwargs['scope']
+
+    if 'reuse' in kwargs:
+        reuse = kwargs['reuse']
+        del kwargs['reuse']
+
+    if 'pool_operation' in kwargs:
+        pool_operation = kwargs['pool_operation']
+        del kwargs['pool_operation']
+
+    kwargs_no_stride = kwargs.copy()
+    del kwargs_no_stride['stride']
+
+    with tf.variable_scope(scope, default_name='InceptionLayer', reuse=reuse):
+        return ph.Pipe(
+            tensor,
+            [
+                tb.convolution2d(num_outputs, [1, 1], **dict(kwargs, scope="Conv1x1"))
+            ,
+            ph.With( tb.variable_scope("Branch3x3"),
+                tb
+                .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                .convolution2d(num_outputs, [3, 3], **dict(kwargs, scope="Conv3x3"))
+            )
+            ,
+            ph.With( tb.variable_scope("Branch5x5"),
+                tb
+                .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                .convolution2d(num_outputs, [5, 5], **dict(kwargs, scope="Conv5x5"))
+            )
+            ,
+            ph.With( tb.variable_scope("BranchPool"),
+                pool_operation(pool_kernel, stride=stride, padding='SAME'),
+                tb.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+            )
+            ],
+            tb.concat(3)
+        )
 
 @TensorBuilder.register_1("tb")
 def minimize(tensor, optimizer, *args, **kwargs):

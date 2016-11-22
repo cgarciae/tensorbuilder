@@ -1,5 +1,5 @@
 from tensorbuilder import tensorbuilder as tb
-from phi import P, Rec, Obj
+from phi import ph, Rec, Obj
 import tensorflow as tf
 
 class TestTensorBuilder(object):
@@ -22,7 +22,7 @@ class TestTensorBuilder(object):
 
         matmul, add = tb.ref('matmul'), tb.ref('add')
 
-        y = P(
+        y = tb.Pipe(
             self.x,
             tb
             .matmul(self.w).on(matmul)
@@ -35,14 +35,14 @@ class TestTensorBuilder(object):
         assert "Add" in add().name
 
     def test_summaries_patch(self):
-        name = P(
+        name = tb.Pipe(
             self.x,
             tb.reduce_mean().make_scalar_summary('mean'),
             Rec.name
         )
         assert "Mean" in name
 
-        name = P(
+        name = tb.Pipe(
             self.x,
             tb.reduce_mean().scalar_summary('mean'),
             Rec.name
@@ -50,22 +50,23 @@ class TestTensorBuilder(object):
         assert "ScalarSummary" in name
 
     def test_layers_patch(self):
-        softmax_layer = P(
+        softmax_layer = tb.Pipe(
             self.x,
-            tb.layers.sigmoid(10)
-            .layers.softmax(20)
+            tb
+            .sigmoid_layer(10)
+            .softmax_layer(20)
         )
         assert "Softmax" in softmax_layer.name
 
     def test_concat(self):
-        concatenated = P(
+        concatenated = tb.Pipe(
             self.x,
             [
-                tb.layers.softmax(3)
+                tb.softmax_layer(3)
             ,
-                tb.layers.tanh(2)
+                tb.tanh_layer(2)
             ,
-                tb.layers.sigmoid(5)
+                tb.sigmoid_layer(5)
             ],
             tb.concat(1)
         )

@@ -1,7 +1,7 @@
 from phi import Builder
 import inspect
 from tensordata import Data
-from phi import P
+from phi import ph
 
 class TensorBuilder(Builder):
     """docstring for TensorBuilder."""
@@ -10,4 +10,3 @@ class TensorBuilder(Builder):
         return Data(*args, **kwargs)
 
 TensorBuilder.__core__ = [ name for name, f in inspect.getmembers(TensorBuilder, predicate=inspect.ismethod) ]
-TensorBuilder.P = P
