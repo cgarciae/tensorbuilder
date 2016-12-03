@@ -1,5 +1,6 @@
+import ipdb
 from tensorbuilder import tensorbuilder as tb
-from phi import ph, Rec, Obj
+from phi import ph, Rec
 import tensorflow as tf
 
 class TestTensorBuilder(object):
@@ -20,15 +21,18 @@ class TestTensorBuilder(object):
 
     def test_patch(self):
 
-        matmul, add = tb.ref('matmul'), tb.ref('add')
+        matmul, add = tb.Ref('matmul'), tb.Ref('add')
 
         y = tb.Pipe(
             self.x,
+
             tb
-            .matmul(self.w).on(matmul)
-            .add(self.b).on(add)
+            .matmul(self.w).On(matmul)
+            .add(self.b).On(add)
             .relu()
         )
+
+
 
         assert "Relu" in y.name
         assert "MatMul" in matmul().name

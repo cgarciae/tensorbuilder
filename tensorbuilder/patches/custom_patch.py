@@ -1,10 +1,10 @@
 import tensorflow as tf
 from tensorbuilder import TensorBuilder
-from phi import ph
+from phi import ph, utils
 
-tb = TensorBuilder()
+tb = TensorBuilder(utils.identity, {})
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def inception_layer(tensor, num_outputs, **kwargs):
     stride = 1
     pool_operation = tb.max_pool2d
@@ -63,15 +63,15 @@ def inception_layer(tensor, num_outputs, **kwargs):
             tb.concat(3)
         )
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def minimize(tensor, optimizer, *args, **kwargs):
     return optimizer.minimize(tensor, *args, **kwargs)
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def maximize(tensor, optimizer, *args, **kwargs):
     return optimizer.maximize(tensor, *args, **kwargs)
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def drop_layer(x, keep_prob, seed=None, name=None):
   """Computes dropout.
   With probability `keep_prob`, outputs the input element scaled up by
@@ -118,12 +118,12 @@ def drop_layer(x, keep_prob, seed=None, name=None):
     ret.set_shape(x.get_shape())
     return ret
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def ensamble_dropout(tree, keep_prob, seed=None, name=None):
     with tf.op_scope(tree.tensors(), name, "drop_layer"):
         return tree.map_each(drop_layer, keep_prob, seed=seed, name=name)
 
-@TensorBuilder.register_1("tb")
+@TensorBuilder.Register1("tb")
 def add_regularization_loss(tensor, graph=None, scope='add_regularization_loss'):
     if not graph:
         reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)

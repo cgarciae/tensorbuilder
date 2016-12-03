@@ -31,7 +31,7 @@ funs = ( (name, f) for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction
 def register_layer_functions(name, f):
     explanation = """and the keyword argument `activation_fn` is set to `tf.nn.{0}`.""".format(name)
 
-    @TensorBuilder.register_1("tf.contrib.layers", name + "_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
+    @TensorBuilder.Register1("tf.contrib.layers", name + "_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
     def layer_function(*args, **kwargs):
         kwargs['activation_fn'] = f
         return fully_connected(*args, **kwargs)
@@ -39,7 +39,7 @@ def register_layer_functions(name, f):
 def register_conv_layer_functions(name, f):
     explanation = """and the keyword argument `activation_fn` is set to `tf.nn.{0}`.""".format(name)
 
-    @TensorBuilder.register_1("tf.contrib.layers", name + "_conv2d_layer", wrapped=convolution2d, explanation=explanation) #, _return_type=TensorBuilder)
+    @TensorBuilder.Register1("tf.contrib.layers", name + "_conv2d_layer", wrapped=convolution2d, explanation=explanation) #, _return_type=TensorBuilder)
     def layer_function(*args, **kwargs):
         kwargs['activation_fn'] = f
         return convolution2d(*args, **kwargs)
@@ -53,12 +53,12 @@ for name, f in funs:
 #linear_layer
 explanation = """and the keyword argument `activation_fn` is set to `None`."""
 
-@TensorBuilder.register_1("tf.contrib.layers", alias="linear_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
+@TensorBuilder.Register1("tf.contrib.layers", alias="linear_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
 def linear_layer(*args, **kwargs):
     kwargs['activation_fn'] = None
     return tf.contrib.layers.fully_connected(*args, **kwargs)
 
-@TensorBuilder.register_1("tf.contrib.layers", alias="linear_conv2d_layer", wrapped=convolution2d, explanation=explanation) #, _return_type=TensorBuilder)
+@TensorBuilder.Register1("tf.contrib.layers", alias="linear_conv2d_layer", wrapped=convolution2d, explanation=explanation) #, _return_type=TensorBuilder)
 def linear_conv2d_layer(*args, **kwargs):
     kwargs['activation_fn'] = None
     return tf.contrib.layers.fully_connected(*args, **kwargs)
@@ -76,7 +76,7 @@ y(i) = z(i)^(i+1)
 where `z = w*x + b`
 """
 
-@TensorBuilder.register_1("tb", alias="polynomial_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
+@TensorBuilder.Register1("tb", alias="polynomial_layer", wrapped=fully_connected, explanation=explanation) #, _return_type=TensorBuilder)
 def polynomial_layer(*args, **kwargs):
     kwargs['activation_fn'] = _polynomial
     return layers.fully_connected(*args, **kwargs)

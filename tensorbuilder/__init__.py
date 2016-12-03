@@ -1,9 +1,10 @@
 from builder import TensorBuilder
 from tensordata import Data
+from phi import utils
 
 import patches #import last
 
-tensorbuilder = TensorBuilder()
+tensorbuilder = TensorBuilder(utils.identity, {})
 
 ########################
 # Documentation
