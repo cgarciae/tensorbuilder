@@ -4,7 +4,7 @@ from phi import utils
 
 import patches #import last
 
-tensorbuilder = TensorBuilder(utils.identity, {})
+T = TensorBuilder(utils.identity, {})
 
 ########################
 # Documentation

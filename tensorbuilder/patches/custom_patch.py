@@ -1,13 +1,13 @@
 import tensorflow as tf
 from tensorbuilder import TensorBuilder
-from phi import ph, utils
+from phi import P, utils
 
-tb = TensorBuilder(utils.identity, {})
+T = TensorBuilder(utils.identity, {})
 
 @TensorBuilder.Register1("tb")
 def inception_layer(tensor, num_outputs, **kwargs):
     stride = 1
-    pool_operation = tb.max_pool2d
+    pool_operation = T.max_pool2d
     pool_kernel = [3, 3]
     scope = None
     reuse = None
@@ -38,29 +38,29 @@ def inception_layer(tensor, num_outputs, **kwargs):
     del kwargs_no_stride['stride']
 
     with tf.variable_scope(scope, default_name='InceptionLayer', reuse=reuse):
-        return ph.Pipe(
+        return P(
             tensor,
             [
-                tb.convolution2d(num_outputs, [1, 1], **dict(kwargs, scope="Conv1x1"))
+                T.convolution2d(num_outputs, [1, 1], **dict(kwargs, scope="Conv1x1"))
             ,
-            ph.With( tb.variable_scope("Branch3x3"),
-                tb
+            P.With( T.variable_scope("Branch3x3"),
+                T
                 .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
                 .convolution2d(num_outputs, [3, 3], **dict(kwargs, scope="Conv3x3"))
             )
             ,
-            ph.With( tb.variable_scope("Branch5x5"),
-                tb
+            P.With( T.variable_scope("Branch5x5"),
+                T
                 .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
                 .convolution2d(num_outputs, [5, 5], **dict(kwargs, scope="Conv5x5"))
             )
             ,
-            ph.With( tb.variable_scope("BranchPool"),
+            P.With( T.variable_scope("BranchPool"),
                 pool_operation(pool_kernel, stride=stride, padding='SAME'),
-                tb.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
             )
             ],
-            tb.concat(3)
+            T.concat(3)
         )
 
 @TensorBuilder.Register1("tb")

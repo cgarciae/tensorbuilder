@@ -1,6 +1,6 @@
 import ipdb
-from tensorbuilder import tensorbuilder as tb
-from phi import ph, Rec
+from tensorbuilder import T
+from phi import P, Rec
 import tensorflow as tf
 
 class TestTensorBuilder(object):
@@ -21,62 +21,60 @@ class TestTensorBuilder(object):
 
     def test_patch(self):
 
-        matmul, add = tb.Ref('matmul'), tb.Ref('add')
+        matmul, add = T.Ref('matmul'), T.Ref('add')
 
-        y = tb.Pipe(
+        y = T.Pipe(
             self.x,
 
-            tb
+            T
             .matmul(self.w).On(matmul)
             .add(self.b).On(add)
             .relu()
         )
-
-
 
         assert "Relu" in y.name
         assert "MatMul" in matmul().name
         assert "Add" in add().name
 
     def test_summaries_patch(self):
-        name = tb.Pipe(
+        name = T.Pipe(
             self.x,
-            tb.reduce_mean().make_scalar_summary('mean'),
+            T.reduce_mean().make_scalar_summary('mean'),
             Rec.name
         )
         assert "Mean" in name
 
-        name = tb.Pipe(
+        name = T.Pipe(
             self.x,
-            tb.reduce_mean().scalar_summary('mean'),
+            T.reduce_mean().scalar_summary('mean'),
             Rec.name
         )
         assert "ScalarSummary" in name
 
     def test_layers_patch(self):
-        softmax_layer = tb.Pipe(
+        softmax_layer = T.Pipe(
             self.x,
-            tb
+            T
             .sigmoid_layer(10)
             .softmax_layer(20)
         )
         assert "Softmax" in softmax_layer.name
 
     def test_concat(self):
-        concatenated = tb.Pipe(
+        concatenated = T.Pipe(
             self.x,
             [
-                tb.softmax_layer(3)
+                T.softmax_layer(3)
             ,
-                tb.tanh_layer(2)
+                T.tanh_layer(2)
             ,
-                tb.sigmoid_layer(5)
+                T.sigmoid_layer(5)
             ],
-            tb.concat(1)
+            T.concat(1)
         )
 
         assert int(concatenated.get_shape()[1]) == 10
 
     def test_rnn_utilities(self):
-        assert tb.rnn_placeholders_from_state
-        assert tb.rnn_state_feed_dict
+        assert T.rnn_placeholders_from_state
+        assert T.rnn_state_feed_dict

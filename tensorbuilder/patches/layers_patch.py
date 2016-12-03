@@ -4,7 +4,7 @@ import functools
 from tensorflow.contrib import layers
 from tensorflow.contrib.layers import fully_connected, convolution2d
 from tensorbuilder import TensorBuilder
-from phi import Builder, utils, ph
+from phi import Builder, utils, P
 
 
 class LayerBuilder(Builder):
