@@ -1,41 +1,35 @@
 import tensorflow as tf
 import inspect
 from tensorbuilder import TensorBuilder
-from tensorbuilder import utils
+from phi import utils
 
-# register functions
-all_fs = [ name for name, f in (
-    inspect.getmembers(tf, inspect.isfunction) +
-    inspect.getmembers(tf.nn, inspect.isfunction)
-)]
 
-f2_names = (
-    ["concat"] +
-    [ name for name in all_fs if "_summary" in name ]
+f0_pred = (lambda x:
+    "scope" in x or
+    "device" in x
 )
 
-f2s = (
-    [ (name, f, "tf.nn") for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction) if name in f2_names ] +
-    [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name in f2_names ]
+f2_pred = (lambda x:
+    x in [
+        "concat"
+    ] or
+    "_summary" in x
 )
 
-f1_blacklist = (
-    ["relu_layer", "device"] +
-    TensorBuilder.__core__ +
-    f2_names
-)
-
-f1s = (
-    [ (name, f, "tf.nn") for (name, f) in inspect.getmembers(tf.nn, inspect.isfunction) if name not in f1_blacklist ] +
-    [ (name, f, "tf") for (name, f) in inspect.getmembers(tf, inspect.isfunction) if name not in f1_blacklist ]
+f1_blacklist = (lambda x:
+    x in ["relu_layer", "device"] or
+    x in TensorBuilder.__core__ or
+    f0_pred(x) or
+    f2_pred(x)
 )
 
 #tf
-utils.patch_with_module_members_1(TensorBuilder, tf, blacklist=f1_blacklist)
-utils.patch_with_module_members_2(TensorBuilder, tf, whitelist=f2_names)
+utils.patch_with_members_from_0(TensorBuilder, tf, whitelist=f0_pred)
+utils.patch_with_members_from_1(TensorBuilder, tf, blacklist=f1_blacklist)
+utils.patch_with_members_from_2(TensorBuilder, tf, whitelist=f2_pred)
 
 #tf.nn
-utils.patch_with_module_members_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
+utils.patch_with_members_from_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
 
 # for name, f, module in f1s:
 #     TensorBuilder.register_function_1(f, module)

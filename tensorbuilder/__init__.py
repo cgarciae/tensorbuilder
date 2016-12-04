@@ -1,20 +1,19 @@
-# Patch docs
-import os
-import sys
-from builder import Builder, utils
-import builder
-from tensorbuilder_class import TensorBuilder
+from builder import TensorBuilder
 from tensordata import Data
-import patches
-import inspect
+from phi import utils
 
 import patches #import last
 
-tensorbuilder = TensorBuilder()
+T = TensorBuilder(utils.identity, {})
 
+########################
+# Documentation
+########################
+import os
+import sys
 
 #pdoc
-__all__ = ["tensordata", "patches", "builder"]
+__all__ = ["tensordata", "patches"]
 
 #set documentation
 def _read(fname):
@@ -22,5 +21,5 @@ def _read(fname):
 
 module = sys.modules[__name__]
 raw_docs = _read("README-template.md")
-__version__ = _read("version.txt")
+__version__ = _read("version.txt").split("\n")[0]
 module.__doc__ = raw_docs.format(__version__)

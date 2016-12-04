@@ -1,6 +1,7 @@
-from builder import Builder
+from phi import Builder
 import inspect
 from tensordata import Data
+from phi import P
 
 class TensorBuilder(Builder):
     """docstring for TensorBuilder."""

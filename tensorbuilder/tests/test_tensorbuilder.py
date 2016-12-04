@@ -1,4 +1,6 @@
-from tensorbuilder import tensorbuilder as tb
+import ipdb
+from tensorbuilder import T
+from phi import P, Rec
 import tensorflow as tf
 
 class TestTensorBuilder(object):
@@ -19,13 +21,14 @@ class TestTensorBuilder(object):
 
     def test_patch(self):
 
-        matmul, add = tb.ref, tb.ref
+        matmul, add = T.Ref('matmul'), T.Ref('add')
 
-        y = tb.pipe(
+        y = T.Pipe(
             self.x,
-            tb
-            .matmul(self.w).store(matmul)
-            .add(self.b).store(add)
+
+            T
+            .matmul(self.w).On(matmul)
+            .add(self.b).On(add)
             .relu()
         )
 
@@ -34,43 +37,44 @@ class TestTensorBuilder(object):
         assert "Add" in add().name
 
     def test_summaries_patch(self):
-        mean = tb.pipe(
+        name = T.Pipe(
             self.x,
-            tb.reduce_mean().make_scalar_summary('mean')
+            T.reduce_mean().make_scalar_summary('mean'),
+            Rec.name
         )
-        assert "Mean" in mean.name
+        assert "Mean" in name
 
-        mean_summary = tb.pipe(
+        name = T.Pipe(
             self.x,
-            tb.reduce_mean().scalar_summary('mean')
+            T.reduce_mean().scalar_summary('mean'),
+            Rec.name
         )
-        assert "ScalarSummary" in mean_summary.name
+        assert "ScalarSummary" in name
 
     def test_layers_patch(self):
-        softmax_layer = tb.pipe(
+        softmax_layer = T.Pipe(
             self.x,
-            tb.layers.sigmoid(10)
-            .layers.softmax(20)
+            T
+            .sigmoid_layer(10)
+            .softmax_layer(20)
         )
         assert "Softmax" in softmax_layer.name
 
     def test_concat(self):
-        concatenated = tb.pipe(
+        concatenated = T.Pipe(
             self.x,
             [
-            (
-                tb.layers.softmax(3),
-            )
+                T.softmax_layer(3)
             ,
-                tb.layers.tanh(2)
+                T.tanh_layer(2)
             ,
-                tb.layers.sigmoid(5)
+                T.sigmoid_layer(5)
             ],
-            tb.concat(1)
+            T.concat(1)
         )
 
         assert int(concatenated.get_shape()[1]) == 10
 
     def test_rnn_utilities(self):
-        assert tb.rnn_placeholders_from_state
-        assert tb.rnn_state_feed_dict
+        assert T.rnn_placeholders_from_state
+        assert T.rnn_state_feed_dict
