@@ -1,8 +1,6 @@
 import tensorflow as tf
-from tensorbuilder import TensorBuilder
+from tensorbuilder import T, TensorBuilder
 from phi import P, utils
-
-T = TensorBuilder(utils.identity, {})
 
 @TensorBuilder.Register1("tb")
 def inception_layer(tensor, num_outputs, **kwargs):
@@ -43,22 +41,22 @@ def inception_layer(tensor, num_outputs, **kwargs):
             [
                 T.convolution2d(num_outputs, [1, 1], **dict(kwargs, scope="Conv1x1"))
             ,
-            P.With( T.variable_scope("Branch3x3"),
-                T
-                .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
-                .convolution2d(num_outputs, [3, 3], **dict(kwargs, scope="Conv3x3"))
-            )
+                P.With( T.variable_scope("Branch3x3"),
+                    T
+                    .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                    .convolution2d(num_outputs, [3, 3], **dict(kwargs, scope="Conv3x3"))
+                )
             ,
-            P.With( T.variable_scope("Branch5x5"),
-                T
-                .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
-                .convolution2d(num_outputs, [5, 5], **dict(kwargs, scope="Conv5x5"))
-            )
+                P.With( T.variable_scope("Branch5x5"),
+                    T
+                    .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                    .convolution2d(num_outputs, [5, 5], **dict(kwargs, scope="Conv5x5"))
+                )
             ,
-            P.With( T.variable_scope("BranchPool"),
-                pool_operation(pool_kernel, stride=stride, padding='SAME'),
-                T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
-            )
+                P.With( T.variable_scope("BranchPool"),
+                    pool_operation(pool_kernel, stride=stride, padding='SAME'),
+                    T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                )
             ],
             T.concat(3)
         )

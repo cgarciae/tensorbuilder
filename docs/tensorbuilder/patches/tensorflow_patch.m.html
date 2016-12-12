@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.patches API documentation</title>
+    <title>tensorbuilder.patches.tensorflow_patch API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1037,17 +1037,17 @@ table {
     <h1>Index</h1>
     <ul id="index">
 
+    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.patches.tensorflow_patch.f0_pred">f0_pred</a></li>
+    <li class="mono"><a href="#tensorbuilder.patches.tensorflow_patch.f1_blacklist">f1_blacklist</a></li>
+    <li class="mono"><a href="#tensorbuilder.patches.tensorflow_patch.f2_pred">f2_pred</a></li>
+  </ul>
 
-
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-        <li class="mono"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></li>
-        <li class="mono"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></li>
-        <li class="mono"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></li>
-        <li class="mono"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></li>
-        <li class="mono"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></li>
-      </ul>
     </li>
+
+
     </ul>
   </div>
 
@@ -1059,17 +1059,49 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.patches</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.patches.tensorflow_patch</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.patches" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1">#import layers_patch</span>
-<span class="kn">import</span> <span class="nn">tensorflow_patch</span>
-<span class="kn">import</span> <span class="nn">summaries_patch</span>
-<span class="kn">import</span> <span class="nn">layers_patch</span>
-<span class="kn">import</span> <span class="nn">rnn_utilities_patch</span>
-<span class="kn">import</span> <span class="nn">custom_patch</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorflow_patch', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.tensorflow_patch" class="source">
+    <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
+<span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">patch</span>
+
+
+<span class="n">f0_pred</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="s2">&quot;scope&quot;</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">or</span>
+    <span class="s2">&quot;device&quot;</span> <span class="ow">in</span> <span class="n">x</span>
+<span class="p">)</span>
+
+<span class="n">f2_pred</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;concat&quot;</span>
+    <span class="p">]</span> <span class="ow">or</span>
+    <span class="s2">&quot;_summary&quot;</span> <span class="ow">in</span> <span class="n">x</span>
+<span class="p">)</span>
+
+<span class="n">f1_blacklist</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;relu_layer&quot;</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="ow">or</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="n">TensorBuilder</span><span class="o">.</span><span class="n">__core__</span> <span class="ow">or</span>
+    <span class="n">f0_pred</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span>
+    <span class="n">f2_pred</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1">#tf</span>
+<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_0</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist</span><span class="o">=</span><span class="n">f0_pred</span><span class="p">)</span>
+<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_1</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">blacklist</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
+<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_2</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist</span><span class="o">=</span><span class="n">f2_pred</span><span class="p">)</span>
+
+<span class="c1">#tf.nn</span>
+<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_1</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="n">module_alias</span><span class="o">=</span><span class="s2">&quot;tf.nn&quot;</span><span class="p">,</span> <span class="n">blacklist</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
+
+<span class="c1"># for name, f, module in f1s:</span>
+<span class="c1">#     TensorBuilder.register_function_1(f, module)</span>
+<span class="c1">#</span>
+<span class="c1"># for name, f, module in f2s:</span>
+<span class="c1">#     TensorBuilder.register_function_2(f, module)</span>
 </pre></div>
 
   </div>
@@ -1078,39 +1110,82 @@ table {
 
   <section id="section-items">
 
-
-
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-      <div class="item">
-      <p class="name"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></p>
+    <h2 class="section-title" id="header-functions">Functions</h2>
       
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.tensorflow_patch.f0_pred">
+    <p>def <span class="ident">f0_pred</span>(</p><p>x)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorflow_patch.f0_pred', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.tensorflow_patch.f0_pred" class="source">
+    <div class="codehilite"><pre><span></span><span class="n">f0_pred</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="s2">&quot;scope&quot;</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">or</span>
+    <span class="s2">&quot;device&quot;</span> <span class="ow">in</span> <span class="n">x</span>
+<span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.tensorflow_patch.f1_blacklist">
+    <p>def <span class="ident">f1_blacklist</span>(</p><p>x)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorflow_patch.f1_blacklist', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.tensorflow_patch.f1_blacklist" class="source">
+    <div class="codehilite"><pre><span></span><span class="n">f1_blacklist</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;relu_layer&quot;</span><span class="p">,</span> <span class="s2">&quot;device&quot;</span><span class="p">]</span> <span class="ow">or</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="n">TensorBuilder</span><span class="o">.</span><span class="n">__core__</span> <span class="ow">or</span>
+    <span class="n">f0_pred</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">or</span>
+    <span class="n">f2_pred</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.tensorflow_patch.f2_pred">
+    <p>def <span class="ident">f2_pred</span>(</p><p>x)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorflow_patch.f2_pred', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.tensorflow_patch.f2_pred" class="source">
+    <div class="codehilite"><pre><span></span><span class="n">f2_pred</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
+    <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;concat&quot;</span>
+    <span class="p">]</span> <span class="ow">or</span>
+    <span class="s2">&quot;_summary&quot;</span> <span class="ow">in</span> <span class="n">x</span>
+<span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
   
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></p>
-      
-  
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></p>
-      
-  
-
-      </div>
   </section>
 
     </article>

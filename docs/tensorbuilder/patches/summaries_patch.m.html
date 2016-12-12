@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.patches API documentation</title>
+    <title>tensorbuilder.patches.summaries_patch API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1036,18 +1036,24 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.patches.summaries_patch.funs">funs</a></li>
+    <li class="mono"><a href="#tensorbuilder.patches.summaries_patch.name">name</a></li>
+  </ul>
 
-
-
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-        <li class="mono"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></li>
-        <li class="mono"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></li>
-        <li class="mono"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></li>
-        <li class="mono"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></li>
-        <li class="mono"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></li>
-      </ul>
     </li>
+
+    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.patches.summaries_patch.register_summary_functions">register_summary_functions</a></li>
+  </ul>
+
+    </li>
+
+
     </ul>
   </div>
 
@@ -1059,17 +1065,27 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.patches</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.patches.summaries_patch</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.patches" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1">#import layers_patch</span>
-<span class="kn">import</span> <span class="nn">tensorflow_patch</span>
-<span class="kn">import</span> <span class="nn">summaries_patch</span>
-<span class="kn">import</span> <span class="nn">layers_patch</span>
-<span class="kn">import</span> <span class="nn">rnn_utilities_patch</span>
-<span class="kn">import</span> <span class="nn">custom_patch</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.summaries_patch', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.summaries_patch" class="source">
+    <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
+
+
+<span class="n">funs</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">tf</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;_summary&quot;</span> <span class="ow">in</span> <span class="n">name</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">register_summary_functions</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="nd">@TensorBuilder.Register2</span><span class="p">(</span><span class="s2">&quot;tf&quot;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;make_{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">wrapped</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">summary_function</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">values</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">funs</span><span class="p">:</span>
+    <span class="n">register_summary_functions</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1077,40 +1093,51 @@ table {
   </header>
 
   <section id="section-items">
-
-
-
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
+    <h2 class="section-title" id="header-variables">Module variables</h2>
       <div class="item">
-      <p class="name"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></p>
+      <p id="tensorbuilder.patches.summaries_patch.funs" class="name">var <span class="ident">funs</span></p>
       
   
+  <div class="source_cont">
+</div>
 
       </div>
       <div class="item">
-      <p class="name"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></p>
+      <p id="tensorbuilder.patches.summaries_patch.name" class="name">var <span class="ident">name</span></p>
       
   
+  <div class="source_cont">
+</div>
 
       </div>
-      <div class="item">
-      <p class="name"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></p>
+
+    <h2 class="section-title" id="header-functions">Functions</h2>
       
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.summaries_patch.register_summary_functions">
+    <p>def <span class="ident">register_summary_functions</span>(</p><p>name, f)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.summaries_patch.register_summary_functions', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.summaries_patch.register_summary_functions" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">register_summary_functions</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="nd">@TensorBuilder.Register2</span><span class="p">(</span><span class="s2">&quot;tf&quot;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;make_{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">wrapped</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">summary_function</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">f</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">values</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
   
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></p>
-      
-  
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></p>
-      
-  
-
-      </div>
   </section>
 
     </article>

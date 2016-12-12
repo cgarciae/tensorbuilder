@@ -4,7 +4,8 @@ import functools
 from tensorflow.contrib import layers
 from tensorflow.contrib.layers import fully_connected, convolution2d
 from tensorbuilder import TensorBuilder
-from phi import Builder, utils, P
+from phi import utils, P, patch
+from phi.builder import Builder
 
 
 class LayerBuilder(Builder):
@@ -18,7 +19,7 @@ class LayerBuilder(Builder):
 TensorBuilder.layers = property(lambda self: LayerBuilder()._unit(self._f, self._refs))
 
 # patch all layer functions
-utils.patch_with_members_from_1(LayerBuilder, layers, module_alias="tf.contrib.layers") #, _return_type=TensorBuilder)
+patch.builder_with_members_from_1(LayerBuilder, layers, module_alias="tf.contrib.layers") #, _return_type=TensorBuilder)
 
 # fully conneted layers
 blacklist = (
@@ -83,4 +84,4 @@ def polynomial_layer(*args, **kwargs):
 
 
 whitelist = ["convolution2d", "max_pool2d", "avg_pool2d", "flatten"]
-utils.patch_with_members_from_1(TensorBuilder, layers, module_alias="tf.contrib.layers", whitelist=lambda x: x in whitelist) #, _return_type=TensorBuilder)
+patch.builder_with_members_from_1(TensorBuilder, layers, module_alias="tf.contrib.layers", whitelist=lambda x: x in whitelist) #, _return_type=TensorBuilder)

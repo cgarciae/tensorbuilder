@@ -1,4 +1,3 @@
-import ipdb
 from tensorbuilder import T
 from phi import P, Rec
 import tensorflow as tf
@@ -27,8 +26,8 @@ class TestTensorBuilder(object):
             self.x,
 
             T
-            .matmul(self.w).On(matmul)
-            .add(self.b).On(add)
+            .matmul(self.w).Write(matmul)
+            .add(self.b).Write(add)
             .relu()
         )
 

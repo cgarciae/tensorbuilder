@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.patches API documentation</title>
+    <title>tensorbuilder.patches.rnn_utilities_patch API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1037,17 +1037,16 @@ table {
     <h1>Index</h1>
     <ul id="index">
 
+    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.patches.rnn_utilities_patch.rnn_placeholders_from_state">rnn_placeholders_from_state</a></li>
+    <li class="mono"><a href="#tensorbuilder.patches.rnn_utilities_patch.rnn_state_feed_dict">rnn_state_feed_dict</a></li>
+  </ul>
 
-
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-        <li class="mono"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></li>
-        <li class="mono"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></li>
-        <li class="mono"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></li>
-        <li class="mono"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></li>
-        <li class="mono"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></li>
-      </ul>
     </li>
+
+
     </ul>
   </div>
 
@@ -1059,17 +1058,25 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.patches</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.patches.rnn_utilities_patch</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.patches" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1">#import layers_patch</span>
-<span class="kn">import</span> <span class="nn">tensorflow_patch</span>
-<span class="kn">import</span> <span class="nn">summaries_patch</span>
-<span class="kn">import</span> <span class="nn">layers_patch</span>
-<span class="kn">import</span> <span class="nn">rnn_utilities_patch</span>
-<span class="kn">import</span> <span class="nn">custom_patch</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.rnn_utilities_patch', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.rnn_utilities_patch" class="source">
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
+
+
+<span class="nd">@TensorBuilder.RegisterMethod</span><span class="p">(</span><span class="s2">&quot;tb&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rnn_placeholders_from_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zero_state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rnn_state&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zero_state</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">rnn_placeholders_from_state</span><span class="p">(</span><span class="n">substate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">substate</span> <span class="ow">in</span> <span class="n">zero_state</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">zero_state</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">zero_state</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+<span class="nd">@TensorBuilder.RegisterMethod</span><span class="p">(</span><span class="s2">&quot;tb&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rnn_state_feed_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholders</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">placeholders</span><span class="p">),</span> <span class="n">utils</span><span class="o">.</span><span class="n">flatten_list</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
 </pre></div>
 
   </div>
@@ -1078,39 +1085,74 @@ table {
 
   <section id="section-items">
 
-
-
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-      <div class="item">
-      <p class="name"><a href="custom_patch.m.html">tensorbuilder.patches.custom_patch</a></p>
+    <h2 class="section-title" id="header-functions">Functions</h2>
       
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.rnn_utilities_patch.rnn_placeholders_from_state">
+    <p>def <span class="ident">rnn_placeholders_from_state</span>(</p><p>self, zero_state, name=&#39;rnn_state&#39;)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>THIS METHOD IS AUTOMATICALLY GENERATED</p>
+<div class="codehilite"><pre><span></span>builder.rnn_placeholders_from_state(*args, **kwargs)
+</pre></div>
+
+
+<p>It accepts the same arguments as <code>tb.rnn_placeholders_from_state</code>. </p>
+<p><strong>tb.rnn_placeholders_from_state</strong></p>
+<div class="codehilite"><pre><span></span>None
+</pre></div></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.rnn_utilities_patch.rnn_placeholders_from_state', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.rnn_utilities_patch.rnn_placeholders_from_state" class="source">
+    <div class="codehilite"><pre><span></span><span class="nd">@TensorBuilder.RegisterMethod</span><span class="p">(</span><span class="s2">&quot;tb&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rnn_placeholders_from_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zero_state</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rnn_state&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zero_state</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">rnn_placeholders_from_state</span><span class="p">(</span><span class="n">substate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">substate</span> <span class="ow">in</span> <span class="n">zero_state</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">zero_state</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">zero_state</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+      
+  <div class="item">
+    <div class="name def" id="tensorbuilder.patches.rnn_utilities_patch.rnn_state_feed_dict">
+    <p>def <span class="ident">rnn_state_feed_dict</span>(</p><p>self, placeholders, values)</p>
+    </div>
+    
+
+    
+  
+    <div class="desc"><p>THIS METHOD IS AUTOMATICALLY GENERATED</p>
+<div class="codehilite"><pre><span></span>builder.rnn_state_feed_dict(*args, **kwargs)
+</pre></div>
+
+
+<p>It accepts the same arguments as <code>tb.rnn_state_feed_dict</code>. </p>
+<p><strong>tb.rnn_state_feed_dict</strong></p>
+<div class="codehilite"><pre><span></span>None
+</pre></div></div>
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.rnn_utilities_patch.rnn_state_feed_dict', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.rnn_utilities_patch.rnn_state_feed_dict" class="source">
+    <div class="codehilite"><pre><span></span><span class="nd">@TensorBuilder.RegisterMethod</span><span class="p">(</span><span class="s2">&quot;tb&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rnn_state_feed_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholders</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">placeholders</span><span class="p">),</span> <span class="n">utils</span><span class="o">.</span><span class="n">flatten_list</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
   
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="layers_patch.m.html">tensorbuilder.patches.layers_patch</a></p>
-      
-  
 
-      </div>
-      <div class="item">
-      <p class="name"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></p>
-      
-  
-
-      </div>
   </section>
 
     </article>

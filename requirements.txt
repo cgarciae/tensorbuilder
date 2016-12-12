@@ -1,3 +1,2 @@
-asq>=1.2.1
-tflearn
 phi
+asq

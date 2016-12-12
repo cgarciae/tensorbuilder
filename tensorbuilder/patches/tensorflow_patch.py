@@ -1,7 +1,7 @@
 import tensorflow as tf
 import inspect
 from tensorbuilder import TensorBuilder
-from phi import utils
+from phi import utils, patch
 
 
 f0_pred = (lambda x:
@@ -24,12 +24,12 @@ f1_blacklist = (lambda x:
 )
 
 #tf
-utils.patch_with_members_from_0(TensorBuilder, tf, whitelist=f0_pred)
-utils.patch_with_members_from_1(TensorBuilder, tf, blacklist=f1_blacklist)
-utils.patch_with_members_from_2(TensorBuilder, tf, whitelist=f2_pred)
+patch.builder_with_members_from_0(TensorBuilder, tf, whitelist=f0_pred)
+patch.builder_with_members_from_1(TensorBuilder, tf, blacklist=f1_blacklist)
+patch.builder_with_members_from_2(TensorBuilder, tf, whitelist=f2_pred)
 
 #tf.nn
-utils.patch_with_members_from_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
+patch.builder_with_members_from_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
 
 # for name, f, module in f1s:
 #     TensorBuilder.register_function_1(f, module)
