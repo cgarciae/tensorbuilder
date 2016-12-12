@@ -5,7 +5,7 @@
 
     <title>tensorbuilder API documentation</title>
     <meta name="description" content="# Tensor Builder
-TensorBuilder is light-weight extensible library that enables you to easily create ..." />
+TensorBuilder had a mayor refactoring and is now based on [Phi](https://github.com/..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -1037,15 +1037,22 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
+    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.T">T</a></li>
+  </ul>
+
+    </li>
 
 
 
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
-        <li class="mono"><a href="api/index.html">tensorbuilder.api</a></li>
-        <li class="mono"><a href="core/index.html">tensorbuilder.core</a></li>
+        <li class="mono"><a href="builder.m.html">tensorbuilder.builder</a></li>
         <li class="mono"><a href="patches/index.html">tensorbuilder.patches</a></li>
-        <li class="mono"><a href="tensordata.m.html">tensorbuilder.tensordata</a></li>
+        <li class="mono"><a href="tensordata/index.html">tensorbuilder.tensordata</a></li>
+        <li class="mono"><a href="tests/index.html">tensorbuilder.tests</a></li>
       </ul>
     </li>
     </ul>
@@ -1061,116 +1068,117 @@ table {
   <header id="section-intro">
   <h1 class="title"><span class="name">tensorbuilder</span> module</h1>
   <h1>Tensor Builder</h1>
-<p>TensorBuilder is light-weight extensible library that enables you to easily create complex deep neural networks through a functional <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent</a> <a href="https://en.wikipedia.org/wiki/Immutable_object">immutable</a> API based on the Builder Pattern. Tensor Builder also comes with a DSL based on <a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids">applicatives</a> and function composition that enables you to express more clearly the structure of your network, make changes faster, and reuse code.</p>
+<p>TensorBuilder had a mayor refactoring and is now based on <a href="https://github.com/cgarciae/phi">Phi</a>. Updates to the README comming soon!</p>
 <h3>Goals</h3>
-<ul>
-<li>Be a light-wrapper around Tensor-based libraries</li>
-<li>Enable users to easily create complex branched topologies while maintaining a fluent API (see <a href="http://cgarciae.github.io/tensorbuilder/api/builder.m.html#tensorbuilder.api.builder.Builder.branch">Builder.branch</a>)</li>
-<li>Let users be expressive and productive through a DSL</li>
-</ul>
+<p>Comming Soon!</p>
 <h2>Installation</h2>
 <p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
 <h4>From pypi</h4>
-<p>```
-pip install tensorbuilder==0.0.18</p>
-<p>```</p>
+<div class="codehilite"><pre><span></span>pip install tensorbuilder
+</pre></div>
+
+
 <h4>From github</h4>
-<p>For the latest development version
-<code>pip install git+https://github.com/cgarciae/tensorbuilder.git@develop</code></p>
+<p>For the latest development version</p>
+<div class="codehilite"><pre><span></span>pip install git+https://github.com/cgarciae/tensorbuilder.git@develop
+</pre></div>
+
+
 <h2>Getting Started</h2>
 <p>Create neural network with a [5, 10, 3] architecture with a <code>softmax</code> output layer and a <code>tanh</code> hidden layer through a Builder and then get back its tensor:</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">T</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-<span class="n">h</span> <span class="o">=</span> <span class="p">(</span>
-  <span class="n">tb</span>
-  <span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-  <span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># tanh(x * w + b)</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+  <span class="n">x</span><span class="p">,</span>
+  <span class="n">T</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># tanh(x * w + b)</span>
   <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span> <span class="c1"># dropout(x, keep_prob)</span>
   <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># softmax(x * w + b)</span>
-  <span class="o">.</span><span class="n">tensor</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div>
 
 
 <h2>Features</h2>
-<ul>
-<li><strong>Branching</strong>: Enable to easily express complex complex topologies with a fluent API. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/branching/">Branching</a>.</li>
-<li><strong>Scoping</strong>: Enable you to express scopes for your tensor graph using methods such as <code>tf.device</code> and <code>tf.variable_scope</code> with the same fluent API. <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/scoping/">Scoping</a>.</li>
-<li><strong>DSL</strong>: Use an abbreviated notation with a functional style to make the creation of networks faster, structural changes easier, and reuse code. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/dsl/">DSL</a>.</li>
-<li><strong>Patches</strong>: Add functions from other Tensor-based libraries as methods of the Builder class. TensorBuilder gives you a curated patch plus some specific patches from <code>TensorFlow</code> and <code>TFLearn</code>, but you can build you own to make TensorBuilder what you want it to be. See <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/patches/">Patches</a>.</li>
-</ul>
+<p>Comming Soon!</p>
 <h2>Documentation</h2>
-<ul>
-<li><a href="http://cgarciae.github.io/tensorbuilder/api/index.html">Complete API</a>.</li>
-<li><a href="http://cgarciae.github.io/tensorbuilder/core/index.html">Core API</a>.</li>
-<li><a href="http://cgarciae.github.io/tensorbuilder/index.html">Complete Documentation</a></li>
-</ul>
+<p>Comming Soon!</p>
 <h2>The Guide</h2>
-<p>Check out <a href="https://cgarciae.gitbooks.io/tensorbuilder/content/">The Guide</a> to learn to code in TensorBuilder.</p>
+<p>Comming Soon!</p>
 <h2>Full Example</h2>
 <p>Next is an example with all the features of TensorBuilder including the DSL, branching and scoping. It creates a branched computation where each branch is executed on a different device. All branches are then reduced to a single layer, but the computation is the branched again to obtain both the activation function and the trainer.</p>
 <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">tb</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">T</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
 
-<span class="p">[</span><span class="n">activation</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+<span class="p">[</span><span class="n">activation</span><span class="p">,</span> <span class="n">trainer</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
     <span class="n">x</span><span class="p">,</span>
     <span class="p">[</span>
-        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:0&quot;</span><span class="p">):</span>
-            <span class="n">tb</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:0&quot;</span><span class="p">):</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">relu_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="p">,</span>
-        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:1&quot;</span><span class="p">):</span>
-            <span class="n">tb</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/gpu:1&quot;</span><span class="p">):</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="p">,</span>
-        <span class="p">{</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/cpu:0&quot;</span><span class="p">):</span>
-            <span class="n">tb</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;/cpu:0&quot;</span><span class="p">):</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="p">],</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">T</span><span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
     <span class="p">[</span>
-        <span class="n">tb</span><span class="o">.</span><span class="n">softmax</span><span class="p">()</span> <span class="c1"># activation</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">softmax</span><span class="p">()</span> <span class="c1"># activation</span>
     <span class="p">,</span>
-        <span class="n">tb</span>
+        <span class="n">T</span>
         <span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="c1"># loss</span>
-        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span> <span class="c1"># trainer</span>
-    <span class="p">],</span>
-    <span class="n">tb</span><span class="o">.</span><span class="n">tensors</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">))</span> <span class="c1"># trainer</span>
+    <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1"># Patch docs</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">builder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
+<span class="kn">from</span> <span class="nn">tensordata</span> <span class="kn">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">patches</span> <span class="c1">#import last</span>
+
+<span class="c1">########################</span>
+<span class="c1"># Documentation</span>
+<span class="c1">########################</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">def</span> <span class="nf">_to_pdoc_markdown</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="n">indent</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;```&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">indent</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">indent</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;```python&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">indent</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="n">line</span>
+
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_read</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="n">fname</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-<span class="n">module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
-<span class="n">raw_docs</span> <span class="o">=</span> <span class="n">_read</span><span class="p">(</span><span class="s2">&quot;README-template.md&quot;</span><span class="p">)</span>
+<span class="n">_raw_docs</span> <span class="o">=</span> <span class="n">_read</span><span class="p">(</span><span class="s2">&quot;README-template.md&quot;</span><span class="p">)</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="n">_read</span><span class="p">(</span><span class="s2">&quot;version.txt&quot;</span><span class="p">)</span>
-<span class="n">module</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">raw_docs</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
-
-
-<span class="c1"># Init code</span>
-<span class="kn">import</span> <span class="nn">core</span>
-<span class="kn">import</span> <span class="nn">tensordata</span>
-<span class="kn">import</span> <span class="nn">patches</span>
-<span class="kn">import</span> <span class="nn">api</span>
-
-<span class="n">tb</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">API</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
-
-<span class="c1">#pdoc</span>
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="s2">&quot;tensordata&quot;</span><span class="p">,</span> <span class="s2">&quot;patches&quot;</span><span class="p">,</span> <span class="s2">&quot;api&quot;</span><span class="p">]</span>
+<span class="n">__doc__</span> <span class="o">=</span> <span class="n">_to_pdoc_markdown</span><span class="p">(</span><span class="n">_raw_docs</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__version__</span><span class="p">))</span>
 </pre></div>
 
   </div>
@@ -1178,18 +1186,21 @@ pip install tensorbuilder==0.0.18</p>
   </header>
 
   <section id="section-items">
+    <h2 class="section-title" id="header-variables">Module variables</h2>
+      <div class="item">
+      <p id="tensorbuilder.T" class="name">var <span class="ident">T</span></p>
+      
+  
+  <div class="source_cont">
+</div>
+
+      </div>
 
 
 
     <h2 class="section-title" id="header-submodules">Sub-modules</h2>
       <div class="item">
-      <p class="name"><a href="api/index.html">tensorbuilder.api</a></p>
-      
-  
-
-      </div>
-      <div class="item">
-      <p class="name"><a href="core/index.html">tensorbuilder.core</a></p>
+      <p class="name"><a href="builder.m.html">tensorbuilder.builder</a></p>
       
   
 
@@ -1201,7 +1212,13 @@ pip install tensorbuilder==0.0.18</p>
 
       </div>
       <div class="item">
-      <p class="name"><a href="tensordata.m.html">tensorbuilder.tensordata</a></p>
+      <p class="name"><a href="tensordata/index.html">tensorbuilder.tensordata</a></p>
+      
+  
+
+      </div>
+      <div class="item">
+      <p class="name"><a href="tests/index.html">tensorbuilder.tests</a></p>
       
   
 
