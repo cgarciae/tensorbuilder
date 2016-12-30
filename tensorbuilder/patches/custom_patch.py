@@ -1,75 +1,62 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import tensorflow as tf
 from tensorbuilder import T, TensorBuilder
 from phi import P, utils
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def inception_layer(tensor, num_outputs, **kwargs):
     stride = 1
-    pool_operation = T.max_pool2d
-    pool_kernel = [3, 3]
-    scope = None
-    reuse = None
+
+    pool_operation = kwargs.pop('pool_operation', T.max_pool2d)
+    pool_kernel = kwargs.pop('pool_kernel', [3, 3])
+    scope = kwargs.pop('scope', None)
+    reuse = kwargs.pop('reuse', None)
 
     if 'stride' in kwargs:
         stride = kwargs['stride']
     else:
         kwargs['stride'] = stride
 
-
-    if 'pool_kernel' in kwargs:
-        pool_kernel = kwargs['pool_kernel']
-        del kwargs['pool_kernel']
-
-    if 'scope' in kwargs:
-        scope = kwargs['scope']
-        del kwargs['scope']
-
-    if 'reuse' in kwargs:
-        reuse = kwargs['reuse']
-        del kwargs['reuse']
-
-    if 'pool_operation' in kwargs:
-        pool_operation = kwargs['pool_operation']
-        del kwargs['pool_operation']
-
     kwargs_no_stride = kwargs.copy()
     del kwargs_no_stride['stride']
 
     with tf.variable_scope(scope, default_name='InceptionLayer', reuse=reuse):
-        return P(
+        return T.Pipe(
             tensor,
-            [
+            T.List(
                 T.convolution2d(num_outputs, [1, 1], **dict(kwargs, scope="Conv1x1"))
             ,
-                P.With( T.variable_scope("Branch3x3"),
-                    T
-                    .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                T.With( T.variable_scope("Branch3x3"),
+                    T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
                     .convolution2d(num_outputs, [3, 3], **dict(kwargs, scope="Conv3x3"))
                 )
             ,
-                P.With( T.variable_scope("Branch5x5"),
-                    T
-                    .convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
+                T.With( T.variable_scope("Branch5x5"),
+                    T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
                     .convolution2d(num_outputs, [5, 5], **dict(kwargs, scope="Conv5x5"))
                 )
             ,
-                P.With( T.variable_scope("BranchPool"),
+                T.With( T.variable_scope("BranchPool"),
                     pool_operation(pool_kernel, stride=stride, padding='SAME'),
                     T.convolution2d(num_outputs, [1, 1], **dict(kwargs_no_stride, scope="Conv1x1"))
                 )
-            ],
-            T.concat(3)
+            )
+            .concat(3)
         )
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def minimize(tensor, optimizer, *args, **kwargs):
     return optimizer.minimize(tensor, *args, **kwargs)
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def maximize(tensor, optimizer, *args, **kwargs):
     return optimizer.maximize(tensor, *args, **kwargs)
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def drop_layer(x, keep_prob, seed=None, name=None):
   """Computes dropout.
   With probability `keep_prob`, outputs the input element scaled up by
@@ -116,12 +103,12 @@ def drop_layer(x, keep_prob, seed=None, name=None):
     ret.set_shape(x.get_shape())
     return ret
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def ensamble_dropout(tree, keep_prob, seed=None, name=None):
     with tf.op_scope(tree.tensors(), name, "drop_layer"):
         return tree.map_each(drop_layer, keep_prob, seed=seed, name=name)
 
-@TensorBuilder.Register1("tb")
+@TensorBuilder.Register("tensorbuilder")
 def add_regularization_loss(tensor, graph=None, scope='add_regularization_loss'):
     if not graph:
         reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)

@@ -1,0 +1,15 @@
+#! /bin/bash
+set -e
+
+sudo chown -R ${USER}:sudo .
+
+echo "TESTING PYTHON27"
+find . -name "*.pyc" -delete
+docker-compose run --rm test27
+
+
+echo "TESTING PYTHON35"
+find . -name "*.pyc" -delete
+docker-compose run --rm test35
+
+sudo chown -R ${USER}:sudo .

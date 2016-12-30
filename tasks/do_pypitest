@@ -1,0 +1,8 @@
+#! /bin/bash
+set -e
+
+pip install -i https://testpypi.python.org/pypi tensorbuilder
+echo
+echo "Testing Library:"
+echo
+python -c "import tensorbuilder; print('Hello from python. Phi version:', tensorbuilder.__version__)"

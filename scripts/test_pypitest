@@ -1,3 +1,0 @@
-#! /bin/bash
-
-docker run -it -v ${PWD}:/code -w /code tensorflow/tensorflow scripts/do_pypitest

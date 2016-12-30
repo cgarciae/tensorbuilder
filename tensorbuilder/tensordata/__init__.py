@@ -1,11 +1,23 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import sys
 import asq
 from asq.initiators import query
 import asq.queryables
 import random
-from itertools import islice, izip_longest
 import numpy as np
 import tensorflow as tf
 from decorator import decorator
+from itertools import islice
+
+if sys.version_info[0] == 2:
+    from itertools import izip_longest
+else:
+    from itertools import zip_longest
+
 
 """
 """
@@ -56,7 +68,7 @@ class Data(object):
             .scan()
             .select(lambda n: int(data_length * n / splits_total))
             .then(_window, n=2)
-            .select(lambda (start, end): np.array(indexes[start:end]))
+            .select(lambda tup: np.array(indexes[tup[0]:tup[1]]))
             .select(lambda split: Data(**{k: source[split,:] for (k, source) in self.sources.iteritems()}))
             .to_list()
         )

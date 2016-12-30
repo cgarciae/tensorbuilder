@@ -1,7 +1,13 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+
 import tensorflow as tf
 import inspect
 from tensorbuilder import TensorBuilder
-from phi import utils, patch
+from phi import utils
 
 
 f0_pred = (lambda x:
@@ -24,12 +30,12 @@ f1_blacklist = (lambda x:
 )
 
 #tf
-patch.builder_with_members_from_0(TensorBuilder, tf, whitelist=f0_pred)
-patch.builder_with_members_from_1(TensorBuilder, tf, blacklist=f1_blacklist)
-patch.builder_with_members_from_2(TensorBuilder, tf, whitelist=f2_pred)
+TensorBuilder.PatchAt(0, tf, whitelist_predicate=f0_pred)
+TensorBuilder.PatchAt(1, tf, blacklist_predicate=f1_blacklist)
+TensorBuilder.PatchAt(2, tf, whitelist_predicate=f2_pred)
 
 #tf.nn
-patch.builder_with_members_from_1(TensorBuilder, tf.nn, module_alias="tf.nn", blacklist=f1_blacklist)
+TensorBuilder.PatchAt(1, tf.nn, module_alias="tf.nn", blacklist_predicate=f1_blacklist)
 
 # for name, f, module in f1s:
 #     TensorBuilder.register_function_1(f, module)

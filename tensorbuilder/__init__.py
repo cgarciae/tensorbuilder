@@ -1,10 +1,17 @@
-from builder import TensorBuilder
-from tensordata import Data
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+from .builder import TensorBuilder
+from .tensordata import Data
 from phi import utils
+from . import api
 
-T = TensorBuilder(utils.identity)
+from .api import *
 
-import patches #import last
+
+from . import patches #import last
 
 ########################
 # Documentation

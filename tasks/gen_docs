@@ -1,8 +1,10 @@
 #! /bin/bash
+set -e
 
 find . -name "*.pyc" -delete
 echo "Generating docs"
+rm -fr docs
 PYTHONPATH=./tensorbuilder pdoc --html-dir=docs --html --all-submodules --overwrite tensorbuilder
 echo "Making README.md"
-python scripts/create_readme.py
+python tasks/create_readme.py
 echo "Finished"
