@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.core.utils API documentation</title>
+    <title>tensorbuilder.helpers API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1040,22 +1040,11 @@ table {
     <li class="set"><h3><a href="#header-functions">Functions</a></h3>
       
   <ul>
-    <li class="mono"><a href="#tensorbuilder.core.utils.flatten">flatten</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.utils.get_instance_methods">get_instance_methods</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.utils.get_method_sig">get_method_sig</a></li>
-    <li class="mono"><a href="#tensorbuilder.core.utils.immutable">immutable</a></li>
+    <li class="mono"><a href="#tensorbuilder.helpers.count_parameters">count_parameters</a></li>
   </ul>
 
     </li>
 
-    <li class="set"><h3><a href="#header-classes">Classes</a></h3>
-      <ul>
-        <li class="mono">
-        <span class="class_name"><a href="#tensorbuilder.core.utils.DefaultArgSpec">DefaultArgSpec</a></span>
-        
-        </li>
-      </ul>
-    </li>
 
     </ul>
   </div>
@@ -1068,99 +1057,26 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.core.utils</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.helpers</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.utils" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">import</span> <span class="nn">functools</span><span class="o">,</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">decorator</span> <span class="kn">import</span> <span class="n">decorator</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.helpers', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.helpers" class="source">
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
 
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">operator</span>
 
-
-<span class="c1"># Decorators</span>
-<span class="nd">@decorator</span>
-<span class="k">def</span> <span class="nf">immutable</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Decorator. Passes a copy of the entity to the method so that the original object remains un touched.</span>
-<span class="sd">    Used in methods to get a fluent immatable API.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="n">DefaultArgSpec</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;DefaultArgSpec&#39;</span><span class="p">,</span> <span class="s1">&#39;has_default default_value&#39;</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">_get_default_arg</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">defaults</span><span class="p">,</span> <span class="n">arg_index</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Method that determines if an argument has default value or not,</span>
-<span class="sd">    and if yes what is the default value for the argument</span>
-
-<span class="sd">    :param args: array of arguments, eg: [&#39;first_arg&#39;, &#39;second_arg&#39;, &#39;third_arg&#39;]</span>
-<span class="sd">    :param defaults: array of default values, eg: (42, &#39;something&#39;)</span>
-<span class="sd">    :param arg_index: index of the argument in the argument array for which,</span>
-<span class="sd">    this function checks if a default value exists or not. And if default value</span>
-<span class="sd">    exists it would return the default value. Example argument: 1</span>
-<span class="sd">    :return: Tuple of whether there is a default or not, and if yes the default</span>
-<span class="sd">    value, eg: for index 2 i.e. for &quot;second_arg&quot; this function returns (True, 42)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">defaults</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">DefaultArgSpec</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-
-    <span class="n">args_with_no_defaults</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">arg_index</span> <span class="o">&lt;</span> <span class="n">args_with_no_defaults</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">DefaultArgSpec</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">defaults</span><span class="p">[</span><span class="n">arg_index</span> <span class="o">-</span> <span class="n">args_with_no_defaults</span><span class="p">]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="n">DefaultArgSpec</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">get_method_sig</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Given a function, it returns a string that pretty much looks how the</span>
-<span class="sd">    function signature_ would be written in python.</span>
-
-<span class="sd">    :param method: a python method</span>
-<span class="sd">    :return: A string similar describing the pythong method signature_.</span>
-<span class="sd">    eg: &quot;my_method(first_argArg, second_arg=42, third_arg=&#39;something&#39;)&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># The return value of ArgSpec is a bit weird, as the list of arguments and</span>
-    <span class="c1"># list of defaults are returned in separate array.</span>
-    <span class="c1"># eg: ArgSpec(args=[&#39;first_arg&#39;, &#39;second_arg&#39;, &#39;third_arg&#39;],</span>
-    <span class="c1"># varargs=None, keywords=None, defaults=(42, &#39;something&#39;))</span>
-    <span class="n">argspec</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-    <span class="n">arg_index</span><span class="o">=</span><span class="mi">0</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Use the args and defaults array returned by argspec and find out</span>
-    <span class="c1"># which arguments has default</span>
-    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">argspec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
-        <span class="n">default_arg</span> <span class="o">=</span> <span class="n">_get_default_arg</span><span class="p">(</span><span class="n">argspec</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">argspec</span><span class="o">.</span><span class="n">defaults</span><span class="p">,</span> <span class="n">arg_index</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">default_arg</span><span class="o">.</span><span class="n">has_default</span><span class="p">:</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">default_arg</span><span class="o">.</span><span class="n">default_value</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-        <span class="n">arg_index</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-
-<span class="k">def</span> <span class="nf">get_instance_methods</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">method_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
-        <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
-            <span class="k">yield</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">method</span>
-
-
-<span class="k">def</span> <span class="nf">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
-                <span class="k">yield</span> <span class="n">j</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">yield</span> <span class="n">i</span>
-
-<span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">count_parameters</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">operator</span>
+    <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">iterable</span><span class="p">:</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">([</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>  <span class="n">v</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">all_variables</span><span class="p">()</span> <span class="p">]</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span> <span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">dims</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1172,121 +1088,23 @@ table {
     <h2 class="section-title" id="header-functions">Functions</h2>
       
   <div class="item">
-    <div class="name def" id="tensorbuilder.core.utils.flatten">
-    <p>def <span class="ident">flatten</span>(</p><p>container)</p>
+    <div class="name def" id="tensorbuilder.helpers.count_parameters">
+    <p>def <span class="ident">count_parameters</span>(</p><p>graph)</p>
     </div>
     
 
     
   
   <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils.flatten', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.utils.flatten" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">container</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">container</span><span class="p">))</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.utils.get_instance_methods">
-    <p>def <span class="ident">get_instance_methods</span>(</p><p>instance)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils.get_instance_methods', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.utils.get_instance_methods" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_instance_methods</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">method_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
-        <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="s1">&#39;__call__&#39;</span><span class="p">):</span>
-            <span class="k">yield</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">method</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.utils.get_method_sig">
-    <p>def <span class="ident">get_method_sig</span>(</p><p>method)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Given a function, it returns a string that pretty much looks how the
-function signature_ would be written in python.</p>
-<p>:param method: a python method
-:return: A string similar describing the pythong method signature_.
-eg: "my_method(first_argArg, second_arg=42, third_arg='something')"</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils.get_method_sig', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.utils.get_method_sig" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_method_sig</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Given a function, it returns a string that pretty much looks how the</span>
-<span class="sd">    function signature_ would be written in python.</span>
-
-<span class="sd">    :param method: a python method</span>
-<span class="sd">    :return: A string similar describing the pythong method signature_.</span>
-<span class="sd">    eg: &quot;my_method(first_argArg, second_arg=42, third_arg=&#39;something&#39;)&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># The return value of ArgSpec is a bit weird, as the list of arguments and</span>
-    <span class="c1"># list of defaults are returned in separate array.</span>
-    <span class="c1"># eg: ArgSpec(args=[&#39;first_arg&#39;, &#39;second_arg&#39;, &#39;third_arg&#39;],</span>
-    <span class="c1"># varargs=None, keywords=None, defaults=(42, &#39;something&#39;))</span>
-    <span class="n">argspec</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-    <span class="n">arg_index</span><span class="o">=</span><span class="mi">0</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Use the args and defaults array returned by argspec and find out</span>
-    <span class="c1"># which arguments has default</span>
-    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">argspec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
-        <span class="n">default_arg</span> <span class="o">=</span> <span class="n">_get_default_arg</span><span class="p">(</span><span class="n">argspec</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">argspec</span><span class="o">.</span><span class="n">defaults</span><span class="p">,</span> <span class="n">arg_index</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">default_arg</span><span class="o">.</span><span class="n">has_default</span><span class="p">:</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">default_arg</span><span class="o">.</span><span class="n">default_value</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-        <span class="n">arg_index</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
-      
-  <div class="item">
-    <div class="name def" id="tensorbuilder.core.utils.immutable">
-    <p>def <span class="ident">immutable</span>(</p><p>func)</p>
-    </div>
-    
-
-    
-  
-    <div class="desc"><p>Decorator. Passes a copy of the entity to the method so that the original object remains un touched.
-Used in methods to get a fluent immatable API.</p></div>
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.core.utils.immutable', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.core.utils.immutable" class="source">
-    <div class="codehilite"><pre><span></span><span class="nd">@decorator</span>
-<span class="k">def</span> <span class="nf">immutable</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Decorator. Passes a copy of the entity to the method so that the original object remains un touched.</span>
-<span class="sd">    Used in methods to get a fluent immatable API.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.helpers.count_parameters', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.helpers.count_parameters" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_parameters</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">operator</span>
+    <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">iterable</span><span class="p">:</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">([</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>  <span class="n">v</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">all_variables</span><span class="p">()</span> <span class="p">]</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span> <span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">dims</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1295,49 +1113,6 @@ Used in methods to get a fluent immatable API.</p></div>
   </div>
   
 
-    <h2 class="section-title" id="header-classes">Classes</h2>
-      
-      <div class="item">
-      <p id="tensorbuilder.core.utils.DefaultArgSpec" class="name">class <span class="ident">DefaultArgSpec</span></p>
-      
-  
-    <div class="desc"><p>DefaultArgSpec(has_default, default_value)</p></div>
-  <div class="source_cont">
-</div>
-
-
-      <div class="class">
-          <h3>Ancestors (in MRO)</h3>
-          <ul class="class_list">
-          <li><a href="#tensorbuilder.core.utils.DefaultArgSpec">DefaultArgSpec</a></li>
-          <li>__builtin__.tuple</li>
-          <li>__builtin__.object</li>
-          </ul>
-          <h3>Instance variables</h3>
-            <div class="item">
-            <p id="tensorbuilder.core.utils.DefaultArgSpec.default_value" class="name">var <span class="ident">default_value</span></p>
-            
-
-            
-  
-    <div class="desc"><p>Alias for field number 1</p></div>
-  <div class="source_cont">
-</div>
-
-            </div>
-            <div class="item">
-            <p id="tensorbuilder.core.utils.DefaultArgSpec.has_default" class="name">var <span class="ident">has_default</span></p>
-            
-
-            
-  
-    <div class="desc"><p>Alias for field number 0</p></div>
-  <div class="source_cont">
-</div>
-
-            </div>
-      </div>
-      </div>
 
   </section>
 

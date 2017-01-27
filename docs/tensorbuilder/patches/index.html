@@ -1046,6 +1046,7 @@ table {
         <li class="mono"><a href="rnn_utilities_patch.m.html">tensorbuilder.patches.rnn_utilities_patch</a></li>
         <li class="mono"><a href="summaries_patch.m.html">tensorbuilder.patches.summaries_patch</a></li>
         <li class="mono"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></li>
+        <li class="mono"><a href="training_patch.m.html">tensorbuilder.patches.training_patch</a></li>
       </ul>
     </li>
     </ul>
@@ -1064,12 +1065,18 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.patches" class="source">
-    <div class="codehilite"><pre><span></span><span class="c1">#import layers_patch</span>
-<span class="kn">import</span> <span class="nn">tensorflow_patch</span>
-<span class="kn">import</span> <span class="nn">summaries_patch</span>
-<span class="kn">import</span> <span class="nn">layers_patch</span>
-<span class="kn">import</span> <span class="nn">rnn_utilities_patch</span>
-<span class="kn">import</span> <span class="nn">custom_patch</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">training_patch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">tensorflow_patch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">layers_patch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">rnn_utilities_patch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">custom_patch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">summaries_patch</span>
 </pre></div>
 
   </div>
@@ -1107,6 +1114,12 @@ table {
       </div>
       <div class="item">
       <p class="name"><a href="tensorflow_patch.m.html">tensorbuilder.patches.tensorflow_patch</a></p>
+      
+  
+
+      </div>
+      <div class="item">
+      <p class="name"><a href="training_patch.m.html">tensorbuilder.patches.training_patch</a></p>
       
   
 

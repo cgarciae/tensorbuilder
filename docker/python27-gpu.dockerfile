@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:0.12.1-gpu
+FROM tensorflow/tensorflow:1.0.0-alpha-gpu
 
 RUN apt-get update
 RUN apt-get -y install git
@@ -13,4 +13,5 @@ RUN pip install tflearn
 RUN pip install asq>=1.2.1
 RUN pip install pytest
 RUN pip install pytest-sugar
-RUN pip install phi>=0.6.2
+
+RUN pip install phi>=0.6.4

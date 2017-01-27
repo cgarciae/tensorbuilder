@@ -9,11 +9,11 @@ services:
     # update gh-pages => git subtree push --prefix docs/tensorbuilder origin gh-pages
     build:
       context: ./docker
-      dockerfile: python27.dockerfile
+      dockerfile: python35.dockerfile
     volumes:
       - ./:/tensorbuilder
-    working_dir: /tensorbuilder
-    command: ./tasks/gen_docs
+    working_dir: /root
+    command: bash -c "pip install -e /tensorbuilder && /tensorbuilder/tasks/gen_docs"
 
   test27:
     build:

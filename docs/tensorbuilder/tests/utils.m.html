@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.extensions.patches API documentation</title>
+    <title>tensorbuilder.tests.utils API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1037,13 +1037,15 @@ table {
     <h1>Index</h1>
     <ul id="index">
 
+    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
+      
+  <ul>
+    <li class="mono"><a href="#tensorbuilder.tests.utils.count_parameters">count_parameters</a></li>
+  </ul>
 
-
-    <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
-      <ul>
-        <li class="mono"><a href="tensorbuilder_patch.m.html">tensorbuilder.extensions.patches.tensorbuilder_patch</a></li>
-      </ul>
     </li>
+
+
     </ul>
   </div>
 
@@ -1055,23 +1057,55 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.extensions.patches</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.tests.utils</span> module</h1>
   
   
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.utils', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.utils" class="source">
+    <div class="codehilite"><pre><span></span><span class="n">ef</span> <span class="n">count_parameters</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+   <span class="kn">import</span> <span class="nn">operator</span>
+   <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+       <span class="n">prod</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">iterable</span><span class="p">:</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+       <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">([</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>  <span class="n">v</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">all_variables</span><span class="p">()</span> <span class="p">]</span>
+       <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span> <span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">dims</span> <span class="p">]</span>
+       <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
+</pre></div>
+
+  </div>
 
   </header>
 
   <section id="section-items">
 
-
-
-    <h2 class="section-title" id="header-submodules">Sub-modules</h2>
-      <div class="item">
-      <p class="name"><a href="tensorbuilder_patch.m.html">tensorbuilder.extensions.patches.tensorbuilder_patch</a></p>
+    <h2 class="section-title" id="header-functions">Functions</h2>
       
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tests.utils.count_parameters">
+    <p>def <span class="ident">count_parameters</span>(</p><p>graph)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.utils.count_parameters', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.utils.count_parameters" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">count_parameters</span><span class="p">(</span><span class="n">graph</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">operator</span>
+    <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+        <span class="n">prod</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">iterable</span><span class="p">:</span> <span class="nb">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">([</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span>  <span class="n">v</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()])</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">all_variables</span><span class="p">()</span> <span class="p">]</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="p">[</span> <span class="n">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">dims</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
   
 
-      </div>
+
   </section>
 
     </article>

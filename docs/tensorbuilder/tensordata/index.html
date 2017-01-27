@@ -1083,14 +1083,26 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tensordata', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tensordata" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">asq</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">asq</span>
 <span class="kn">from</span> <span class="nn">asq.initiators</span> <span class="kn">import</span> <span class="n">query</span>
 <span class="kn">import</span> <span class="nn">asq.queryables</span>
 <span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span><span class="p">,</span> <span class="n">izip_longest</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">decorator</span> <span class="kn">import</span> <span class="n">decorator</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">islice</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">izip_longest</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">zip_longest</span>
+
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -1141,7 +1153,7 @@ table {
             <span class="o">.</span><span class="n">scan</span><span class="p">()</span>
             <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_length</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">splits_total</span><span class="p">))</span>
             <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">_window</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
             <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">split</span><span class="p">:</span> <span class="n">Data</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="n">split</span><span class="p">,:]</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}))</span>
             <span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
         <span class="p">)</span>
@@ -1311,7 +1323,7 @@ Used in methods to get a fluent immatable API.</p></div>
             <span class="o">.</span><span class="n">scan</span><span class="p">()</span>
             <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_length</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">splits_total</span><span class="p">))</span>
             <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">_window</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
             <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">split</span><span class="p">:</span> <span class="n">Data</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="n">split</span><span class="p">,:]</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}))</span>
             <span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
         <span class="p">)</span>
@@ -1640,7 +1652,7 @@ Used in methods to get a fluent immatable API.</p></div>
         <span class="o">.</span><span class="n">scan</span><span class="p">()</span>
         <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_length</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">splits_total</span><span class="p">))</span>
         <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">_window</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+        <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
         <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="k">lambda</span> <span class="n">split</span><span class="p">:</span> <span class="n">Data</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="n">split</span><span class="p">,:]</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()}))</span>
         <span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
     <span class="p">)</span>

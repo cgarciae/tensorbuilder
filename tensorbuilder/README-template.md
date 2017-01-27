@@ -1,5 +1,5 @@
 # Tensor Builder
-TensorBuilder had a mayor refactoring and is now based on [Phi](https://github.com/cgarciae/phi). Updates to the README comming soon!
+TensorBuilder is a TensorFlow-based library that enables you to easily create complex neural networks using functional programming.
 
 ##Import
 

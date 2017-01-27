@@ -3,7 +3,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .builder import T
+from .builder import TensorBuilder as _TB
+
+T = _TB()
 
 Then0 = T.Then0
 Then = T.Then

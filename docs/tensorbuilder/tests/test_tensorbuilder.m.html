@@ -1047,10 +1047,14 @@ table {
   <ul>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.setup_method">setup_method</a></li>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_concat">test_concat</a></li>
+    <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_convolution">test_convolution</a></li>
+    <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception">test_inception</a></li>
+    <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception_net">test_inception_net</a></li>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_layers_patch">test_layers_patch</a></li>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_patch">test_patch</a></li>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_rnn_utilities">test_rnn_utilities</a></li>
     <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_summaries_patch">test_summaries_patch</a></li>
+    <li class="mono"><a href="#tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_trainop">test_trainop</a></li>
   </ul>
 
         </li>
@@ -1073,9 +1077,9 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tests.test_tensorbuilder" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">T</span>
-<span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">P</span><span class="p">,</span> <span class="n">Rec</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">tensorbuilder.api</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib</span> <span class="kn">import</span> <span class="n">layers</span>
 
 <span class="k">class</span> <span class="nc">TestTensorBuilder</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;docstring for TestBuilder&quot;&quot;&quot;</span>
@@ -1095,40 +1099,40 @@ table {
 
     <span class="k">def</span> <span class="nf">test_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">),</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">)</span>
-
-        <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-
-            <span class="n">T</span>
-            <span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">matmul</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+        <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span><span class="p">,</span> <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">matmul</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">ReadList</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;relu&#39;</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">relu</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">test_summaries_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">make_scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
             <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span>
         <span class="k">assert</span> <span class="s2">&quot;Mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
             <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span>
-        <span class="k">assert</span> <span class="s2">&quot;ScalarSummary&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">test_layers_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">softmax_layer</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
             <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
             <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
         <span class="p">)</span>
@@ -1136,15 +1140,15 @@ table {
 
     <span class="k">def</span> <span class="nf">test_concat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">concatenated</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">List</span><span class="p">(</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="p">,</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
             <span class="p">,</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">concatenated</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">10</span>
@@ -1152,6 +1156,80 @@ table {
     <span class="k">def</span> <span class="nf">test_rnn_utilities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">rnn_placeholders_from_state</span>
         <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">rnn_state_feed_dict</span>
+
+
+    <span class="k">def</span> <span class="nf">test_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;Conv&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="s2">&quot;Elu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">test_inception</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+
+
+    <span class="k">def</span> <span class="nf">test_inception_net</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;inputs&#39;</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+            <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">)</span>
+            <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;keep_prob&#39;</span><span class="p">)</span>
+
+
+        <span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">trainer</span><span class="p">,</span> <span class="n">loss</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#, scope=&#39;logits&#39;),</span>
+            <span class="o">.</span><span class="n">List</span><span class="p">(</span>
+                <span class="n">T</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+            <span class="p">,</span>
+                <span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">),</span>
+                    <span class="n">T</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">))</span>
+            <span class="p">,</span>
+                <span class="n">Read</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">loss</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">test_trainop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+
+        <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">TrainOp</span>
+
+        <span class="n">trainer</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="o">.</span><span class="n">TrainOp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">Trainer</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">trainer</span>
 </pre></div>
 
   </div>
@@ -1189,40 +1267,40 @@ table {
 
     <span class="k">def</span> <span class="nf">test_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">),</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">)</span>
-
-        <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-
-            <span class="n">T</span>
-            <span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">matmul</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+        <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span><span class="p">,</span> <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">matmul</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+                <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">ReadList</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;relu&#39;</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">relu</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">test_summaries_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">make_scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
             <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span>
         <span class="k">assert</span> <span class="s2">&quot;Mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
             <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
         <span class="p">)</span>
-        <span class="k">assert</span> <span class="s2">&quot;ScalarSummary&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">test_layers_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">softmax_layer</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
             <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
             <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
         <span class="p">)</span>
@@ -1230,15 +1308,15 @@ table {
 
     <span class="k">def</span> <span class="nf">test_concat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">concatenated</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-            <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">List</span><span class="p">(</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="p">,</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
             <span class="p">,</span>
                 <span class="n">T</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">T</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">concatenated</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">10</span>
@@ -1246,6 +1324,80 @@ table {
     <span class="k">def</span> <span class="nf">test_rnn_utilities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">rnn_placeholders_from_state</span>
         <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">rnn_state_feed_dict</span>
+
+
+    <span class="k">def</span> <span class="nf">test_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;Conv&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="s2">&quot;Elu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">test_inception</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+
+
+    <span class="k">def</span> <span class="nf">test_inception_net</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;inputs&#39;</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+            <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">)</span>
+            <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;keep_prob&#39;</span><span class="p">)</span>
+
+
+        <span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">trainer</span><span class="p">,</span> <span class="n">loss</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#, scope=&#39;logits&#39;),</span>
+            <span class="o">.</span><span class="n">List</span><span class="p">(</span>
+                <span class="n">T</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+            <span class="p">,</span>
+                <span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">),</span>
+                    <span class="n">T</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">))</span>
+            <span class="p">,</span>
+                <span class="n">Read</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">loss</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">test_trainop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+
+        <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">TrainOp</span>
+
+        <span class="n">trainer</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+            <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="o">.</span><span class="n">TrainOp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">Trainer</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">trainer</span>
 </pre></div>
 
   </div>
@@ -1303,17 +1455,118 @@ table {
   <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_concat" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_concat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">concatenated</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+        <span class="o">.</span><span class="n">List</span><span class="p">(</span>
             <span class="n">T</span><span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="p">,</span>
             <span class="n">T</span><span class="o">.</span><span class="n">tanh_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="p">,</span>
             <span class="n">T</span><span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">T</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">concatenated</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">10</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_convolution">
+    <p>def <span class="ident">test_convolution</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_convolution', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_convolution" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">convolution2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;Conv&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span> <span class="ow">and</span> <span class="s2">&quot;Elu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception">
+    <p>def <span class="ident">test_inception</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_inception</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception_net">
+    <p>def <span class="ident">test_inception_net</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception_net', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_inception_net" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_inception_net</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;inputs&#39;</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+        <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">)</span>
+        <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;keep_prob&#39;</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">trainer</span><span class="p">,</span> <span class="n">loss</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+        <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">inception_layer</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">elu</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">elu_conv2d_layer</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;VALID&#39;</span><span class="p">,</span> <span class="n">normalizer_fn</span><span class="o">=</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#, scope=&#39;logits&#39;),</span>
+        <span class="o">.</span><span class="n">List</span><span class="p">(</span>
+            <span class="n">T</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+        <span class="p">,</span>
+            <span class="n">With</span><span class="p">(</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">),</span>
+                <span class="n">T</span><span class="o">.</span><span class="n">softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdadeltaOptimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">))</span>
+        <span class="p">,</span>
+            <span class="n">Read</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">loss</span><span class="o">.</span><span class="n">name</span>
 </pre></div>
 
   </div>
@@ -1335,8 +1588,7 @@ table {
   <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_layers_patch" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_layers_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">softmax_layer</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
         <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
         <span class="o">.</span><span class="n">softmax_layer</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
     <span class="p">)</span>
@@ -1361,17 +1613,20 @@ table {
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_patch', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_patch" class="source">
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">),</span> <span class="n">T</span><span class="o">.</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">T</span>
-        <span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">matmul</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+    <span class="n">matmul</span><span class="p">,</span> <span class="n">add</span><span class="p">,</span> <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+        <span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+            <span class="n">matmul</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+            <span class="n">add</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span>
+            <span class="n">relu</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">relu</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">ReadList</span><span class="p">(</span><span class="s1">&#39;matmul&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;relu&#39;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">assert</span> <span class="s2">&quot;Relu&quot;</span> <span class="ow">in</span> <span class="n">relu</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">assert</span> <span class="s2">&quot;MatMul&quot;</span> <span class="ow">in</span> <span class="n">matmul</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">assert</span> <span class="s2">&quot;Add&quot;</span> <span class="ow">in</span> <span class="n">add</span><span class="o">.</span><span class="n">name</span>
 </pre></div>
 
   </div>
@@ -1416,16 +1671,47 @@ table {
     <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_summaries_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">make_scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
         <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="s2">&quot;Mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Pipe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">T</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">scalar_summary</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+        <span class="o">.</span><span class="n">reduce_mean</span><span class="p">()</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">),</span>
         <span class="n">Rec</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
-    <span class="k">assert</span> <span class="s2">&quot;ScalarSummary&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+    <span class="k">assert</span> <span class="s2">&quot;mean&quot;</span> <span class="ow">in</span> <span class="n">name</span>
+</pre></div>
+
+  </div>
+</div>
+
+  </div>
+  
+            
+  <div class="item">
+    <div class="name def" id="tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_trainop">
+    <p>def <span class="ident">test_trainop</span>(</p><p>self)</p>
+    </div>
+    
+
+    
+  
+  <div class="source_cont">
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_trainop', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.tests.test_tensorbuilder.TestTensorBuilder.test_trainop" class="source">
+    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">test_trainop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">T</span><span class="o">.</span><span class="n">TrainOp</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Pipe</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">T</span>
+        <span class="o">.</span><span class="n">sigmoid_layer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">TrainOp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span><span class="mf">0.01</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">Trainer</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">trainer</span>
 </pre></div>
 
   </div>

@@ -5,7 +5,7 @@
 
     <title>tensorbuilder API documentation</title>
     <meta name="description" content="# Tensor Builder
-TensorBuilder had a mayor refactoring and is now based on [Phi](https://github.com/..." />
+TensorBuilder is a TensorFlow-based library that enables you to easily create compl..." />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
   
@@ -1037,19 +1037,14 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
-    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#tensorbuilder.T">T</a></li>
-  </ul>
-
-    </li>
 
 
 
     <li class="set"><h3><a href="#header-submodules">Sub-modules</a></h3>
       <ul>
+        <li class="mono"><a href="api.m.html">tensorbuilder.api</a></li>
         <li class="mono"><a href="builder.m.html">tensorbuilder.builder</a></li>
+        <li class="mono"><a href="helpers.m.html">tensorbuilder.helpers</a></li>
         <li class="mono"><a href="patches/index.html">tensorbuilder.patches</a></li>
         <li class="mono"><a href="tensordata/index.html">tensorbuilder.tensordata</a></li>
         <li class="mono"><a href="tests/index.html">tensorbuilder.tests</a></li>
@@ -1068,9 +1063,90 @@ table {
   <header id="section-intro">
   <h1 class="title"><span class="name">tensorbuilder</span> module</h1>
   <h1>Tensor Builder</h1>
-<p>TensorBuilder had a mayor refactoring and is now based on <a href="https://github.com/cgarciae/phi">Phi</a>. Updates to the README comming soon!</p>
-<h3>Goals</h3>
-<p>Comming Soon!</p>
+<p>TensorBuilder is a TensorFlow-based library that enables you to easily create complex neural networks using functional programming.</p>
+<h2>Import</h2>
+<p>For demonstration purposes we will import right now everything we will need for the rest of the exercises like this</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">tensorbuilder.api</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+</pre></div>
+
+
+<p>but you can also import just what you need from the <code>tensorbuilder</code> module.</p>
+<h2>Phi</h2>
+<h4>Lambdas</h4>
+<p>With the <code>T</code> object you can create quick math-like lambdas using any operator, this lets you write things like</p>
+<div class="codehilite"><pre><span></span>x, b = tf.placeholder(&#39;float&#39;), tf.placeholder(&#39;float&#39;)
+
+f = (T + b) / (T + 10)  #lambda x: (x + b) / (x + 10)
+y = f(x)
+
+assert &quot;div&quot; in y.name
+</pre></div>
+
+
+<h4>Composition</h4>
+<p>Use function composition with the <code>&gt;&gt;</code> operator to improve readability</p>
+<div class="codehilite"><pre><span></span>x, w, b = tf.placeholder(&#39;float&#39;, [None, 5]),  tf.placeholder(&#39;float&#39;, [5, 3]), tf.placeholder(&#39;float&#39;, [3])
+
+f = T.matmul(w) &gt;&gt; T + b &gt;&gt; T.sigmoid()
+y = f(x)
+
+assert &quot;Sigmoid&quot; in y.name
+</pre></div>
+
+
+<h2>tf + nn</h2>
+<p>Any function from the <code>tf</code> and <code>nn</code> modules is a method from the <code>T</code> object, as before you can use the <code>&gt;&gt;</code> operator or you can chain them to produce complex functions</p>
+<div class="codehilite"><pre><span></span>x, w, b = tf.placeholder(&#39;float&#39;, [None, 5]),  tf.placeholder(&#39;float&#39;, [5, 3]), tf.placeholder(&#39;float&#39;, [3])
+
+f = T.matmul(w).add(b).sigmoid()
+y = f(x)
+
+assert &quot;Sigmoid&quot; in y.name
+</pre></div>
+
+
+<h2>layers</h2>
+<h4>affine</h4>
+<p>You can use functions from the <code>tf.contrib.layers</code> module via the <code>T.layers</code> property. Here we will use <a href="https://github.com/cgarciae/phi#seq-and-pipe">Pipe</a> to apply a value directly to an expression:</p>
+<div class="codehilite"><pre><span></span>x = tf.placeholder(&#39;float&#39;, [None, 5])
+
+y = Pipe(
+  x,
+  T.layers.fully_connected(64, activation_fn=tf.nn.sigmoid)  # sigmoid layer 64
+  .layers.fully_connected(32, activation_fn=tf.nn.tanh)  # tanh layer 32
+  .layers.fully_connected(16, activation_fn=None)  # linear layer 16
+  .layers.fully_connected(8, activation_fn=tf.nn.relu)  # relu layer 8
+)
+
+assert &quot;Relu&quot; in y.name
+</pre></div>
+
+
+<p>However, since it is such a common task to build fully_connected layers using the different functions from the <code>tf.nn</code> module, we've (dynamically) create all combination of these as their own methods so you con rewrite the previous as</p>
+<div class="codehilite"><pre><span></span>x = tf.placeholder(&#39;float&#39;, [None, 5])
+
+y = Pipe(
+  x,
+  T.sigmoid_layer(64)  # sigmoid layer 64
+  .tanh_layer(32)  # tanh layer 32
+  .linear_layer(16)  # linear layer 16
+  .relu_layer(8)  # relu layer 8
+)
+
+assert &quot;Relu&quot; in y.name
+</pre></div>
+
+
+<p>The latter is much more compact, English readable, and reduces a lot of noise.</p>
+<h4>convolutional</h4>
+<p>Coming soon!</p>
+<h2>leveraging phi</h2>
+<p>Coming soon!</p>
+<h2>summary</h2>
+<p>Coming soon!</p>
+<h2>other ops</h2>
+<p>Coming soon!</p>
 <h2>Installation</h2>
 <p>Tensor Builder assumes you have a working <code>tensorflow</code> installation. We don't include it in the <code>requirements.txt</code> since the installation of tensorflow varies depending on your setup.</p>
 <h4>From pypi</h4>
@@ -1143,13 +1219,20 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">builder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
-<span class="kn">from</span> <span class="nn">tensordata</span> <span class="kn">import</span> <span class="n">Data</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">.builder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
+<span class="kn">from</span> <span class="nn">.tensordata</span> <span class="kn">import</span> <span class="n">Data</span>
 <span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">api</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">identity</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.api</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="kn">import</span> <span class="nn">patches</span> <span class="c1">#import last</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">patches</span> <span class="c1">#import last</span>
 
 <span class="c1">########################</span>
 <span class="c1"># Documentation</span>
@@ -1186,21 +1269,24 @@ table {
   </header>
 
   <section id="section-items">
-    <h2 class="section-title" id="header-variables">Module variables</h2>
-      <div class="item">
-      <p id="tensorbuilder.T" class="name">var <span class="ident">T</span></p>
-      
-  
-  <div class="source_cont">
-</div>
-
-      </div>
 
 
 
     <h2 class="section-title" id="header-submodules">Sub-modules</h2>
       <div class="item">
+      <p class="name"><a href="api.m.html">tensorbuilder.api</a></p>
+      
+  
+
+      </div>
+      <div class="item">
       <p class="name"><a href="builder.m.html">tensorbuilder.builder</a></p>
+      
+  
+
+      </div>
+      <div class="item">
+      <p class="name"><a href="helpers.m.html">tensorbuilder.helpers</a></p>
       
   
 

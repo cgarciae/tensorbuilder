@@ -3,7 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 
-    <title>tensorbuilder.patches.tensorbuilder_patch.applicative_ops API documentation</title>
+    <title>tensorbuilder.patches.training_patch API documentation</title>
     <meta name="description" content="" />
 
   <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
@@ -1036,21 +1036,7 @@ table {
   <div id="sidebar">
     <h1>Index</h1>
     <ul id="index">
-    <li class="set"><h3><a href="#header-variables">Module variables</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#tensorbuilder.patches.tensorbuilder_patch.applicative_ops.builders_blacklist">builders_blacklist</a></li>
-  </ul>
 
-    </li>
-
-    <li class="set"><h3><a href="#header-functions">Functions</a></h3>
-      
-  <ul>
-    <li class="mono"><a href="#tensorbuilder.patches.tensorbuilder_patch.applicative_ops.patch_classes">patch_classes</a></li>
-  </ul>
-
-    </li>
 
 
     </ul>
@@ -1064,63 +1050,17 @@ table {
 
 
   <header id="section-intro">
-  <h1 class="title"><span class="name">tensorbuilder.patches.tensorbuilder_patch.applicative_ops</span> module</h1>
+  <h1 class="title"><span class="name">tensorbuilder.patches.training_patch</span> module</h1>
   
   
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorbuilder_patch.applicative_ops', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.patches.tensorbuilder_patch.applicative_ops" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">tensorbuilder.core</span> <span class="kn">import</span> <span class="n">utils</span>
-
-<span class="n">builders_blacklist</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="k">def</span> <span class="nf">patch_classes</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">BuilderTree</span><span class="p">,</span> <span class="n">Applicative</span><span class="p">,</span>
-    <span class="n">applicative_builder_blacklist</span><span class="p">,</span> <span class="n">applicative_tree_blacklist</span><span class="p">):</span>
+  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.training_patch', this);">Show source &equiv;</a></p>
+  <div id="source-tensorbuilder.patches.training_patch" class="source">
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">tflearn.helpers.trainer</span> <span class="kn">import</span> <span class="n">TrainOp</span><span class="p">,</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
 
 
-    <span class="k">def</span> <span class="nf">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
-                <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_method</span>
-
-
-    <span class="n">_dsl_funs</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">[</span> <span class="p">(</span><span class="s2">&quot;BuilderTree&quot;</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span>  <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">BuilderTree</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)</span> <span class="k">if</span> <span class="n">_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span> <span class="ow">and</span> <span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">applicative_tree_blacklist</span> <span class="p">]</span> <span class="o">+</span>
-        <span class="p">[</span> <span class="p">(</span><span class="s2">&quot;Builder&quot;</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span>  <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)</span> <span class="k">if</span> <span class="n">_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span> <span class="ow">and</span> <span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">applicative_builder_blacklist</span> <span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">_dsl_funs</span><span class="p">:</span>
-        <span class="n">_f_signature</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_method_sig</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">_f_docs</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="n">_method</span> <span class="o">=</span> <span class="n">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="n">_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_name</span>
-        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
-
-<span class="s2">Alias for `.compose({1}.{0}, ...)`</span>
-
-<span class="s2">**Arguments**</span>
-
-<span class="s2">* All other \*args and \*\*kwargs are forwarded to `{1}.{0}`</span>
-
-<span class="s2">**Return**</span>
-
-<span class="s2">Applicative</span>
-
-<span class="s2">**Origial documentation for {1}.{0}**</span>
-
-<span class="s2">    def {2}:</span>
-
-<span class="s2">{3}</span>
-<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
-
-        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">Register</span><span class="p">(</span><span class="n">TrainOp</span><span class="p">,</span> <span class="s2">&quot;tflearn.&quot;</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">Register</span><span class="p">(</span><span class="n">Trainer</span><span class="p">,</span> <span class="s2">&quot;tflearn.&quot;</span><span class="p">)</span>
 </pre></div>
 
   </div>
@@ -1128,82 +1068,7 @@ table {
   </header>
 
   <section id="section-items">
-    <h2 class="section-title" id="header-variables">Module variables</h2>
-      <div class="item">
-      <p id="tensorbuilder.patches.tensorbuilder_patch.applicative_ops.builders_blacklist" class="name">var <span class="ident">builders_blacklist</span></p>
-      
-  
-  <div class="source_cont">
-</div>
 
-      </div>
-
-    <h2 class="section-title" id="header-functions">Functions</h2>
-      
-  <div class="item">
-    <div class="name def" id="tensorbuilder.patches.tensorbuilder_patch.applicative_ops.patch_classes">
-    <p>def <span class="ident">patch_classes</span>(</p><p>Builder, BuilderTree, Applicative, applicative_builder_blacklist, applicative_tree_blacklist)</p>
-    </div>
-    
-
-    
-  
-  <div class="source_cont">
-  <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorbuilder_patch.applicative_ops.patch_classes', this);">Show source &equiv;</a></p>
-  <div id="source-tensorbuilder.patches.tensorbuilder_patch.applicative_ops.patch_classes" class="source">
-    <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">patch_classes</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">BuilderTree</span><span class="p">,</span> <span class="n">Applicative</span><span class="p">,</span>
-    <span class="n">applicative_builder_blacklist</span><span class="p">,</span> <span class="n">applicative_tree_blacklist</span><span class="p">):</span>
-
-
-    <span class="k">def</span> <span class="nf">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">_lambda</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
-                <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">g</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">_lambda</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_method</span>
-
-
-    <span class="n">_dsl_funs</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">[</span> <span class="p">(</span><span class="s2">&quot;BuilderTree&quot;</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span>  <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">BuilderTree</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)</span> <span class="k">if</span> <span class="n">_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span> <span class="ow">and</span> <span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">applicative_tree_blacklist</span> <span class="p">]</span> <span class="o">+</span>
-        <span class="p">[</span> <span class="p">(</span><span class="s2">&quot;Builder&quot;</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span>  <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">)</span> <span class="k">if</span> <span class="n">_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span> <span class="ow">and</span> <span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">applicative_builder_blacklist</span> <span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">_dsl_funs</span><span class="p">:</span>
-        <span class="n">_f_signature</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_method_sig</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">_f_docs</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="n">_method</span> <span class="o">=</span> <span class="n">_get_app_method</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="n">_method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">_name</span>
-        <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">THIS METHOD IS AUTOMATICALLY GENERATED</span>
-
-<span class="s2">Alias for `.compose({1}.{0}, ...)`</span>
-
-<span class="s2">**Arguments**</span>
-
-<span class="s2">* All other \*args and \*\*kwargs are forwarded to `{1}.{0}`</span>
-
-<span class="s2">**Return**</span>
-
-<span class="s2">Applicative</span>
-
-<span class="s2">**Origial documentation for {1}.{0}**</span>
-
-<span class="s2">    def {2}:</span>
-
-<span class="s2">{3}</span>
-<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">_f_signature</span><span class="p">,</span> <span class="n">_f_docs</span><span class="p">)</span>
-
-        <span class="n">Applicative</span><span class="o">.</span><span class="n">register_method</span><span class="p">(</span><span class="n">_method</span><span class="p">,</span> <span class="n">_module_name</span><span class="p">,</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">_method</span><span class="o">.</span><span class="n">__doc__</span><span class="p">)</span>
-</pre></div>
-
-  </div>
-</div>
-
-  </div>
-  
 
 
   </section>

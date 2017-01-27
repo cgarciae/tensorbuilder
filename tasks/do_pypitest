@@ -1,6 +1,7 @@
 #! /bin/bash
 set -e
 
+pip install -r requirements.txt
 pip install -i https://testpypi.python.org/pypi tensorbuilder
 echo
 echo "Testing Library:"

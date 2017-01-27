@@ -1064,10 +1064,16 @@ table {
   
   <p class="source_link"><a href="javascript:void(0);" onclick="toggle('source-tensorbuilder.patches.tensorflow_patch', this);">Show source &equiv;</a></p>
   <div id="source-tensorbuilder.patches.tensorflow_patch" class="source">
-    <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+    <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">tensorbuilder</span> <span class="kn">import</span> <span class="n">TensorBuilder</span>
-<span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">patch</span>
+<span class="kn">from</span> <span class="nn">phi</span> <span class="kn">import</span> <span class="n">utils</span>
 
 
 <span class="n">f0_pred</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span>
@@ -1090,12 +1096,12 @@ table {
 <span class="p">)</span>
 
 <span class="c1">#tf</span>
-<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_0</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist</span><span class="o">=</span><span class="n">f0_pred</span><span class="p">)</span>
-<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_1</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">blacklist</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
-<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_2</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist</span><span class="o">=</span><span class="n">f2_pred</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">PatchAt</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist_predicate</span><span class="o">=</span><span class="n">f0_pred</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">PatchAt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">blacklist_predicate</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">PatchAt</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">whitelist_predicate</span><span class="o">=</span><span class="n">f2_pred</span><span class="p">)</span>
 
 <span class="c1">#tf.nn</span>
-<span class="n">patch</span><span class="o">.</span><span class="n">builder_with_members_from_1</span><span class="p">(</span><span class="n">TensorBuilder</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="n">module_alias</span><span class="o">=</span><span class="s2">&quot;tf.nn&quot;</span><span class="p">,</span> <span class="n">blacklist</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
+<span class="n">TensorBuilder</span><span class="o">.</span><span class="n">PatchAt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="p">,</span> <span class="n">module_alias</span><span class="o">=</span><span class="s2">&quot;tf.nn&quot;</span><span class="p">,</span> <span class="n">blacklist_predicate</span><span class="o">=</span><span class="n">f1_blacklist</span><span class="p">)</span>
 
 <span class="c1"># for name, f, module in f1s:</span>
 <span class="c1">#     TensorBuilder.register_function_1(f, module)</span>

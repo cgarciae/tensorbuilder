@@ -1,5 +1,5 @@
 #! /bin/bash
 set -e
 
-docker run -it -v ${PWD}:/code -w /code python:2.7 tasks/do_pypitest
-docker run -it -v ${PWD}:/code -w /code python:3.5 tasks/do_pypitest
+docker run -it -v ${PWD}:/code -w /code tensorflow/tensorflow:1.0.0-alpha-gpu tasks/do_pypitest
+docker run -it -v ${PWD}:/code -w /code tensorflow/tensorflow:1.0.0-alpha-gpu-py3 tasks/do_pypitest
